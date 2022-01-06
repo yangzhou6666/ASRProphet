@@ -3,6 +3,8 @@ import glob
 import json
 import random
 
+from audio_duration import measure_audio_duration
+
 
 def idx_to_file(idx):
     return "/".join(idx.split("-")[:-1])
@@ -35,9 +37,9 @@ if __name__ == "__main__":
                 flac_path = fname + ".flac"
                 wav_path = fname + ".wav"
 
-                wav_path = f"data/LibriSpeech/{wav_path}"
+                wav_path = f"/media/mhilmiasyrofi/ASRDebugger/data/LibriSpeech/{wav_path}"
 
-                data.append({"text": text, "audio_filepath": wav_path})
+                data.append({"text": text, "audio_filepath": wav_path, "duration": measure_audio_duration(wav_path)})
 
             file.close()
 
