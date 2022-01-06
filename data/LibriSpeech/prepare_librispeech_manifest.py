@@ -7,6 +7,11 @@ import random
 def idx_to_file(idx):
     return "/".join(idx.split("-")[:-1])
 
+def write_json_data(filepath, data):
+    with open(filepath, 'w') as f:
+        for d in data:
+            json.dump(d, f)
+            f.write("\n")
 
 if __name__ == "__main__":
 
@@ -41,8 +46,26 @@ if __name__ == "__main__":
     random.shuffle(data)
     
     os.makedirs("manifests/", exist_ok=True)
+    filepath = "manifests/all.json"
+    write_json_data(filepath, data)
 
-    with open("manifests/all.json", 'w') as f:
-        for d in data :
-            json.dump(d, f)
-            f.write("\n")
+    n = len(data)
+
+    selection = ("selection", int(n * 0.5))
+    seed = ("seed", int(n * 0.1))
+    dev = ("dev", int(n * 0.1))
+    test_size = n - selection[1] - seed[1] - dev[1]
+    test = ("test", test_size)
+
+    lower = 0
+    
+    for name, interval in [seed, dev, selection, test]:
+        upper = lower + interval
+        
+        curr_data = data[lower:upper] 
+        write_json_data(f"manifests/{name}.json", curr_data)
+        
+        lower = upper
+
+    write_json_data(f"manifests/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
+
