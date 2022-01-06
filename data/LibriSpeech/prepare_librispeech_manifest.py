@@ -1,6 +1,7 @@
 import os
 import glob
 import json
+import random
 
 
 def idx_to_file(idx):
@@ -29,9 +30,17 @@ if __name__ == "__main__":
                 flac_path = fname + ".flac"
                 wav_path = fname + ".wav"
 
+                wav_path = f"data/LibriSpeech/{wav_path}"
+
                 data.append({"text": text, "audio_filepath": wav_path})
 
             file.close()
+
+    
+    random.seed(123456)
+    random.shuffle(data)
+    
+    os.makedirs("manifests/", exist_ok=True)
 
     with open("manifests/all.json", 'w') as f:
         for d in data :
