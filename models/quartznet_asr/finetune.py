@@ -18,8 +18,8 @@ import os
 import time
 import toml
 import torch
-import apex
-from apex import amp
+# import apex
+# from apex import amp
 import random
 import numpy as np
 import math
@@ -140,11 +140,11 @@ def train(
 
                 model.eval()
                 
-                if optim_level == 1:
-                  with amp.disable_casts():
-                      t_processed_signal_e, t_processed_sig_length_e = audio_preprocessor(t_audio_signal_e, t_a_sig_length_e) 
-                else:
-                  t_processed_signal_e, t_processed_sig_length_e = audio_preprocessor(t_audio_signal_e, t_a_sig_length_e)
+                # if optim_level == 1:
+                #   with amp.disable_casts():
+                #       t_processed_signal_e, t_processed_sig_length_e = audio_preprocessor(t_audio_signal_e, t_a_sig_length_e) 
+                # else:
+                t_processed_signal_e, t_processed_sig_length_e = audio_preprocessor(t_audio_signal_e, t_a_sig_length_e)
                 
                 if jasper_encoder.use_conv_mask:
                     t_log_probs_e, t_encoded_len_e = model.forward((t_processed_signal_e, t_processed_sig_length_e))
@@ -219,11 +219,11 @@ def train(
             model.train()
             if args.turn_bn_eval:
                 make_bn_layers_in_eval_mode(model.jasper_encoder)
-            if optim_level == 1:
-              with amp.disable_casts():
-                  t_processed_signal_t, t_processed_sig_length_t = audio_preprocessor(t_audio_signal_t, t_a_sig_length_t) 
-            else:
-              t_processed_signal_t, t_processed_sig_length_t = audio_preprocessor(t_audio_signal_t, t_a_sig_length_t)
+            # if optim_level == 1:
+            #   with amp.disable_casts():
+            #       t_processed_signal_t, t_processed_sig_length_t = audio_preprocessor(t_audio_signal_t, t_a_sig_length_t) 
+            # else:
+            t_processed_signal_t, t_processed_sig_length_t = audio_preprocessor(t_audio_signal_t, t_a_sig_length_t)
 
             t_processed_signal_t = data_spectr_augmentation(t_processed_signal_t)
             if jasper_encoder.use_conv_mask:
@@ -240,11 +240,11 @@ def train(
             if args.gradient_accumulation_steps > 1:
                 t_total_loss = t_total_loss / args.gradient_accumulation_steps
 
-            if optim_level >=0 and optim_level <=3:
-                with amp.scale_loss(t_total_loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                t_total_loss.backward()
+            # if optim_level >=0 and optim_level <=3:
+            #     with amp.scale_loss(t_total_loss, optimizer) as scaled_loss:
+            #         scaled_loss.backward()
+            # else:
+            t_total_loss.backward()
             batch_counter += 1
             average_loss += t_total_loss.item()
 
@@ -472,12 +472,12 @@ def main(args):
         raise ValueError("invalid optimizer choice: {}".format(args.optimizer_kind))
 
 
-    if optim_level >= 0 and optim_level <=3:
-        model, optimizer = amp.initialize(
-            min_loss_scale=1.0,
-            models=model,
-            optimizers=optimizer,
-            opt_level=AmpOptimizations[optim_level])
+    # if optim_level >= 0 and optim_level <=3:
+    #     model, optimizer = amp.initialize(
+    #         min_loss_scale=1.0,
+    #         models=model,
+    #         optimizers=optimizer,
+    #         opt_level=AmpOptimizations[optim_level])
     model = model_multi_gpu(model, multi_gpu)
 
     if args.ckpt is not None and args.load_optimizer_state:

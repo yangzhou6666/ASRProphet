@@ -24,8 +24,8 @@ from quartznet_model import AudioPreprocessing, GreedyCTCDecoder, JasperEncoderD
 from parts.features import audio_from_file
 import torch
 import torch.nn as nn
-import apex
-from apex import amp
+# import apex
+# from apex import amp
 import random
 import numpy as np
 import pickle
@@ -73,7 +73,6 @@ def calc_wer(data_layer, audio_processor,
 
         # Evaluation mini-batch for loop
         for it, data in enumerate(tqdm(data_layer.data_iterator)):
-
             tensors = []
             for d in data:
                 tensors.append(d.cuda())
@@ -237,9 +236,9 @@ def main(args):
     print ("audio_preprocessor.normalize: ", audio_preprocessor.featurizer.normalize)
     audio_preprocessor.cuda()
     encoderdecoder.cuda()
-    if args.fp16:
-        encoderdecoder = amp.initialize( models=encoderdecoder,
-                                         opt_level=AmpOptimizations[optim_level])
+    # if args.fp16:
+    #     encoderdecoder = amp.initialize( models=encoderdecoder,
+    #                                      opt_level=AmpOptimizations[optim_level])
 
     encoderdecoder = model_multi_gpu(encoderdecoder, multi_gpu)
     audio_preprocessor.eval()

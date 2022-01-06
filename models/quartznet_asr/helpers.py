@@ -15,7 +15,8 @@
 import torch
 import torch.nn as nn
 import torch.distributed as dist
-from apex.parallel import DistributedDataParallel as DDP
+
+# from apex.parallel import DistributedDataParallel as DDP
 from enum import Enum
 from metrics import word_error_rate, f_wer, f_cer
 import json
@@ -235,7 +236,7 @@ def print_dict(d):
 
 def model_multi_gpu(model, multi_gpu=False):
     if multi_gpu:
-        model = DDP(model)
+        model = torch.nn.DataParallel(model)
         print('DDP(model)')
     return model
 

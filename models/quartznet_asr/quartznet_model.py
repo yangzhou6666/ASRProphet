@@ -15,7 +15,7 @@
 from typing import Callable, List, Optional, Tuple
 from torch import Tensor
 
-from apex import amp
+# from apex import amp
 import torch
 import torch.nn as nn
 from parts.features import FeatureFactory
