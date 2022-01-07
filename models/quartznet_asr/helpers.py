@@ -256,8 +256,11 @@ def print_sentence_wise_wer(hypotheses, references,output_file,input_file):
             wav_filenames.append(line['audio_filepath'])
         '''    
         
+    # print(hypotheses)
+    # print(references)
+    # print(wav_filenames)
     assert len(hypotheses) == len(references)
-    assert len(hypotheses) == len(wav_filenames)
+    # assert len(hypotheses) == len(wav_filenames)
 
     wers = []
     cers = []
