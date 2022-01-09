@@ -53,9 +53,9 @@ if __name__ == "__main__":
 
     n = len(data)
 
-    selection = ("selection", int(n * 0.5))
-    seed = ("seed", int(n * 0.1))
-    dev = ("dev", int(n * 0.1))
+    selection = ("selection", int(n * 0.4))
+    seed = ("seed", int(n * 0.25))
+    dev = ("dev", int(n * 0.25))
     test_size = n - selection[1] - seed[1] - dev[1]
     test = ("test", test_size)
 
