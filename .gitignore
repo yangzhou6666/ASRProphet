@@ -136,4 +136,9 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 data/
-pretrained_checkpoints/
+models/pretrained_checkpoints/*
+
+!data/LibriSpeech/prepare_librispeech_manifest.py
+!data/LibriSpeech/audio_duration.py
+!data/LibriSpeech/helpers.py
+!data/LibriSpeech/generate_random_train_data.py

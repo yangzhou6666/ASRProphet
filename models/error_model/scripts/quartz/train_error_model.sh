@@ -19,12 +19,12 @@ do
       --hidden_size=64 \
       --input_size=64 \
       --weight_decay=0.001 \
-      --train_portion=0.65 \
+      --train_portion=0.8 \
       --hypotheses_path=$DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_out.txt \
       --lr_decay=warmup \
       --seed=$seed \
-      --output_dir=$PRETRAINED_CKPTS/error_models/$accent/seed_"$seed"/recent \
-      --best_dir=$PRETRAINED_CKPTS/error_models/$accent/seed_"$seed"/best \
+      --output_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/recent \
+      --best_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
       --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/librispeech/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt
   echo
   done

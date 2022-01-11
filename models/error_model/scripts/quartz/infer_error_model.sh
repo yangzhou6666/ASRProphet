@@ -15,8 +15,8 @@ do
       --hidden_size=64 \
       --input_size=64 \
       --json_path=$DATA/$accent/manifests/selection.json \
-      --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/$accent/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt \
-      --output_dir=$PRETRAINED_CKPTS/error_models/$accent/seed_"$seed"/best \
+      --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt \
+      --output_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
     > $PRETRAINED_CKPTS/error_models/$accent/seed_"$seed"/infer_log.txt
   echo
   done
