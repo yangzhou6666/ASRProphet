@@ -247,6 +247,8 @@ def __generate_error_sequence(reference_hypothesis_pair):
     reference, hypothesis = reference_hypothesis_pair
     error_sequence = []
     reference_phonemes = get_phoneme_transcript(reference,markers=False)
+    reference = reference.lower()
+    hypothesis = hypothesis.lower()
     aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
     try:
         aligner.align()
@@ -284,6 +286,9 @@ def __generate_error_sequence(reference_hypothesis_pair):
           ph_ref_word = [ref_word]
 
         if op == 'C':
+            # if ref_word != hyp_word :
+            #   print(ref_word)
+            #   print(hyp_word)
             assert ref_word == hyp_word
             #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
             ref_constructed += ph_ref_word
