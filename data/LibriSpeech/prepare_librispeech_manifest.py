@@ -2,18 +2,13 @@ import os
 import glob
 import json
 import random
-
-from audio_duration import measure_audio_duration
+import helpers
 
 
 def idx_to_file(idx):
     return "/".join(idx.split("-")[:-1])
 
-def write_json_data(filepath, data):
-    with open(filepath, 'w') as f:
-        for d in data:
-            json.dump(d, f)
-            f.write("\n")
+
 
 if __name__ == "__main__":
 
@@ -39,7 +34,7 @@ if __name__ == "__main__":
 
                 wav_path = f"/media/mhilmiasyrofi/ASRDebugger/data/LibriSpeech/{wav_path}"
 
-                data.append({"text": text, "audio_filepath": wav_path, "duration": measure_audio_duration(wav_path)})
+                data.append({"text": text, "audio_filepath": wav_path, "duration": helpers.measure_audio_duration(wav_path)})
 
             file.close()
 
@@ -49,7 +44,7 @@ if __name__ == "__main__":
     
     os.makedirs("manifests/", exist_ok=True)
     filepath = "manifests/all.json"
-    write_json_data(filepath, data)
+    helpers.write_json_data(filepath, data)
 
     n = len(data)
 
@@ -65,9 +60,9 @@ if __name__ == "__main__":
         upper = lower + interval
         
         curr_data = data[lower:upper] 
-        write_json_data(f"manifests/{name}.json", curr_data)
+        helpers.write_json_data(f"manifests/{name}.json", curr_data)
         
         lower = upper
 
-    write_json_data(f"manifests/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
+    helpers.write_json_data(f"manifests/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
 
