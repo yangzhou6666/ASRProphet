@@ -194,15 +194,20 @@ def main(args):
   seed_samples = [line for line in open(seed_json_file)]
   weights_file = args.error_model_weights
   exp_id = args.exp_id
-  for num_samples in [50,100,200,500]:
+  # for num_samples in [50,100,200,500]:
+  for num_samples in [3000, 3500, 4000]:
     weights = pickle.load(open(weights_file,'rb'))
     weights_list = [weights]  
-    random_json_file = os.path.join(random_json_path,str(num_samples),'seed_'+exp_id,'train.json')
+    random_json_dir = os.path.join(random_json_path, str(num_samples), 'seed_'+exp_id)
+    os.makedirs(random_json_dir, exist_ok=True)
+    random_json_file = os.path.join(random_json_dir,'train.json')
     random_samples_duration = get_json_duration(random_json_file)
     seed_duration = get_json_duration(seed_json_file)
     required_duration = random_samples_duration - seed_duration
     assert required_duration > 0
-    output_json_file = os.path.join(output_json_path,str(num_samples),'seed_'+exp_id,'train.json')
+    output_json_dir = os.path.join(output_json_path, str(num_samples), 'seed_'+exp_id)
+    os.makedirs(output_json_dir, exist_ok=True)
+    output_json_file = os.path.join(output_json_dir,'train.json')
     sampler = ErrorModelSampler(selection_json_file, error_model_weights=weights_list)
     samples = get_samples(sampler, required_duration)
     dump_samples(seed_samples + samples,output_json_file)
