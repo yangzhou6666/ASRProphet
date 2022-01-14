@@ -6,10 +6,10 @@ do
   mkdir -p $DATA/$accent/manifests/deepspeech_outputs
   echo $accent
   python3 -u inference.py \
-  --output_file=$DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_out.txt \
-  --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
+  --output_file=$DATA/$accent/manifests/deepspeech_outputs/test_out.txt \
+  --val_manifest=$DATA/$accent/manifests/test.json \
   --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
-  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
   --model_tag=deepspeech \
-  > $DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_infer_log.txt
+  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+  > $DATA/$accent/manifests/deepspeech_outputs/test_infer_log.txt
 done
