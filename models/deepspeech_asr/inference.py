@@ -24,9 +24,11 @@ def parse_args():
     parser.add_argument("--val_manifest", type=str, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--model", type=str, help='path to the model pbmm')
     parser.add_argument("--scorer", default=None, type=str, required=True, help='path to the model scorer')
-    parser.add_argument("--model_tag", type=str, help='indicating the tag version of the model (e.g. deepspeech, finetuned_deepspeech)')
-    parser.add_argument("--seed", default=42, type=int, help='seed')
+    parser.add_argument("--model_tag", type=str, required=True, help='original model or fine-tuned model')
     parser.add_argument("--output_file",default="out.txt",type=str)
+    parser.add_argument("--args.", type=str, help='indicating the tag version of the model (e.g. deepspeech, finetuned_deepspeech)')
+    parser.add_argument("--seed", default=42, type=int, help='seed')
+    parser.add_argument("--overwrite", action='store_true', help='overwrite the previous transcritiption')
     return parser.parse_args()
 
 
@@ -48,9 +50,6 @@ def main(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
 
-    model_tag = "deepspeech"
-
-
     references = []
     predictions = []
 
@@ -60,10 +59,10 @@ def main(args):
         js_instance = json.loads(line)
 
         wav_path = js_instance["audio_filepath"]
-        transcription_path = wav_path[:-3] + model_tag + ".transcription.txt"
+        transcription_path = wav_path[:-3] + args.model_tag + ".transcription.txt"
 
 
-        if (not os.path.exists(transcription_path)) or helpers.is_empty_file(transcription_path):
+        if args.overwrite or (not os.path.exists(transcription_path)) or helpers.is_empty_file(transcription_path):
             print("Processing: ", transcription_path)
 
             transcription = deepspeech_recognize_audio(args.model, args.scorer, wav_path)
