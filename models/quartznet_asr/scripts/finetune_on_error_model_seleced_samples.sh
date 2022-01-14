@@ -1,7 +1,7 @@
 DATA=$(cd ../../data; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd) 
 #declare -a accents=('kannada_male_english' 'rajasthani_male_english' 'gujarati_female_english' 'hindi_male_english' 'assamese_female_english' 'malayalam_male_english' 'manipuri_female_english' 'tamil_male_english')
-declare -a accents=('kannada_male_english')
+declare -a accents=('LibriSpeech')
 for seed in 1
 do 
   for size in 50
@@ -20,7 +20,7 @@ do
         --train_freq=30 \
         --lr=1e-5 \
         --wav_dir=$DATA/indicTTS_audio/$accent/english/wav \
-        --train_manifest=$DATA/$accent/manifests/train/error_model/$size/seed_"$seed"/train.json \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
         --output_dir=$model_dir/recent \

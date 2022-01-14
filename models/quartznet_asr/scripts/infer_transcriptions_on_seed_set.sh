@@ -8,7 +8,7 @@ do
   mkdir -p $DATA/$accent/manifests/quartznet_outputs
   echo $accent
   python3 -u inference.py \
-  --batch_size=8 \
+  --batch_size=16 \
   --output_file=$DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_out.txt \
   --wav_dir=$DATA/indicTTS_audio/$accent/english/wav \
   --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
