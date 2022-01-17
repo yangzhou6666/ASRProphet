@@ -194,8 +194,8 @@ def main(args):
   seed_samples = [line for line in open(seed_json_file)]
   weights_file = args.error_model_weights
   exp_id = args.exp_id
-  # for num_samples in [50,100,200,500]:
-  for num_samples in [3000, 3500, 4000]:
+  # for num_samples in []:
+  for num_samples in [50, 100]:
     weights = pickle.load(open(weights_file,'rb'))
     weights_list = [weights]  
     random_json_dir = os.path.join(random_json_path, str(num_samples), 'seed_'+exp_id)
