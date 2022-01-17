@@ -24,8 +24,8 @@ do
         --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
         --output_dir=$model_dir/recent \
         --gpu_id=1 \
-        --num_epochs="$ep" \
-        --learning_rate="$lr" \ 
+        --num_epochs=$ep \
+        --learning_rate=$lr 
       > $model_dir/train_log.txt
     done
   done
