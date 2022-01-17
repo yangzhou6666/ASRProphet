@@ -1,0 +1,2 @@
+Prepare librispeech train-clean-100 inside this folder (`data/LibrispeechTrain/train-clean-100`).
+Please download the dataset from [https://www.openslr.org/12/](https://www.openslr.org/12/) and extract here!
