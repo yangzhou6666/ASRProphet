@@ -1,0 +1,2 @@
+bash scripts/finetune_on_error_model_seleced_samples.sh
+bash scripts/test_ASR_finetuned_on_error_model_sents.sh
