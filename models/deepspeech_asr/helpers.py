@@ -45,11 +45,11 @@ def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
             f.write("Hyp: "+hyp+'\n')
             f.write('\n')
     
-        f.write('\n')
-        f.write('\n')
-        f.write('================================ \n')
-        f.write("Average WER: " + str(sum(wers)/len(wers)) + '\n')
-        f.write("Average CER: " + str(sum(cers)/len(cers)) + '\n')
+        print('\n')
+        print('\n')
+        print('================================ \n')
+        print("Average WER: " + str(sum(wers)/len(wers)) + '\n')
+        print("Average CER: " + str(sum(cers)/len(cers)) + '\n')
 
 
     return wav_filenames
