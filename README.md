@@ -1,29 +1,80 @@
-# Error-driven Fixed-Budget ASR Personalization for Accented Speakers (ICASSP 2021) 
+# ASRDebugger
 
-This repository provides an implementation of experiments in our [ICASSP-2021 paper](https://arxiv.org/abs/2103.03142)
-```
-@inproceedings{awasthi2021error,
-  title={Error-Driven Fixed-Budget ASR Personalization for Accented Speakers},
-  author={Awasthi, Abhijeet and Kansal, Aman and Sarawagi, Sunita and Jyothi, Preethi},
-  booktitle={ICASSP 2021-2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
-  pages={7033--7037},
-  year={2021},
-  organization={IEEE}
-}
-```  
+This repository provides an implementation of experiments in our [FSE-2022 paper]()
 
 # Requirements
 This code was developed with python 3.8.9. <br/>
 Create a new virtual environment and install the dependencies by running `bash install_requirements.sh`
 
 # Dataset
-IndicTTS dataset used in our experiments can be obtained by contacting [IndicTTS](https://www.iitm.ac.in/donlab/tts/contact.php) team at `smtiitm@gmail.com`. Please mention that you require data for all the accents in Indian English.
 
-The dataset consists of utterances from various accented speakers. The speaker utterances are in the format \<accent>_\<gender>_english.zip. The data can be unzipped in appropriate format using the `data/indicTTS_audio/unzip_indic` scripts.
+### 1. Librispeech
+
+Librispeech dataset is used in our experiments is downloaded from [Librispeech OpenSLR](https://www.openslr.org/12/). The dataset is Open Source, and contains 1000 hours of speeches. 
+
+Prepare librispeech test-clean, test-other, dev-clean, dev-other inside this folder (`data/Librispeech/test-clean`, `data/Librispeech/test-other`, `data/Librispeech/dev-clean`, `data/Librispeech/dev-other`).
+
 ```
-cd data/indicTTS_audio
-python3 unzip_indic.py --input_path <path_to_speaker_zip_file>
+cd data/Librispeech/
+
+# download test-clean
+wget https://www.openslr.org/resources/12/test-clean.tar.gz 
+
+# extract the tar.gz dataset
+
+# do the same thing for test-other, dev-clean, and dev-other
 ```
+
+Prepare `manifests` for the dataset.
+
+```
+bash generate_data.sh
+```
+
+### 2. Librispeech Train
+
+Prepare Librispeech-train dataset
+```
+cd data/LibrispeechTrain/
+
+# download train-100
+wget https://www.openslr.org/resources/12/train-clean-100.tar.gz
+
+# extract the tar.gz dataset
+
+```
+
+Prepare `manifests` for the next experiments.
+
+```
+bash generate_data.sh
+```
+
+
+### 3. ST-AEDS
+
+A free American English corpus by Surfingtech (www.surfing.ai), containing utterances from 10 speakers, Each speaker has about 350 utterances.
+
+Prepare ST-AEDS dataset
+```
+cd data/ST-AEDS/
+
+# download the dataset
+wget https://www.openslr.org/resources/45/ST-AEDS-20180100_1-OS.tgz
+
+# extract the .tgz dataset
+
+
+```
+
+Please rename the extracted folder into `data`, thus each audio files and the transcription (text.txt) located in `data/ST-AEDS/data/`
+
+Prepare `manifests` for the next experiments.
+
+```
+bash generate_data.sh
+```
+
 
 # Usage
   * Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
