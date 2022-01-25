@@ -103,6 +103,8 @@ cd models/pretrained_checkpoints/deepspeech/checkpoints/
 
 wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-checkpoint.tar.gz
 
+# extract the tar.gz file
+```
 
 Prepare code for fine-tuning
 
@@ -120,9 +122,6 @@ docker build -t <your username>/traindeepspeech .
 docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
 ```
 
-```
-
-Extract the tar.gz file
 
 
 # Usage
