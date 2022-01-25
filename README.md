@@ -75,6 +75,37 @@ Prepare `manifests` for the next experiments.
 bash generate_data.sh
 ```
 
+# ASR Models
+
+### 1. QuartzNet
+
+QuartNet ASR models are available to use directly after cloning the repository
+
+### 2. Deepspeech
+
+Download the model and the scorer
+
+```
+mkdir models/pretrained_checkpoints/deepspeech/
+
+cd models/pretrained_checkpoints/deepspeech/
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.pbmm
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.scorer
+```
+
+Download the checkpoint for fine-tuning
+
+```
+mkdir models/pretrained_checkpoints/deepspeech/checkpoints/
+cd models/pretrained_checkpoints/deepspeech/checkpoints/
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-checkpoint.tar.gz
+```
+
+Extract the tar.gz file
+
 
 # Usage
   * Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
