@@ -79,7 +79,7 @@ bash generate_data.sh
 
 ### 1. QuartzNet
 
-QuartNet ASR models are available to use directly after cloning the repository
+QuartzNet ASR models are available to use directly after cloning the repository
 
 ### 2. Deepspeech
 
@@ -102,6 +102,24 @@ mkdir models/pretrained_checkpoints/deepspeech/checkpoints/
 cd models/pretrained_checkpoints/deepspeech/checkpoints/
 
 wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-checkpoint.tar.gz
+
+
+Prepare code for fine-tuning
+
+```
+cd models/deepspeech_asr/
+
+git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
+
+#read the readme from the project
+#build the docker image
+cd FineTuneDeepSpeech
+docker build -t <your username>/traindeepspeech .
+
+#run the docker
+docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
+```
+
 ```
 
 Extract the tar.gz file
