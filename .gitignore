@@ -136,7 +136,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 data/
-models/pretrained_checkpoints/*
+models/pretrained_checkpoints/error_models/
+models/pretrained_checkpoints/deepspeech/
+models/pretrained_checkpoints/quartznet/finetuned/
+
+!models/pretrained_checkpoints/deepspeech/deepspeech-0.9.3-models.pbmm
+!models/pretrained_checkpoints/deepspeech/deepspeech-0.9.3-models.scorer
 
 !data/LibriSpeech/prepare_librispeech_manifest.py
 !data/LibriSpeech/audio_duration.py
