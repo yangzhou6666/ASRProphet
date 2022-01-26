@@ -29,16 +29,16 @@ def macGenerateAudio(text, audio_path):
 
 os.makedirs("/workspace/ASRDebugger/data/LibriSpeech/TTS/")
 
-with open("./manifests/seed_plus_dev.json") as f, open("./TTS/seed_plus_dev.json", "a") as w:
+with open("./manifests/all.json") as f, open("./TTS/all.json", "a") as w:
     count = 0
     texts = []
     for line in f.readlines():
         item = json.loads(line)
-        texts.append(item["text"])
+        texts.append((item["audio_filepath"], item["text"]))
 
-    for index, text in enumerate(tqdm(texts)):
-        googleGenerateAudio(text, "/workspace/ASRDebugger/data/LibriSpeech/TTS/"+str(index)+".wav")
-        json.dump({"id": index, "text": text, "audio_filepath": "/workspace/ASRDebugger/data/LibriSpeech/TTS/"+str(index)+".wav"}, w)
+    for text in tqdm(texts):
+        macGenerateAudio(text[1], "/workspace/ASRDebugger/data/LibriSpeech/TTS/"+text[0].split("/")[-1])
+        json.dump({"read_audio": text[0], "text": text[1], "audio_filepath": "/workspace/ASRDebugger/data/LibriSpeech/TTS/"+str(index)+".wav"}, w)
         w.write("\n")
 
 
