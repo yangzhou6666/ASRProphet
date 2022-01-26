@@ -14,9 +14,9 @@ def format_data(data):
 if __name__ == "__main__" :
 
     ## load selection.json
-    selection_json_fpath = "/media/mhilmiasyrofi/ASRDebugger/data/LibriSpeech/manifests/selection.json"
+    selection_json_fpath = "/workspace/ASRDebugger/data/ST-AEDS/manifests/selection.json"
     seeds = [1, 2, 3]
-    numbers = [50, 100, 200,300, 400, 500, 600, 3000, 3500, 4000]
+    numbers = [50, 100, 1500, 2000]
     
     file = open(selection_json_fpath)
     instances = file.readlines() 
