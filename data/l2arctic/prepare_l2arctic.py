@@ -11,11 +11,12 @@ def format_data(data):
 
 
 def process(path_to_l2arctic_release_v5):
-    data = []
-
 
 
     for name in os.listdir(path_to_l2arctic_release_v5):
+        print(name, end='...\n')
+        data = []
+
         root_dir = f"{path_to_l2arctic_release_v5}{name}/"
         # Path to each original sub-dataset
         transcript_dir = os.path.join(root_dir, "transcript")
@@ -50,11 +51,11 @@ def process(path_to_l2arctic_release_v5):
 
         lower = 0
         
-        for name, interval in [seed, dev, selection, test]:
+        for data_type, interval in [seed, dev, selection, test]:
             upper = lower + interval
             
             curr_data = data[lower:upper] 
-            helpers.write_json_data(f"{path_to_store}/{name}.json", curr_data)
+            helpers.write_json_data(f"{path_to_store}/{data_type}.json", curr_data)
             
             lower = upper
 
