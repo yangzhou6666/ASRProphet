@@ -148,6 +148,10 @@ docker build -t <your username>/traindeepspeech .
 docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
 ```
 
+### 3. Wav2Vec2
+
+Wav2Vec2 ASR will download the model and tokenizer automatically from HuggingFace
+
 
 
 # Usage

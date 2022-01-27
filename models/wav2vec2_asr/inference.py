@@ -16,7 +16,7 @@ import torch
 import soundfile as sf
 import time, gc
 
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer, Wav2Vec2CTCTokenizer
 
 import helpers
 
@@ -29,6 +29,8 @@ def parse_args():
 
     parser.add_argument("--val_manifest", type=str, required=True, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--model_name", type=str, required=True, help='path to the model pbmm')
+    parser.add_argument("--vocab", type=str, required=True,
+                        help='saves vocab.json for tokenizer')
     parser.add_argument("--model_tag", type=str, required=True, help='original model or fine-tuned model')
     parser.add_argument("--output_file", default="out.txt", type=str)
     parser.add_argument("--args.", type=str, help='indicating the tag version of the model (e.g. deepspeech, finetuned_deepspeech)')
@@ -39,10 +41,12 @@ def parse_args():
 
 def main(args):
 
-    model_name = "facebook/wav2vec2-base-960h"
-
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_name)
-    model = Wav2Vec2ForCTC.from_pretrained(model_name)
+    if args.vocab == "facebook/wav2vec2-base-960h":
+        tokenizer = Wav2Vec2Tokenizer.from_pretrained(args.vocab)
+    else :
+        tokenizer = Wav2Vec2CTCTokenizer(args.vocab, unk_token="[UNK]", pad_token="[PAD]", word_delimiter_token="|")
+    
+    model = Wav2Vec2ForCTC.from_pretrained(args.model_name)
 
     def wav2vec2_recognize_audio(audio_fpath):
         audio_input, _ = sf.read(audio_fpath)
