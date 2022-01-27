@@ -184,6 +184,42 @@ docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path
     bash scripts/test_ASR_finetuned_on_random_sents.sh
     ```
 
+## l2arctic dataset
+  * Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
+    ```
+    cd models/quartznet_asr
+    bash scripts/l2arcticinfer_transcriptions_on_seed_set.sh
+    ```
+  * Train error model by aligning the references and generated transcripts for seed+dev set
+    ```
+    cd models/error_model
+    bash ./scripts/quartznet/l2arctic/train_error_model.sh
+    ```
+  * Infer the trained error model on the set of sentences from which we wish to do the selection
+    ```
+    cd models/error_model
+    bash ./scripts/quartznet/l2arctic/infer_error_model.sh
+    ```
+  * Select the sentences using the error model as proposed in our paper (Equation-2 and Algorithm-1)
+    ```
+    cd models/error_model
+    bash ./scripts/quartznet/l2arctic/error_model_sampling.sh
+    ```
+  * Finetune and Test the ASR on the sentences selected via error model
+    ```
+    cd models/quartznet_asr
+    bash scripts/finetune_on_error_model_seleced_samples.sh
+    bash scripts/test_ASR_finetuned_on_error_model_sents.sh
+    ```
+  * Finetune and Test the ASR on the randomly selected sentences
+    ```
+    cd models/quartznet_asr
+    bash scripts/finetune_on_randomly_seleced_samples.sh
+    bash scripts/test_ASR_finetuned_on_random_sents.sh
+    ```
+
+
+
 # Contents
   * `data/$accent/manifests`:
     - `all.json`: All the samples for a given accented speaker
