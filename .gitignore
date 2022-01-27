@@ -135,7 +135,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-data/
+
 models/pretrained_checkpoints/error_models/
 models/pretrained_checkpoints/deepspeech/
 models/pretrained_checkpoints/quartznet/finetuned/
@@ -147,3 +147,10 @@ models/pretrained_checkpoints/quartznet/finetuned/
 !data/LibriSpeech/audio_duration.py
 !data/LibriSpeech/helpers.py
 !data/LibriSpeech/generate_random_train_data.py
+
+
+data/l2arctic/l2arctic_release_v5
+data/l2arctic/processed
+data/LibriSpeech/LibriSpeech
+*.tar.gz
+*.zip
