@@ -12,7 +12,7 @@ from math import floor,ceil
 from functools import partial
 from shutil import copyfile
 
-from model import ErrorClassifierPhoneBiLSTM_V2, ErrorClassifierPhoneBiLSTM
+from model import ErrorClassifierPhoneBiLSTM_V2, ErrorClassifierTTS
 from data import error_classifier_collate_fn, geneate_error_data_from_hypotheses_file
 from metrics import xent_loss, error_classifier_errors, get_precision_recall_f1
 from helpers import print_dict, warmup_decay_policy, save_model
@@ -28,8 +28,10 @@ def eval(eval_data_loader,model,args,device):
 
     for data in eval_data_loader:
       data = [item.to(device) for item in data]
+      # phonemes, error_positions, padding_positions, sequence_lengths = data
       phonemes, error_positions, padding_positions, sequence_lengths, tts_seqs, vowel, fine = data
       model.eval()
+      # logits = model(phonemes,sequence_lengths)
       logits = model(phonemes,tts_seqs,vowel, fine,sequence_lengths)
       dev_loss = xent_loss(logits, error_positions,padding_positions)
       predictions = torch.argmax(logits,-1)
@@ -67,6 +69,7 @@ def train(
     for data in train_data_loader:
       steps +=1
       data = [item.to(device) for item in data] 
+      # phonemes, error_positions, padding_positions, sequence_lengths = data
       phonemes, error_positions, padding_positions, sequence_lengths, tts_seqs, vowel, fine = data
 
       if fn_lr_policy is not None:
@@ -76,6 +79,7 @@ def train(
       
       optimizer.zero_grad()
       model.train()
+      # logits = model(phonemes,sequence_lengths)
       logits = model(phonemes,tts_seqs,vowel, fine, sequence_lengths)
       predictions = torch.argmax(logits,-1)
       train_errors, true_positives, false_positives, false_negatives, true_negatives = error_classifier_errors(predictions,
@@ -176,7 +180,7 @@ def main(args):
                                                 drop_last=False)
 
   print('creating model...')
-  phone_bilstm = ErrorClassifierPhoneBiLSTM(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
+  phone_bilstm = ErrorClassifierTTS(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
   if args.pretrained_ckpt:
     # optionally initialize an with an error model trained on errors of native speech
     # expected this to provide a warm start

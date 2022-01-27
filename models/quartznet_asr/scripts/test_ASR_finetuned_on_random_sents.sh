@@ -1,10 +1,10 @@
 DATA=$(cd ../../data; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd) 
 #declare -a accents=('kannada_male_english' 'rajasthani_male_english' 'gujarati_female_english' 'hindi_male_english' 'assamese_female_english' 'malayalam_male_english' 'manipuri_female_english' 'tamil_male_english')
-declare -a accents=('kannada_male_english')
+declare -a accents=('ST-AEDS')
 for seed in 1
 do 
-  for size in 50
+  for size in 300
   do
     for accent in "${accents[@]}"
     do

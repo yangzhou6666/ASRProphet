@@ -140,3 +140,5 @@ data/ST-AEDS/data
 data/ST-AEDS/manifests
 models/pretrained_checkpoints/*
 
+data/
+

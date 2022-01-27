@@ -16,7 +16,7 @@ if __name__ == "__main__" :
     ## load selection.json
     selection_json_fpath = "/workspace/ASRDebugger/data/ST-AEDS/manifests/selection.json"
     seeds = [1, 2, 3]
-    numbers = [50, 100, 1500, 2000]
+    numbers = [50, 300, 1500, 2000]
     
     file = open(selection_json_fpath)
     instances = file.readlines() 
