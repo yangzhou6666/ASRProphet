@@ -17,12 +17,17 @@ Prepare librispeech test-clean, test-other, dev-clean, dev-other inside this fol
 ```
 cd data/Librispeech/
 
-# download test-clean
+# download test-clean, test-other, dev-clean, dev-other
 wget https://www.openslr.org/resources/12/test-clean.tar.gz 
+wget https://www.openslr.org/resources/12/test-other.tar.gz 
+wget https://www.openslr.org/resources/12/dev-clean.tar.gz 
+wget https://www.openslr.org/resources/12/dev-other.tar.gz 
 
 # extract the tar.gz dataset
-
-# do the same thing for test-other, dev-clean, and dev-other
+tar -zxvf test-clean.tar.gz 
+tar -zxvf test-other.tar.gz 
+tar -zxvf dev-clean.tar.gz 
+tar -zxvf dev-other.tar.gz 
 ```
 
 Prepare `manifests` for the dataset.
@@ -74,6 +79,27 @@ Prepare `manifests` for the next experiments.
 ```
 bash generate_data.sh
 ```
+
+### 4. l2arctic
+
+At the current stage (for better sharing within the collaborators), we upload the dataset to Google Drive. The dataset can be download using a command:
+
+Prepare l2arctic dataset
+```
+cd data/l2arctic/
+
+# download the dataset
+gdown https://drive.google.com/uc?id=1kRA5HgGijT8LhjoQb19ez98fKrJ_9z1r
+
+# unzip the file
+unzip l2arctic_release_v5.zip
+
+# Process the dataset
+python prepare_l2arctic.py
+```
+
+Then, we processed dataset will be stored under `data/l2arctic/processed`.
+
 
 # ASR Models
 
