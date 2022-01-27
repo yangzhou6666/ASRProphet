@@ -139,6 +139,7 @@ data/
 models/pretrained_checkpoints/error_models/
 models/pretrained_checkpoints/deepspeech/
 models/pretrained_checkpoints/quartznet/finetuned/
+models/pretrained_checkpoints/wav2vec2/
 
 !models/pretrained_checkpoints/deepspeech/deepspeech-0.9.3-models.pbmm
 !models/pretrained_checkpoints/deepspeech/deepspeech-0.9.3-models.scorer
