@@ -2,6 +2,7 @@ import os
 import json
 import random
 import helpers
+from config import WORK_DIR
 
 
 def format_data(data):
@@ -14,7 +15,7 @@ def format_data(data):
 if __name__ == "__main__" :
 
     ## load selection.json
-    selection_json_fpath = "/workspace/ASRDebugger/data/ST-AEDS/manifests/selection.json"
+    selection_json_fpath = f"{WORK_DIR}/manifests/selection.json"
     seeds = [1, 2, 3]
     numbers = [50, 300, 1500, 2000]
     

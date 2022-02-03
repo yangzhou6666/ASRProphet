@@ -136,6 +136,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+data/
 models/pretrained_checkpoints/error_models/
 models/pretrained_checkpoints/deepspeech/
 models/pretrained_checkpoints/quartznet/finetuned/
