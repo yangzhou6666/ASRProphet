@@ -70,7 +70,7 @@ def synthesize_text(text, output_path, config_name, language_code, gender):
         print(f'Audio content written to file "{output_path}"')
 
 if __name__=='__main__':
-    config_name = 'en-IN-Standard-B'
+    config_name = 'en-US-Standard-H'
     language_code = TTS_CONFIG[config_name]["language_code"]
     gender = TTS_CONFIG[config_name]["gender"]
 
@@ -79,6 +79,8 @@ if __name__=='__main__':
     api_call_limit = 1000000
     word_count = 0
     for sub_dataset in os.listdir(path_to_dataset):
+        if len(sub_dataset.split('.')) > 1:
+            continue
         path_to_synthetic = os.path.join(path_to_dataset, sub_dataset, 'synthetic_wav', '-'.join([config_name, gender]))
         path_to_text = os.path.join(path_to_dataset, sub_dataset, 'transcript')
         os.makedirs(path_to_synthetic, exist_ok=True)
@@ -94,5 +96,5 @@ if __name__=='__main__':
 
                 path_to_save_audio = os.path.join(path_to_synthetic, text_id.split('.')[0] + ".wav")
                 synthesize_text(transcript, path_to_save_audio, config_name, language_code, gender)
-        break
+
 
