@@ -180,7 +180,12 @@ def error_classifier_collate_fn(batch, padding_value=0):
   fines = []
 
   for error_sequence, phoneme_sequence, tts_seq, vowel, fine in batch:
-    assert len(error_sequence) == len(phoneme_sequence) == len(tts_seq)
+    try:
+      assert len(phoneme_sequence) == len(tts_seq)
+    except:
+      print(len(phoneme_sequence))
+      print(len(tts_seq))
+      raise
     error_sequences.append(error_sequence)
     phoneme_sequences.append(convert_phonemes_to_ids(phoneme_sequence))
     sequence_lengths.append(len(phoneme_sequence))
@@ -196,6 +201,8 @@ def error_classifier_collate_fn(batch, padding_value=0):
   vowels = [item + [padding_value]*(max_length-len(item)) for item in vowels]
   fines = [item + [padding_value]*(max_length-len(item)) for item in fines]
 
+  torch.tensor(tts_seqs, dtype=torch.int64)
+
   return torch.tensor(phoneme_sequences,dtype=torch.int64), \
         torch.tensor(error_sequences,dtype=torch.int64), \
         torch.tensor(padding_positions, dtype=torch.float), \
@@ -207,14 +214,14 @@ def error_classifier_collate_fn(batch, padding_value=0):
 def get_WER_from_para(para):
   return float(para.strip().split('\n')[2][5:])
 
-def geneate_error_data_from_hypotheses_file(path_hypotheses, skip_zero_CER=False):
+def geneate_error_data_from_hypotheses_file(path_hypotheses, is_train=False, skip_zero_CER=False):
   with open(path_hypotheses) as f, open(path_hypotheses.split(".")[0]+"_tts.txt") as r:
     paragraphs = f.read().strip().split('\n\n')
     tts_paragraphs = r.read().strip().split('\n\n')
     ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:], tts.strip().split('\n')[4][5:]) \
                       for para, tts in zip(paragraphs, tts_paragraphs) if (not skip_zero_CER or get_WER_from_para(para)!=0.0)]
     pool = Pool(16)
-    multiprocessed_output = list(filter(None, pool.map(__generate_error_sequence, tqdm(ref_hyp_pairs, total=len(ref_hyp_pairs)))))
+    multiprocessed_output = list(filter(None, pool.map(__generate_error_sequence, tqdm(ref_hyp_pairs, is_train, total=len(ref_hyp_pairs)))))
     pool.close()
     # error_sequences, reference_phonemes = zip(*multiprocessed_output)
     error_sequences, reference_phonemes, tts_sequences, vowels, fines = zip(*multiprocessed_output)
@@ -263,7 +270,98 @@ def __get_error_sequence_between_words(reference, hypothesis):
   assert len(error_sequence) == len(p_r)
   return error_sequence, insert_left, insert_right
 
-def __generate_error_sequence(reference_hypothesis_pair):
+
+def is_align(reference, hypothesis):
+  reference_phonemes = get_phoneme_transcript(reference,markers=False)
+  reference = reference.lower()
+  hypothesis = hypothesis.lower()
+  error_sequence = []
+
+  aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
+  try:
+      aligner.align()
+  except:
+      print("alignement failed")
+      return None
+
+  power_alignment = aligner.power_alignment
+  # print(power_alignment)
+  p_ref = [SOS] + power_alignment.ref() + [EOS]
+  p_hyp = [SOS] + power_alignment.hyp() + [EOS]
+  p_ops = ['C'] + power_alignment.align + ['C']
+
+
+  hyp_pointer = 0
+  ref_pointer = 0
+
+  ref_invariant = [SOS,' '] + reference_phonemes + [' ',EOS]
+  ref_constructed = []
+
+  for op in p_ops:
+      if hyp_pointer < len(p_hyp):
+          hyp_word = p_hyp[hyp_pointer]
+      else:
+          assert op=='D'
+
+      if ref_pointer < len(p_ref):
+          ref_word = p_ref[ref_pointer]
+      else:
+          assert op == 'I'
+
+      if not (ref_word in [SOS,EOS]):
+        ph_ref_word = get_phoneme_transcript(ref_word, markers=False)
+      else:
+        ph_ref_word = [ref_word]
+
+      if op == 'C':
+          # if ref_word != hyp_word :
+          #   print(ref_word)
+          #   print(hyp_word)
+          assert ref_word == hyp_word
+          #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
+          ref_constructed += ph_ref_word
+          error_sequence += [0]*len(ph_ref_word)
+          if len(error_sequence) < len(reference_phonemes) + 4:
+            error_sequence += [0]
+            ref_constructed += [' ']
+
+          hyp_pointer +=1
+          ref_pointer +=1
+      elif op == 'D':
+          #tp,tr,th,cm = _get_statistics(ref_word,'')
+          error_sequence += [1]*len(ph_ref_word)
+          ref_constructed += ph_ref_word
+          if len(error_sequence) < len(reference_phonemes) + 4:
+            error_sequence += [0]
+            ref_constructed += [' ']
+          ref_pointer +=1
+      elif op == 'I':
+          error_sequence[-1] = 1
+          #tp,tr,th,cm = _get_statistics('',hyp_word)
+          hyp_pointer +=1
+      elif op == 'S':
+          #tp,tr,th,cm = _get_statistics(ref_word,hyp_word)
+          ph_hyp_word = get_phoneme_transcript(hyp_word, markers=False)
+          ref_constructed += ph_ref_word
+          substition_error, insert_left, insert_right = __get_error_sequence_between_words(ref_word, hyp_word)
+          if insert_left:
+            error_sequence[-1] = 1
+          error_sequence += substition_error
+          ref_pointer +=1
+          hyp_pointer +=1
+          if len(error_sequence) < len(reference_phonemes) + 4:
+            error_sequence += [0]
+            ref_constructed += [' ']
+          if insert_right:
+            error_sequence[-1] = 1
+
+  assert error_sequence[0] == error_sequence[-1] == 0
+  error_sequence = error_sequence[1:-1]
+
+  reference_phonemes = [SOS] + reference_phonemes + [EOS]
+  return len(error_sequence) == len(reference_phonemes)
+
+def __generate_error_sequence(reference_hypothesis_pair, is_train=False):
     reference, hypothesis, tts = reference_hypothesis_pair
     error_sequence = []
     tts_sequence = []
@@ -272,91 +370,95 @@ def __generate_error_sequence(reference_hypothesis_pair):
     reference = reference.lower()
     hypothesis = hypothesis.lower()
     tts = tts.lower()
-    aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
-    try:
-        aligner.align()
-    except:
-        print("alignement failed")
+    if is_train:
+      aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
+      try:
+          aligner.align()
+      except:
+          print("alignement failed")
+          return None
+
+      power_alignment = aligner.power_alignment
+      # print(power_alignment)
+      p_ref = [SOS] + power_alignment.ref() + [EOS]
+      p_hyp = [SOS] + power_alignment.hyp() + [EOS]
+      p_ops = ['C'] + power_alignment.align + ['C']
+
+
+      hyp_pointer = 0
+      ref_pointer = 0
+
+      ref_invariant = [SOS,' '] + reference_phonemes + [' ',EOS]
+      ref_constructed = []
+
+      for op in p_ops:
+          if hyp_pointer < len(p_hyp):
+              hyp_word = p_hyp[hyp_pointer]
+          else:
+              assert op=='D'
+
+          if ref_pointer < len(p_ref):
+              ref_word = p_ref[ref_pointer]
+          else:
+              assert op == 'I'
+
+          if not (ref_word in [SOS,EOS]):
+            ph_ref_word = get_phoneme_transcript(ref_word, markers=False)
+          else:
+            ph_ref_word = [ref_word]
+
+          if op == 'C':
+              # if ref_word != hyp_word :
+              #   print(ref_word)
+              #   print(hyp_word)
+              assert ref_word == hyp_word
+              #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
+              ref_constructed += ph_ref_word
+              error_sequence += [0]*len(ph_ref_word)
+              if len(error_sequence) < len(reference_phonemes) + 4:
+                error_sequence += [0]
+                ref_constructed += [' ']
+
+              hyp_pointer +=1
+              ref_pointer +=1
+          elif op == 'D':
+              #tp,tr,th,cm = _get_statistics(ref_word,'')
+              error_sequence += [1]*len(ph_ref_word)
+              ref_constructed += ph_ref_word
+              if len(error_sequence) < len(reference_phonemes) + 4:
+                error_sequence += [0]
+                ref_constructed += [' ']
+              ref_pointer +=1
+          elif op == 'I':
+              error_sequence[-1] = 1
+              #tp,tr,th,cm = _get_statistics('',hyp_word)
+              hyp_pointer +=1
+          elif op == 'S':
+              #tp,tr,th,cm = _get_statistics(ref_word,hyp_word)
+              ph_hyp_word = get_phoneme_transcript(hyp_word, markers=False)
+              ref_constructed += ph_ref_word
+              substition_error, insert_left, insert_right = __get_error_sequence_between_words(ref_word, hyp_word)
+              if insert_left:
+                error_sequence[-1] = 1
+              error_sequence += substition_error
+              ref_pointer +=1
+              hyp_pointer +=1
+              if len(error_sequence) < len(reference_phonemes) + 4:
+                error_sequence += [0]
+                ref_constructed += [' ']
+              if insert_right:
+                error_sequence[-1] = 1
+      
+      assert error_sequence[0] == error_sequence[-1] == 0
+      error_sequence = error_sequence[1:-1]
+
+      reference_phonemes = [SOS] + reference_phonemes + [EOS]
+      if not (len(error_sequence) == len(reference_phonemes)):
+        print('len(error_sequence) == len(reference_phonemes)... returning None')
         return None
-
-    power_alignment = aligner.power_alignment
-    # print(power_alignment)
-    p_ref = [SOS] + power_alignment.ref() + [EOS]
-    p_hyp = [SOS] + power_alignment.hyp() + [EOS]
-    p_ops = ['C'] + power_alignment.align + ['C']
-
-
-    hyp_pointer = 0
-    ref_pointer = 0
-
-    ref_invariant = [SOS,' '] + reference_phonemes + [' ',EOS]
-    ref_constructed = []
-
-    for op in p_ops:
-        if hyp_pointer < len(p_hyp):
-            hyp_word = p_hyp[hyp_pointer]
-        else:
-            assert op=='D'
-
-        if ref_pointer < len(p_ref):
-            ref_word = p_ref[ref_pointer]
-        else:
-            assert op == 'I'
-
-        if not (ref_word in [SOS,EOS]):
-          ph_ref_word = get_phoneme_transcript(ref_word, markers=False)
-        else:
-          ph_ref_word = [ref_word]
-
-        if op == 'C':
-            # if ref_word != hyp_word :
-            #   print(ref_word)
-            #   print(hyp_word)
-            assert ref_word == hyp_word
-            #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
-            ref_constructed += ph_ref_word
-            error_sequence += [0]*len(ph_ref_word)
-            if len(error_sequence) < len(reference_phonemes) + 4:
-              error_sequence += [0]
-              ref_constructed += [' ']
-
-            hyp_pointer +=1
-            ref_pointer +=1
-        elif op == 'D':
-            #tp,tr,th,cm = _get_statistics(ref_word,'')
-            error_sequence += [1]*len(ph_ref_word)
-            ref_constructed += ph_ref_word
-            if len(error_sequence) < len(reference_phonemes) + 4:
-              error_sequence += [0]
-              ref_constructed += [' ']
-            ref_pointer +=1
-        elif op == 'I':
-            error_sequence[-1] = 1
-            #tp,tr,th,cm = _get_statistics('',hyp_word)
-            hyp_pointer +=1
-        elif op == 'S':
-            #tp,tr,th,cm = _get_statistics(ref_word,hyp_word)
-            ph_hyp_word = get_phoneme_transcript(hyp_word, markers=False)
-            ref_constructed += ph_ref_word
-            substition_error, insert_left, insert_right = __get_error_sequence_between_words(ref_word, hyp_word)
-            if insert_left:
-              error_sequence[-1] = 1
-            error_sequence += substition_error
-            ref_pointer +=1
-            hyp_pointer +=1
-            if len(error_sequence) < len(reference_phonemes) + 4:
-              error_sequence += [0]
-              ref_constructed += [' ']
-            if insert_right:
-              error_sequence[-1] = 1
-    
-    assert error_sequence[0] == error_sequence[-1] == 0
-    error_sequence = error_sequence[1:-1]
-    reference_phonemes = [SOS] + reference_phonemes + [EOS]
-    if not (len(error_sequence) == len(reference_phonemes)):
-      print('len(error_sequence) == len(reference_phonemes)... returning None')
-      return None
-    assert len(error_sequence) == len(reference_phonemes)
+      assert len(error_sequence) == len(reference_phonemes)
+    else:
+      reference_phonemes = [SOS] + reference_phonemes + [EOS]
 
     reference_phonemes_tts = get_phoneme_transcript(reference,markers=False)
     aligner = PowerAligner(reference, tts, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
@@ -440,10 +542,12 @@ def __generate_error_sequence(reference_hypothesis_pair):
     assert tts_sequence[0] == tts_sequence[-1] == 0
     tts_sequence = tts_sequence[1:-1]
     reference_phonemes_tts = [SOS] + reference_phonemes_tts + [EOS]
-    if not (len(tts_sequence) == len(reference_phonemes_tts) == len(reference_phonemes)):
+
+    
+    if not (len(tts_sequence) == len(reference_phonemes_tts)):
       print('len(tts_sequence) == len(reference_phonemes_tts)... returning None')
       return None
-    assert len(tts_sequence) == len(reference_phonemes_tts) == len(reference_phonemes)
+    
     vowel = [1 if item in Phonemes.vowels else 0 for item in reference_phonemes]
     fine = [coarse_phone_to_fine_phone(phone) for phone in reference_phonemes]
     return error_sequence, reference_phonemes, tts_sequence, vowel, fine
@@ -459,52 +563,4 @@ if __name__ == '__main__':
 
   error_sequence = __generate_error_sequence((s1,s2))
   
-  '''
-  ref = 'and take a break for the midday meals and return to resume work till evening'
-  hyp = 'and take a brack for the made the mils and return to razing work till evening'
-  __generate_error_sequence((ref,hyp))
 
-  ref = 'and take a break for the midday meals'
-  hyp = 'and take a brack for the made the mils'
-  __generate_error_sequence((ref,hyp))
-
-  ref = 'and take a break for the midday meals and'
-  hyp = 'and take a brack for the made the mils and'
-  __generate_error_sequence((ref,hyp))
-
-  ref = 'return to resume'
-  hyp = 'return to razing'
-  __generate_error_sequence((ref,hyp))
-  '''
-
-  '''
-  s1 = 'Hello what are you trying to code'
-  p1 = get_phoneme_transcript(s1)
-  m1 = mask_phoneme_tokens(p1)
-  p1_id = convert_phonemes_to_ids(p1)
-  m1_id = convert_phonemes_to_ids(m1)
-
-  s2 = 'How is your PhD going on'
-  p2 = get_phoneme_transcript(s2)
-  m2 = mask_phoneme_tokens(p2)
-  p2_id = convert_phonemes_to_ids(p2)
-  m2_id = convert_phonemes_to_ids(m2)
-
-  s3 = 'How many more years will it take to finish PhD'
-  p3 = get_phoneme_transcript(s3)
-  m3 = mask_phoneme_tokens(p3)
-  p3_id = convert_phonemes_to_ids(p3)
-  m3_id = convert_phonemes_to_ids(m3)
-
-  s4 = 'oh please'
-  p4 = get_phoneme_transcript(s4)
-  m4 = mask_phoneme_tokens(p4)
-  p4_id = convert_phonemes_to_ids(p4)
-  m4_id = convert_phonemes_to_ids(m4)
-
-  s5 = 'nice'
-  p5 = get_phoneme_transcript(s5)
-  m5 = mask_phoneme_tokens(p5)
-  p5_id = convert_phonemes_to_ids(p5)
-  m5_id = convert_phonemes_to_ids(m5)
-  '''
