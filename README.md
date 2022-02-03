@@ -206,7 +206,7 @@ docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path
   * Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
     ```
     cd models/quartznet_asr
-    bash scripts/l2arcticinfer_transcriptions_on_seed_set.sh
+    bash scripts/l2arctic/infer_transcriptions_on_seed_set.sh
     ```
   * Train error model by aligning the references and generated transcripts for seed+dev set
     ```
