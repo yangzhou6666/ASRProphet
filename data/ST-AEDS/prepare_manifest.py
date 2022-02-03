@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
         wav_path = os.path.join(data_dir, wav_path)
 
-        wav_path = f"/media/mhilmiasyrofi/ASRDebugger/data/ST-AEDS/{wav_path}"
+        wav_path = f"/workspace/ASRDebugger/data/ST-AEDS/{wav_path}"
 
         if os.path.exists(wav_path) :
             text = remove_dot_in_last_sentence(helpers.remove_punctuation(text))
@@ -62,4 +62,7 @@ if __name__ == "__main__":
         lower = upper
 
     helpers.write_json_data(f"manifests/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
+<<<<<<< HEAD
 
+=======
+>>>>>>> debugger

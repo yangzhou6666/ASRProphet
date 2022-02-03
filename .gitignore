@@ -157,3 +157,11 @@ data/LibriSpeech/LibriSpeech
 *.zip
 .DS_Store
 data/
+data/LibriSpeech
+data/ST-AEDS/data
+data/ST-AEDS/TTS
+data/ST-AEDS/manifests
+models/pretrained_checkpoints/*
+
+data/
+.DS_Store

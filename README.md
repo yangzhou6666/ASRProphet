@@ -79,6 +79,24 @@ Prepare `manifests` for the next experiments.
 ```
 bash generate_data.sh
 ```
+cd models/deepspeech_asr/
+
+git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
+
+#read the readme from the project
+#build the docker image
+cd FineTuneDeepSpeech
+docker build -t <your username>/traindeepspeech .
+
+#run the docker
+docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
+```
+
+### 3. Wav2Vec2
+
+Wav2Vec2 ASR will download the model and tokenizer automatically from HuggingFace
+
+
 
 ### 4. l2arctic
 
@@ -90,9 +108,6 @@ cd data/l2arctic/
 
 # download the dataset
 gdown https://drive.google.com/uc?id=1kRA5HgGijT8LhjoQb19ez98fKrJ_9z1r
-
-# download the dataset with Mac-generated audios
-gdown https://drive.google.com/uc?id=1_Bgg0Us7NyL8zdk1qANaFlZdEls0JVD3
 
 # unzip the file
 unzip l2arctic_release_v5.zip
@@ -150,10 +165,6 @@ docker build -t <your username>/traindeepspeech .
 #run the docker
 docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
 ```
-
-### 3. Wav2Vec2
-
-Wav2Vec2 ASR will download the model and tokenizer automatically from HuggingFace
 
 
 
