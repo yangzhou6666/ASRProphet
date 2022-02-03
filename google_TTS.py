@@ -93,8 +93,9 @@ if __name__=='__main__':
                 if word_count > api_call_limit:
                     print("Reach API call limits.")
                     exit()
-
                 path_to_save_audio = os.path.join(path_to_synthetic, text_id.split('.')[0] + ".wav")
-                synthesize_text(transcript, path_to_save_audio, config_name, language_code, gender)
+                if not os.path.exists(path_to_save_audio):
+                    # if query APIs if the file is not generated.
+                    synthesize_text(transcript, path_to_save_audio, config_name, language_code, gender)
 
 
