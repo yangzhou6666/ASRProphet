@@ -5,7 +5,7 @@ from operator import itemgetter
 from tqdm import tqdm
 from g2p_en import G2p
 get_phoneme_seq = G2p()
-
+from data import is_align, get_WER_from_para
 from text import _clean_text
 import string
 import pickle
@@ -79,9 +79,11 @@ class ErrorModelSampler():
   def __init__(self, json_file, error_model_weights=None):
     self.json_file = json_file
     print('\tparsing json...')
-    
-    self.sentences = [normalized_json_transcript(line) for line in open(self.json_file)]
-    self.json_lines = [line for line in open(self.json_file)]
+    with open(json_file) as f:
+      paragraphs = f.read().strip().split('\n\n')
+    ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:]) for para in paragraphs]
+    self.sentences = [line[0] for line in ref_hyp_pairs if is_align(line[0], line[1])]
+    self.json_lines = [line for line in open('/'+"/".join(self.json_file.split("/")[:-2])+"/selection.json")]
     self.phone_sentences = []
 
     print('\tgenerating_vocab...')
