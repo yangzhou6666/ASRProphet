@@ -91,6 +91,9 @@ cd data/l2arctic/
 # download the dataset
 gdown https://drive.google.com/uc?id=1kRA5HgGijT8LhjoQb19ez98fKrJ_9z1r
 
+# download the dataset with Mac-generated audios
+gdown https://drive.google.com/uc?id=1_Bgg0Us7NyL8zdk1qANaFlZdEls0JVD3
+
 # unzip the file
 unzip l2arctic_release_v5.zip
 
