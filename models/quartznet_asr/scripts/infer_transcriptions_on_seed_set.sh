@@ -8,11 +8,11 @@ do
   mkdir -p $DATA/$accent/manifests/quartznet_outputs
   echo $accent
   python3 -u inference.py \
-  --batch_size=8 \
-  --output_file=$DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_out.txt \
-  --wav_dir=$DATA/indicTTS_audio/$accent/english/wav \
-  --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
+  --batch_size=16 \
+  --output_file=$DATA/$accent/manifests/quartznet_outputs/selection_out.txt \
+  --wav_dir=$DATA/$accent/data \
+  --val_manifest=$DATA/$accent/manifests/selection.json \
   --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
   --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log.txt
+  > $DATA/$accent/manifests/quartznet_outputs/selection_log.txt
 done

@@ -208,15 +208,19 @@ def get_WER_from_para(para):
   return float(para.strip().split('\n')[2][5:])
 
 def geneate_error_data_from_hypotheses_file(path_hypotheses, skip_zero_CER=False):
-  with open(path_hypotheses) as f:
+  with open(path_hypotheses) as f, open(path_hypotheses.split(".")[0]+"_tts.txt") as r:
     paragraphs = f.read().strip().split('\n\n')
-    ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:], para.strip().split('\n')[5][5:]) \
-                      for para in paragraphs if (not skip_zero_CER or get_WER_from_para(para)!=0.0)]
+    tts_paragraphs = r.read().strip().split('\n\n')
+    ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:], tts.strip().split('\n')[4][5:]) \
+                      for para, tts in zip(paragraphs, tts_paragraphs) if (not skip_zero_CER or get_WER_from_para(para)!=0.0)]
     pool = Pool(16)
     multiprocessed_output = list(filter(None, pool.map(__generate_error_sequence, tqdm(ref_hyp_pairs, total=len(ref_hyp_pairs)))))
     pool.close()
+    # error_sequences, reference_phonemes = zip(*multiprocessed_output)
     error_sequences, reference_phonemes, tts_sequences, vowels, fines = zip(*multiprocessed_output)
-
+    # print(error_sequences[0])
+    # print(reference_phonemes[0])
+    # return list(zip(error_sequences, reference_phonemes))
     print(error_sequences[0])
     print(reference_phonemes[0])
     print(tts_sequences[0])

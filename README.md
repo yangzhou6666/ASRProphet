@@ -1,29 +1,154 @@
-# Error-driven Fixed-Budget ASR Personalization for Accented Speakers (ICASSP 2021) 
+# ASRDebugger
 
-This repository provides an implementation of experiments in our [ICASSP-2021 paper](https://arxiv.org/abs/2103.03142)
-```
-@inproceedings{awasthi2021error,
-  title={Error-Driven Fixed-Budget ASR Personalization for Accented Speakers},
-  author={Awasthi, Abhijeet and Kansal, Aman and Sarawagi, Sunita and Jyothi, Preethi},
-  booktitle={ICASSP 2021-2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
-  pages={7033--7037},
-  year={2021},
-  organization={IEEE}
-}
-```  
+This repository provides an implementation of experiments in our [FSE-2022 paper]()
 
 # Requirements
 This code was developed with python 3.8.9. <br/>
 Create a new virtual environment and install the dependencies by running `bash install_requirements.sh`
 
 # Dataset
-IndicTTS dataset used in our experiments can be obtained by contacting [IndicTTS](https://www.iitm.ac.in/donlab/tts/contact.php) team at `smtiitm@gmail.com`. Please mention that you require data for all the accents in Indian English.
 
-The dataset consists of utterances from various accented speakers. The speaker utterances are in the format \<accent>_\<gender>_english.zip. The data can be unzipped in appropriate format using the `data/indicTTS_audio/unzip_indic` scripts.
+### 1. Librispeech
+
+Librispeech dataset is used in our experiments is downloaded from [Librispeech OpenSLR](https://www.openslr.org/12/). The dataset is Open Source, and contains 1000 hours of speeches. 
+
+Prepare librispeech test-clean, test-other, dev-clean, dev-other inside this folder (`data/Librispeech/test-clean`, `data/Librispeech/test-other`, `data/Librispeech/dev-clean`, `data/Librispeech/dev-other`).
+
 ```
-cd data/indicTTS_audio
-python3 unzip_indic.py --input_path <path_to_speaker_zip_file>
+cd data/Librispeech/
+
+# download test-clean, test-other, dev-clean, dev-other
+wget https://www.openslr.org/resources/12/test-clean.tar.gz 
+wget https://www.openslr.org/resources/12/test-other.tar.gz 
+wget https://www.openslr.org/resources/12/dev-clean.tar.gz 
+wget https://www.openslr.org/resources/12/dev-other.tar.gz 
+
+# extract the tar.gz dataset
+tar -zxvf test-clean.tar.gz 
+tar -zxvf test-other.tar.gz 
+tar -zxvf dev-clean.tar.gz 
+tar -zxvf dev-other.tar.gz 
 ```
+
+Prepare `manifests` for the dataset.
+
+```
+bash generate_data.sh
+```
+
+### 2. Librispeech Train
+
+Prepare Librispeech-train dataset
+```
+cd data/LibrispeechTrain/
+
+# download train-100
+wget https://www.openslr.org/resources/12/train-clean-100.tar.gz
+
+# extract the tar.gz dataset
+
+```
+
+Prepare `manifests` for the next experiments.
+
+```
+bash generate_data.sh
+```
+
+
+### 3. ST-AEDS
+
+A free American English corpus by Surfingtech (www.surfing.ai), containing utterances from 10 speakers, Each speaker has about 350 utterances.
+
+Prepare ST-AEDS dataset
+```
+cd data/ST-AEDS/
+
+# download the dataset
+wget https://www.openslr.org/resources/45/ST-AEDS-20180100_1-OS.tgz
+
+# extract the .tgz dataset
+
+
+```
+
+Please rename the extracted folder into `data`, thus each audio files and the transcription (text.txt) located in `data/ST-AEDS/data/`
+
+Prepare `manifests` for the next experiments.
+
+```
+bash generate_data.sh
+```
+
+### 4. l2arctic
+
+At the current stage (for better sharing within the collaborators), we upload the dataset to Google Drive. The dataset can be download using a command:
+
+Prepare l2arctic dataset
+```
+cd data/l2arctic/
+
+# download the dataset
+gdown https://drive.google.com/uc?id=1kRA5HgGijT8LhjoQb19ez98fKrJ_9z1r
+
+# unzip the file
+unzip l2arctic_release_v5.zip
+
+# Process the dataset
+python prepare_l2arctic.py
+```
+
+Then, we processed dataset will be stored under `data/l2arctic/processed`.
+
+
+# ASR Models
+
+### 1. QuartzNet
+
+QuartzNet ASR models are available to use directly after cloning the repository
+
+### 2. Deepspeech
+
+Download the model and the scorer
+
+```
+mkdir models/pretrained_checkpoints/deepspeech/
+
+cd models/pretrained_checkpoints/deepspeech/
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.pbmm
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.scorer
+```
+
+Download the checkpoint for fine-tuning
+
+```
+mkdir models/pretrained_checkpoints/deepspeech/checkpoints/
+cd models/pretrained_checkpoints/deepspeech/checkpoints/
+
+wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-checkpoint.tar.gz
+
+# extract the tar.gz file
+```
+
+Prepare code for fine-tuning
+
+```
+cd models/deepspeech_asr/
+
+git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
+
+#read the readme from the project
+#build the docker image
+cd FineTuneDeepSpeech
+docker build -t <your username>/traindeepspeech .
+
+#run the docker
+docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
+```
+
+
 
 # Usage
   * Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
