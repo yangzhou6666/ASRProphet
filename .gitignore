@@ -156,3 +156,4 @@ data/LibriSpeech/LibriSpeech
 *.tar.gz
 *.zip
 .DS_Store
+data/
