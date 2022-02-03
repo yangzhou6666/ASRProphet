@@ -12,7 +12,7 @@ from math import floor,ceil
 from functools import partial
 from shutil import copyfile
 
-from model import ErrorClassifierPhoneBiLSTM_V2
+from model import ErrorClassifierPhoneBiLSTM_V2, ErrorClassifierTTS
 from data import error_classifier_collate_fn, geneate_error_data_from_hypotheses_file
 from metrics import xent_loss, error_classifier_errors, get_precision_recall_f1
 from helpers import print_dict, warmup_decay_policy, save_model
@@ -28,9 +28,11 @@ def eval(eval_data_loader,model,args,device):
 
     for data in eval_data_loader:
       data = [item.to(device) for item in data]
-      phonemes, error_positions, padding_positions, sequence_lengths = data
+      # phonemes, error_positions, padding_positions, sequence_lengths = data
+      phonemes, error_positions, padding_positions, sequence_lengths, tts_seqs, vowel, fine = data
       model.eval()
-      logits = model(phonemes,sequence_lengths)
+      # logits = model(phonemes,sequence_lengths)
+      logits = model(phonemes,tts_seqs,vowel, fine,sequence_lengths)
       dev_loss = xent_loss(logits, error_positions,padding_positions)
       predictions = torch.argmax(logits,-1)
       errors, true_positives, false_positives, false_negatives, true_negatives = error_classifier_errors(predictions,
@@ -67,7 +69,8 @@ def train(
     for data in train_data_loader:
       steps +=1
       data = [item.to(device) for item in data] 
-      phonemes, error_positions, padding_positions, sequence_lengths = data
+      # phonemes, error_positions, padding_positions, sequence_lengths = data
+      phonemes, error_positions, padding_positions, sequence_lengths, tts_seqs, vowel, fine = data
 
       if fn_lr_policy is not None:
         adjusted_lr = fn_lr_policy(steps)
@@ -76,7 +79,8 @@ def train(
       
       optimizer.zero_grad()
       model.train()
-      logits = model(phonemes,sequence_lengths)
+      # logits = model(phonemes,sequence_lengths)
+      logits = model(phonemes,tts_seqs,vowel, fine, sequence_lengths)
       predictions = torch.argmax(logits,-1)
       train_errors, true_positives, false_positives, false_negatives, true_negatives = error_classifier_errors(predictions,
                                                                          error_positions, padding_positions)
@@ -87,7 +91,7 @@ def train(
       train_loss.backward()
       optimizer.step()
 
-      if steps % args.train_frequency == 0:
+      if steps % args.steps_per_epoch == 0:
         print('\t epoch: {} steps: {} train_precision: {:.2f} train_recall: {:.2f} train_f1: {:.2f} train_acc: {:.2f} train_loss: {:.2f}\n'.format(epoch,steps,precision,recall,f1,acc,train_loss))
         other_inputs["summary_writer"].add_scalar('Loss/train', train_loss.item(), steps)
         other_inputs["summary_writer"].add_scalar('Error/train', train_error_rate, steps)
@@ -112,8 +116,8 @@ def train(
         # and thus model is not not well trained yet.
         save_model(model, optimizer, epoch, output_dir=args.best_dir, save_optimizer=False)
 
-    print('epoch: {} steps: {} best_f1: {:.2f} dev_precision: {:.2f} dev_recall: {:.2f} dev_f1: {:.2f} dev_acc: {:.2f} dev_loss: {:.2f}\n'.format(epoch,steps,
-                                                              best_f1,precision, recall, f1, acc, dev_loss))
+    print('epoch: {} steps: {} error_rate: {:.2f} best_f1: {:.2f} dev_precision: {:.2f} dev_recall: {:.2f} dev_f1: {:.2f} dev_acc: {:.2f} dev_loss: {:.2f}\n'.format(epoch,steps,
+                                                              dev_error_rate,best_f1,precision, recall, f1, acc, dev_loss))
 
   if not os.path.isdir(args.best_dir):
     # if no best ckpt is saved, copy the most recent ckpt
@@ -176,7 +180,7 @@ def main(args):
                                                 drop_last=False)
 
   print('creating model...')
-  phone_bilstm = ErrorClassifierPhoneBiLSTM_V2(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
+  phone_bilstm = ErrorClassifierTTS(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
   if args.pretrained_ckpt:
     # optionally initialize an with an error model trained on errors of native speech
     # expected this to provide a warm start
@@ -190,12 +194,12 @@ def main(args):
   phone_bilstm.to(device)
   optimizer = optim.Adam(phone_bilstm.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-  steps_per_epoch = ceil(len(train_data)/args.batch_size)
-  print('steps per epoch: {}'.format(steps_per_epoch))
+  args.steps_per_epoch = ceil(len(train_data)/args.batch_size)
+  print('steps per epoch: {}'.format(args.steps_per_epoch))
 
 
   if args.lr_decay == 'warmup':
-      fn_lr_policy = lambda s: warmup_decay_policy(args.lr, s, args.num_epochs * steps_per_epoch)
+      fn_lr_policy = lambda s: warmup_decay_policy(args.lr, s, args.num_epochs * args.steps_per_epoch)
   else:
       fn_lr_policy = None
 

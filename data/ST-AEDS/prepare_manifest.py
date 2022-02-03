@@ -25,7 +25,7 @@ if __name__ == "__main__":
         text = " ".join(line.split()[1:])
 
         wav_path = os.path.join(data_dir, wav_path)
-
+        
         wav_path = f"{WORK_DIR}/{wav_path}"
 
         if os.path.exists(wav_path) :
@@ -64,4 +64,3 @@ if __name__ == "__main__":
         lower = upper
 
     helpers.write_json_data(f"manifests/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
-

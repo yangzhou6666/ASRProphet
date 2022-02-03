@@ -4,7 +4,7 @@ PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
 declare -a accents=('LibriSpeech')
 for seed in 1
 do 
-  for size in 50
+  for size in 300
   do
     for accent in "${accents[@]}"
     do

@@ -15,7 +15,7 @@ def print_dict(d):
         print(fmtString % keyPair)
 
 
-def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
+def print_sentence_wise_wer(hypotheses, references, tts_preds, output_file, input_file):
     
     ## ensure that the number of transcriptions are equal to the number of ground-truth texts
     assert len(hypotheses) == len(references)
@@ -37,12 +37,13 @@ def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
         cers.append(f_cer(hyp, ref))
 
     with open(output_file, 'w') as f:
-        for hyp, ref, wer, cer, wav_filename in zip(hypotheses, references, wers, cers, wav_filenames):
+        for hyp, ref, wer, cer, wav_filename, tts in zip(hypotheses, references, wers, cers, wav_filenames, tts_preds):
             f.write(wav_filename+"\n")
             f.write("WER: "+str(wer)+'\n')
             f.write("CER: " + str(cer) + '\n')
             f.write("Ref: "+ref+'\n')
             f.write("Hyp: "+hyp+'\n')
+            f.write("TTS: "+tts+'\n')
             f.write('\n')
     
         print('\n')

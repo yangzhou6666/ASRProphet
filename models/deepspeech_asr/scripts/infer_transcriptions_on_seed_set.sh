@@ -8,8 +8,8 @@ do
   python3 -u inference.py \
   --output_file=$DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_out.txt \
   --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
-  --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
-  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
-  --model_tag=deepspeech \
+  --tts_manifest=$DATA/$accent/TTS/seed_plus_dev.json \
+  --model=$PRETRAINED_CKPTS/deepspeech/deepspeech/deepspeech-0.9.3-models.pbmm \
+  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech/deepspeech-0.9.3-models.scorer \
   > $DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_infer_log.txt
 done
