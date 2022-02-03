@@ -1,7 +1,7 @@
 
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
-declare -a accents=('YKWK' 'ZHAA' 'suitcase_corpus')
+declare -a accents=('ASI')
 #     
 for seed in 1
 do
