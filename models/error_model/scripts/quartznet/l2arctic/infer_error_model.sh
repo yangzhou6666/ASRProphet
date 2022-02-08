@@ -1,6 +1,6 @@
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
-declare -a accents=('ASI')
+declare -a accents=('ABA' 'ASI' 'BWC' 'EBVS' 'ERMS' 'HJK' 'HKK' 'HQTV' 'LXC' 'MBMPS' 'NCC' 'NJS' 'PNV' 'RRBI' 'SKA' 'SVBI' 'THV' 'TLV' 'TNI' 'TXHC' 'YBAA' 'YDCK' 'YKWK' 'ZHAA' 'suitcase_corpus')
 for seed in 1
 do
   for accent in "${accents[@]}"
@@ -11,7 +11,7 @@ do
       --num_layers=4 \
       --hidden_size=64 \
       --input_size=64 \
-      --json_path=$DATA/$accent/manifests/quartznet_outputs/selection.txt \
+      --json_path=$DATA/$accent/manifests/quartznet_outputs/selection_out.txt \
       --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/ErrorClassifierTTS.pt \
       --output_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
     > $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/infer_log.txt
