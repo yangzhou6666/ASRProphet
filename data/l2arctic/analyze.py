@@ -61,4 +61,18 @@ for name in os.listdir(path):
     else:
         print("\033[0;37;41m\t!!Data Missing!!\033[0m")
 
+
+    print("------ All TTS------")
+    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/all_tts/test_infer_log.txt'
+    if os.path.exists(baseline_log): 
+        with open(baseline_log) as f:
+            contents = f.readlines()
+            WER = contents[-6].strip()
+
+            CER = contents[-2].strip()
+            print(WER)
+            print(CER)
+    else:
+        print("\033[0;37;41m\t!!Data Missing!!\033[0m")
+
     print("\n\n")
