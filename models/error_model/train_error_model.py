@@ -157,7 +157,7 @@ def main(args):
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
   print('loading data....')
-  data = geneate_error_data_from_hypotheses_file(hypotheses_path, is_train=True)
+  data = geneate_error_data_from_hypotheses_file(hypotheses_path)
   random.shuffle(data)
   
   train_data = data[0:floor(args.train_portion*len(data))]
