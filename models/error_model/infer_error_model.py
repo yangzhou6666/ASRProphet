@@ -13,8 +13,8 @@ from functools import partial
 import pickle
 import json
 
-from model import ErrorClassifierPhoneBiLSTM, ErrorClassifierPhoneBiLSTM_V2, ErrorClassifierTTS
-from data import inference_collate_fn, load_phoneme_sequences, phone_list, geneate_error_data_from_hypotheses_file, error_classifier_collate_fn
+from model import ErrorClassifierPhoneBiLSTM, ErrorClassifierPhoneBiLSTM_V2
+from data import inference_collate_fn, load_phoneme_sequences, phone_list
 from metrics import xent_loss, error_classifier_errors, get_precision_recall_f1
 from helpers import print_dict, warmup_decay_policy, save_model
 
@@ -24,12 +24,10 @@ def eval(eval_data_loader,model,args,device):
 
     for data in eval_data_loader:
       data = [item.to(device) for item in data]
-      # phonemes, padding_positions, sequence_lengths = data
-      phonemes, error_positions, padding_positions, sequence_lengths, tts_seqs, vowel, fine = data
+      phonemes, padding_positions, sequence_lengths = data
       one_hot_phones = F.one_hot(phonemes,num_classes=len(phone_list)).float()
       model.eval()
-      # logits = model(phonemes,sequence_lengths)
-      logits = model(phonemes,tts_seqs,vowel, fine, sequence_lengths)
+      logits = model(phonemes,sequence_lengths)
       probs = F.softmax(logits,-1)
       error_probs = probs[:,:,1]
       error_probs = error_probs * padding_positions
@@ -62,8 +60,7 @@ def main(args):
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
   print('loading data....')
-  # data = load_phoneme_sequences([json_path],remove_duplicates=False)
-  data = geneate_error_data_from_hypotheses_file(json_path)
+  data = load_phoneme_sequences([json_path],remove_duplicates=False)
 
   print('data_size: {}'.format(len(data)))
 
@@ -72,11 +69,11 @@ def main(args):
   data_loader = torch.utils.data.DataLoader(data,
                                             batch_size=args.batch_size,
                                             shuffle=False,
-                                            collate_fn=error_classifier_collate_fn,
+                                            collate_fn=inference_collate_fn,
                                             drop_last=False)
 
   print('creating model...')
-  phone_bilstm = ErrorClassifierTTS(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
+  phone_bilstm = ErrorClassifierPhoneBiLSTM_V2(input_size=args.input_size,hidden_size=args.hidden_size,num_layers=args.num_layers)
   if args.pretrained_ckpt:
     print('loading pretrained cpkt from : {}'.format(args.pretrained_ckpt))
     checkpoint = torch.load(args.pretrained_ckpt, map_location="cpu")

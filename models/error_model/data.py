@@ -175,58 +175,38 @@ def error_classifier_collate_fn(batch, padding_value=0):
   phoneme_sequences = []
   error_sequences = []
   padding_positions = []
-  tts_seqs = []
-  vowels = []
-  fines = []
 
-  for error_sequence, phoneme_sequence, tts_seq, vowel, fine in batch:
-    assert len(error_sequence) == len(phoneme_sequence) == len(tts_seq)
+  for i,(error_sequence, phoneme_sequence) in enumerate(batch):
+    assert len(error_sequence) == len(phoneme_sequence)
     error_sequences.append(error_sequence)
     phoneme_sequences.append(convert_phonemes_to_ids(phoneme_sequence))
     sequence_lengths.append(len(phoneme_sequence))
-    tts_seqs.append(tts_seq)
-    vowels.append(vowel)
-    fines.append(fine)
   
   max_length = max(sequence_lengths)
   padding_positions = [[1]*len(item)+[0]*(max_length-len(item)) for item in phoneme_sequences]
   phoneme_sequences = [item + [padding_value]*(max_length-len(item)) for item in phoneme_sequences]
   error_sequences = [item + [padding_value]*(max_length-len(item)) for item in error_sequences]
-  tts_seqs = [item + [padding_value]*(max_length-len(item)) for item in tts_seqs]
-  vowels = [item + [padding_value]*(max_length-len(item)) for item in vowels]
-  fines = [item + [padding_value]*(max_length-len(item)) for item in fines]
 
   return torch.tensor(phoneme_sequences,dtype=torch.int64), \
         torch.tensor(error_sequences,dtype=torch.int64), \
         torch.tensor(padding_positions, dtype=torch.float), \
-        torch.tensor(sequence_lengths, dtype=torch.int64), \
-        torch.tensor(tts_seqs, dtype=torch.int64), \
-        torch.tensor(vowels, dtype=torch.int64), \
-        torch.tensor(fines, dtype=torch.int64)
+        torch.tensor(sequence_lengths, dtype=torch.int64)
 
 def get_WER_from_para(para):
   return float(para.strip().split('\n')[2][5:])
 
 def geneate_error_data_from_hypotheses_file(path_hypotheses, skip_zero_CER=False):
-  with open(path_hypotheses) as f, open(path_hypotheses.split(".")[0]+"_tts.txt") as r:
+  with open(path_hypotheses) as f:
     paragraphs = f.read().strip().split('\n\n')
-    tts_paragraphs = r.read().strip().split('\n\n')
-    ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:], tts.strip().split('\n')[4][5:]) \
-                      for para, tts in zip(paragraphs, tts_paragraphs) if (not skip_zero_CER or get_WER_from_para(para)!=0.0)]
+    ref_hyp_pairs = [(para.strip().split('\n')[3][5:], para.strip().split('\n')[4][5:]) \
+                      for para in paragraphs if (not skip_zero_CER or get_WER_from_para(para)!=0.0)]
     pool = Pool(16)
     multiprocessed_output = list(filter(None, pool.map(__generate_error_sequence, tqdm(ref_hyp_pairs, total=len(ref_hyp_pairs)))))
     pool.close()
-    # error_sequences, reference_phonemes = zip(*multiprocessed_output)
-    error_sequences, reference_phonemes, tts_sequences, vowels, fines = zip(*multiprocessed_output)
-    # print(error_sequences[0])
-    # print(reference_phonemes[0])
-    # return list(zip(error_sequences, reference_phonemes))
+    error_sequences, reference_phonemes = zip(*multiprocessed_output)
     print(error_sequences[0])
     print(reference_phonemes[0])
-    print(tts_sequences[0])
-    print(vowels[0])
-    print(fines[0])
-    return list(zip(error_sequences, reference_phonemes, tts_sequences, vowels, fines))
+    return list(zip(error_sequences, reference_phonemes))
 
 def __get_error_sequence_between_words(reference, hypothesis):
   p_h = get_phoneme_transcript(hypothesis,markers=False)
@@ -264,14 +244,9 @@ def __get_error_sequence_between_words(reference, hypothesis):
   return error_sequence, insert_left, insert_right
 
 def __generate_error_sequence(reference_hypothesis_pair):
-    reference, hypothesis, tts = reference_hypothesis_pair
+    reference, hypothesis = reference_hypothesis_pair
     error_sequence = []
-    tts_sequence = []
-    # print(reference_hypothesis_pair)
     reference_phonemes = get_phoneme_transcript(reference,markers=False)
-    reference = reference.lower()
-    hypothesis = hypothesis.lower()
-    tts = tts.lower()
     aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
     try:
         aligner.align()
@@ -309,9 +284,6 @@ def __generate_error_sequence(reference_hypothesis_pair):
           ph_ref_word = [ref_word]
 
         if op == 'C':
-            # if ref_word != hyp_word :
-            #   print(ref_word)
-            #   print(hyp_word)
             assert ref_word == hyp_word
             #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
             ref_constructed += ph_ref_word
@@ -357,96 +329,7 @@ def __generate_error_sequence(reference_hypothesis_pair):
       print('len(error_sequence) == len(reference_phonemes)... returning None')
       return None
     assert len(error_sequence) == len(reference_phonemes)
-
-    reference_phonemes_tts = get_phoneme_transcript(reference,markers=False)
-    aligner = PowerAligner(reference, tts, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
-    try:
-        aligner.align()
-    except:
-        print("alignement failed")
-        return None
-
-    power_alignment = aligner.power_alignment
-    # print(power_alignment)
-    p_ref = [SOS] + power_alignment.ref() + [EOS]
-    p_hyp = [SOS] + power_alignment.hyp() + [EOS]
-    p_ops = ['C'] + power_alignment.align + ['C']
-
-
-    hyp_pointer = 0
-    ref_pointer = 0
-
-    ref_invariant = [SOS,' '] + reference_phonemes_tts + [' ',EOS]
-    ref_constructed = []
-
-    for op in p_ops:
-        if hyp_pointer < len(p_hyp):
-            hyp_word = p_hyp[hyp_pointer]
-        else:
-            assert op=='D'
-
-        if ref_pointer < len(p_ref):
-            ref_word = p_ref[ref_pointer]
-        else:
-            assert op == 'I'
-
-        if not (ref_word in [SOS,EOS]):
-          ph_ref_word = get_phoneme_transcript(ref_word, markers=False)
-        else:
-          ph_ref_word = [ref_word]
-
-        if op == 'C':
-            # if ref_word != hyp_word :
-            #   print(ref_word)
-            #   print(hyp_word)
-            assert ref_word == hyp_word
-            #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
-            ref_constructed += ph_ref_word
-            tts_sequence += [0]*len(ph_ref_word)
-            if len(tts_sequence) < len(reference_phonemes_tts) + 4:
-              tts_sequence += [0]
-              ref_constructed += [' ']
-
-            hyp_pointer +=1
-            ref_pointer +=1
-        elif op == 'D':
-            #tp,tr,th,cm = _get_statistics(ref_word,'')
-            tts_sequence += [1]*len(ph_ref_word)
-            ref_constructed += ph_ref_word
-            if len(tts_sequence) < len(reference_phonemes_tts) + 4:
-              tts_sequence += [0]
-              ref_constructed += [' ']
-            ref_pointer +=1
-        elif op == 'I':
-            tts_sequence[-1] = 1
-            #tp,tr,th,cm = _get_statistics('',hyp_word)
-            hyp_pointer +=1
-        elif op == 'S':
-            #tp,tr,th,cm = _get_statistics(ref_word,hyp_word)
-            ph_hyp_word = get_phoneme_transcript(hyp_word, markers=False)
-            ref_constructed += ph_ref_word
-            substition_error, insert_left, insert_right = __get_error_sequence_between_words(ref_word, hyp_word)
-            if insert_left:
-              tts_sequence[-1] = 1
-            tts_sequence += substition_error
-            ref_pointer +=1
-            hyp_pointer +=1
-            if len(tts_sequence) < len(reference_phonemes_tts) + 4:
-              tts_sequence += [0]
-              ref_constructed += [' ']
-            if insert_right:
-              tts_sequence[-1] = 1
-    
-    assert tts_sequence[0] == tts_sequence[-1] == 0
-    tts_sequence = tts_sequence[1:-1]
-    reference_phonemes_tts = [SOS] + reference_phonemes_tts + [EOS]
-    if not (len(tts_sequence) == len(reference_phonemes_tts) == len(reference_phonemes)):
-      print('len(tts_sequence) == len(reference_phonemes_tts)... returning None')
-      return None
-    assert len(tts_sequence) == len(reference_phonemes_tts) == len(reference_phonemes)
-    vowel = [1 if item in Phonemes.vowels else 0 for item in reference_phonemes]
-    fine = [coarse_phone_to_fine_phone(phone) for phone in reference_phonemes]
-    return error_sequence, reference_phonemes, tts_sequence, vowel, fine
+    return error_sequence, reference_phonemes
 
 
 if __name__ == '__main__':

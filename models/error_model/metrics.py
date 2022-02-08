@@ -18,18 +18,16 @@ def error_classifier_errors(predictions, error_positions, padding_positions):
   error = torch.sum(error)
   true_positives = (predictions == 1.0).float() * (error_positions == 1.0).float() * padding_positions
   true_positives = torch.sum(true_positives)
-  true_negatives = (predictions == 0.0).float() * (error_positions == 0.0).float() * padding_positions
-  true_negatives = torch.sum(true_negatives)
   false_positives = (predictions == 1.0).float() * (error_positions == 0.0).float() * padding_positions
   false_positives = torch.sum(false_positives)
   false_negatives = (predictions == 0.0).float() * (error_positions == 1.0).float() * padding_positions
   false_negatives = torch.sum(false_negatives)
 
-  return error, true_positives, false_positives, false_negatives, true_negatives
+  return error, true_positives, false_positives, false_negatives
 
-def get_precision_recall_f1(true_positives, false_positives, false_negatives, true_negatives):
+def get_precision_recall_f1(true_positives, false_positives, false_negatives):
   precision = (true_positives)/(true_positives + false_positives + 1e-10)
   recall = (true_positives)/(true_positives + false_negatives + 1e-10)
   f1 = (2*precision*recall)/(precision + recall + 1e-10)
-  acc = (true_positives+true_negatives)/(true_positives + false_positives+ false_negatives+true_negatives + 1e-10)
-  return precision*100, recall*100, f1*100, acc
+
+  return precision*100, recall*100, f1*100
