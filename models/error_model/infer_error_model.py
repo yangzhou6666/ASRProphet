@@ -63,7 +63,7 @@ def main(args):
 
   print('loading data....')
   # data = load_phoneme_sequences([json_path],remove_duplicates=False)
-  data = geneate_error_data_from_hypotheses_file(json_path, is_train=False)
+  data = geneate_error_data_from_hypotheses_file(json_path)
 
   print('data_size: {}'.format(len(data)))
 
