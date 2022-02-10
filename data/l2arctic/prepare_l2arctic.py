@@ -149,6 +149,38 @@ def sample(path_to_l2arctic_release_v5):
                 ## save to external files 
                 helpers.write_json_data(filepath, sample_data)
 
+def sample_synthetic(path_to_l2arctic_release_v5):
+    seeds = [1, 2, 3]
+    numbers = [50, 100, 200, 500]
+
+    ## load selection.json
+    for name in os.listdir(path_to_l2arctic_release_v5):
+        if len(name.split('.')) > 1:
+            # only deal with folders
+            continue
+
+        selection_json_fpath = f"./processed/{name}/manifests/selection_tts.json"
+
+        file = open(selection_json_fpath)
+        instances = file.readlines() 
+        file.close()
+        ## random select for several seeds
+        for seed in seeds :
+            random.seed(seed)
+            data = random.sample(instances, len(instances))
+            
+            for number in numbers :
+                sample_data = data[:number]
+                sample_data = format_data(sample_data)
+                folder_dir = f"./processed/{name}/manifests/train/random_tts/{number}/seed_{seed}/"
+                
+                os.makedirs(folder_dir, exist_ok=True)
+                
+                filepath = folder_dir + "train.json"
+                
+                ## save to external files 
+                helpers.write_json_data(filepath, sample_data)
+
 if __name__ == "__main__":
     path_to_l2arctic_release_v5 = "./l2arctic_release_v5/"
     # Path to the original dataset
@@ -159,3 +191,4 @@ if __name__ == "__main__":
 
     ## Sample
     sample(path_to_l2arctic_release_v5)
+    sample_synthetic(path_to_l2arctic_release_v5)
