@@ -1,6 +1,6 @@
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
-declare -a accents=('HQTV' 'LXC' 'MBMPS' 'NCC' 'NJS' 'PNV' 'RRBI' 'SKA' 'SVBI' 'THV' 'TLV' 'TNI' 'TXHC' 'YBAA' 'YDCK')
+declare -a accents=("ASI")
 WAV_DIR=$(cd ../../data/l2arctic/; pwd)
 
 for seed in 1
@@ -12,8 +12,8 @@ do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/all_tts
-      CUDA_VISIBLE_DEVICES=3 python3 -u inference.py \
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/all_tts_and_seed
+      python3 -u inference.py \
       --batch_size=64 \
       --output_file=$model_dir/test_out.txt \
       --wav_dir=$WAV_DIR \

@@ -14,7 +14,7 @@ do
   --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
   --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
   --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log.txt &
+  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log.txt 
 done
 
 for accent in "${accents[@]}"
@@ -29,5 +29,5 @@ do
   --val_manifest=$DATA/$accent/manifests/seed_plus_dev_tts.json \
   --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
   --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log_tts.txt &
+  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log_tts.txt 
 done

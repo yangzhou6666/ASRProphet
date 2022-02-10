@@ -1,6 +1,6 @@
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
-declare -a accents=('ABA')
+declare -a accents=('ASI')
 WAV_DIR=$(cd ../../data/l2arctic/; pwd)
 for seed in 1
 do 

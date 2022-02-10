@@ -12,7 +12,7 @@ do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/error_model
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/error_model_tts
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=1 python3 -u finetune.py \
         --batch_size=8 \
@@ -21,7 +21,7 @@ do
         --train_freq=30 \
         --lr=1e-5 \
         --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/train.json \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
         --output_dir=$model_dir/recent \

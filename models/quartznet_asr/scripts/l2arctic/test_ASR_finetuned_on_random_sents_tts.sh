@@ -11,7 +11,7 @@ do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/random
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/random_tts
       python3 -u inference.py \
       --batch_size=64 \
       --output_file=$model_dir/test_out.txt \

@@ -12,16 +12,16 @@ do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/all_tts
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/all_tts_and_seed
       mkdir -p $model_dir
-      CUDA_VISIBLE_DEVICES=6 python3 -u finetune.py \
+      python3 -u finetune.py \
         --batch_size=16 \
         --num_epochs=100 \
         --eval_freq=1 \
         --train_freq=30 \
         --lr=1e-5 \
         --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/all_tts.json \
+        --train_manifest=$DATA/$accent/manifests/all_tts_and_seed.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
         --output_dir=$model_dir/recent \
