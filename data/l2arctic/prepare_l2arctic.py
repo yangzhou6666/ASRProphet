@@ -127,6 +127,17 @@ def sample(path_to_l2arctic_release_v5):
 
     ## load selection.json
     for name in os.listdir(path_to_l2arctic_release_v5):
+        if len(name.split('.')) > 1:
+            # only deal with folders
+            continue
+
+        # load the seed dataset
+        seed_data_path = f"./processed/{name}/manifests/seed.json"
+        # notice: seed data is REAL audio
+        file = open(seed_data_path)
+        seed_instances = file.readlines() 
+        file.close()
+
         selection_json_fpath = f"./processed/{name}/manifests/selection.json"
     
         file = open(selection_json_fpath)
@@ -139,6 +150,7 @@ def sample(path_to_l2arctic_release_v5):
             
             for number in numbers :
                 sample_data = data[:number]
+                sample_data = seed_instances + sample_data
                 sample_data = format_data(sample_data)
                 folder_dir = f"./processed/{name}/manifests/train/random/{number}/seed_{seed}/"
                 
@@ -159,6 +171,13 @@ def sample_synthetic(path_to_l2arctic_release_v5):
             # only deal with folders
             continue
 
+        # load the seed dataset
+        seed_data_path = f"./processed/{name}/manifests/seed.json"
+        # notice: seed data is REAL audio
+        file = open(seed_data_path)
+        seed_instances = file.readlines() 
+        file.close()
+
         selection_json_fpath = f"./processed/{name}/manifests/selection_tts.json"
 
         file = open(selection_json_fpath)
@@ -171,6 +190,7 @@ def sample_synthetic(path_to_l2arctic_release_v5):
             
             for number in numbers :
                 sample_data = data[:number]
+                sample_data = seed_instances + sample_data
                 sample_data = format_data(sample_data)
                 folder_dir = f"./processed/{name}/manifests/train/random_tts/{number}/seed_{seed}/"
                 
@@ -189,6 +209,6 @@ if __name__ == "__main__":
     process(path_to_l2arctic_release_v5) # process original audio
     prepare_tts_audio(path_to_l2arctic_release_v5) # process syntheitc audio
 
-    ## Sample
+    # ## Sample
     sample(path_to_l2arctic_release_v5) # sample original audio
     sample_synthetic(path_to_l2arctic_release_v5) # sample synthetic audio
