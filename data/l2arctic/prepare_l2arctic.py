@@ -1,7 +1,7 @@
 import os
 import json
 import random
-import helpers
+from helpers import measure_audio_duration, write_json_data
 
 def format_data(data):
     fmt_data = []
@@ -33,7 +33,7 @@ def prepare_tts_audio(path_to_l2arctic_release_v5):
                 text = f.readlines()[0]
 
             wav_path = os.path.join(wav_dir, file_id + '.wav')
-            data.append({"text": text, "audio_filepath": wav_path, "duration": helpers.measure_audio_duration(wav_path)})
+            data.append({"text": text, "audio_filepath": wav_path, "duration": measure_audio_duration(wav_path)})
 
     
         random.seed(123456)
@@ -42,11 +42,11 @@ def prepare_tts_audio(path_to_l2arctic_release_v5):
         path_to_store = os.path.join("./processed", name, 'manifests')
         
         os.makedirs(path_to_store, exist_ok=True)
-        helpers.write_json_data(os.path.join(path_to_store, "all_tts.json"), data)
+        write_json_data(os.path.join(path_to_store, "all_tts.json"), data)
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.75))
+        selection = ("selection", int(n * 0.7))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
@@ -58,11 +58,11 @@ def prepare_tts_audio(path_to_l2arctic_release_v5):
             upper = lower + interval
             
             curr_data = data[lower:upper] 
-            helpers.write_json_data(f"{path_to_store}/{data_type}_tts.json", curr_data)
+            write_json_data(f"{path_to_store}/{data_type}_tts.json", curr_data)
             
             lower = upper
 
-        helpers.write_json_data(f"{path_to_store}/seed_plus_dev_tts.json", data[0:(seed[1]+dev[1])])
+        write_json_data(f"{path_to_store}/seed_plus_dev_tts.json", data[0:(seed[1]+dev[1])])
 
 
 def process(path_to_l2arctic_release_v5):
@@ -88,7 +88,7 @@ def process(path_to_l2arctic_release_v5):
                 text = f.readlines()[0]
 
             wav_path = os.path.join(wav_dir, file_id + '.wav')
-            data.append({"text": text, "audio_filepath": wav_path, "duration": helpers.measure_audio_duration(wav_path)})
+            data.append({"text": text, "audio_filepath": wav_path, "duration": measure_audio_duration(wav_path)})
 
     
         random.seed(123456)
@@ -97,11 +97,11 @@ def process(path_to_l2arctic_release_v5):
         path_to_store = os.path.join("./processed", name, 'manifests')
         
         os.makedirs(path_to_store, exist_ok=True)
-        helpers.write_json_data(os.path.join(path_to_store, "all.json"), data)
+        write_json_data(os.path.join(path_to_store, "all.json"), data)
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.75))
+        selection = ("selection", int(n * 0.7))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
@@ -113,11 +113,11 @@ def process(path_to_l2arctic_release_v5):
             upper = lower + interval
             
             curr_data = data[lower:upper] 
-            helpers.write_json_data(f"{path_to_store}/{data_type}.json", curr_data)
+            write_json_data(f"{path_to_store}/{data_type}.json", curr_data)
             
             lower = upper
 
-        helpers.write_json_data(f"{path_to_store}/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
+        write_json_data(f"{path_to_store}/seed_plus_dev.json", data[0:(seed[1]+dev[1])])
 
 
 
@@ -147,7 +147,7 @@ def sample(path_to_l2arctic_release_v5):
                 filepath = folder_dir + "train.json"
                 
                 ## save to external files 
-                helpers.write_json_data(filepath, sample_data)
+                write_json_data(filepath, sample_data)
 
 def sample_synthetic(path_to_l2arctic_release_v5):
     seeds = [1, 2, 3]
@@ -179,16 +179,16 @@ def sample_synthetic(path_to_l2arctic_release_v5):
                 filepath = folder_dir + "train.json"
                 
                 ## save to external files 
-                helpers.write_json_data(filepath, sample_data)
+                write_json_data(filepath, sample_data)
 
 if __name__ == "__main__":
     path_to_l2arctic_release_v5 = "./l2arctic_release_v5/"
     # Path to the original dataset
 
     ## Preprocess
-    process(path_to_l2arctic_release_v5)
-    prepare_tts_audio(path_to_l2arctic_release_v5)
+    process(path_to_l2arctic_release_v5) # process original audio
+    prepare_tts_audio(path_to_l2arctic_release_v5) # process syntheitc audio
 
     ## Sample
-    sample(path_to_l2arctic_release_v5)
-    sample_synthetic(path_to_l2arctic_release_v5)
+    sample(path_to_l2arctic_release_v5) # sample original audio
+    sample_synthetic(path_to_l2arctic_release_v5) # sample synthetic audio
