@@ -29,29 +29,29 @@ for name in os.listdir(path):
     print_result(log_path)
     
     print("------Randome Selection------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/random/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/random/test_infer_log.txt'
     print_result(log_path)
 
     print("------Randome TTS------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/random_tts/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/random_tts/test_infer_log.txt'
     print_result(log_path)
 
     print("------ICASSP 2021------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/error_model/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/error_model/test_infer_log.txt'
     print_result(log_path)
 
     print("------Selected TTS------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/error_model_tts/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/error_model_tts/test_infer_log.txt'
     print_result(log_path)
 
 
     print("------Upper Bound------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/all/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/all/test_infer_log.txt'
     print_result(log_path)
 
 
     print("------ All TTS------")
-    baseline_log = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/all_tts/test_infer_log.txt'
+    log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/all_tts/test_infer_log.txt'
     print_result(log_path)
 
     print("\n\n")
