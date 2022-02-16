@@ -27,7 +27,15 @@ for name in os.listdir(path):
     print("------Original Performance on Synthetic Seed + Dev------")
     log_path = os.path.join(path, name, 'manifests', 'quartznet_outputs', 'seed_plus_dev_infer_log_tts.txt')
     print_result(log_path)
+
+    print("------Original Performance on Test ------")
+    log_path = os.path.join(path, name, 'manifests', 'quartznet_outputs', 'original_test_infer_log.txt')
+    print_result(log_path)
     
+    print("------Original Performance on Synthetic Test ------")
+    log_path = os.path.join(path, name, 'manifests', 'quartznet_outputs', 'original_test_infer_log_tts.txt')
+    print_result(log_path)
+
     print("------Randome Selection------")
     log_path = f'../../models/pretrained_checkpoints/quartznet/finetuned/{name}/200/seed_1/random/test_infer_log.txt'
     print_result(log_path)
