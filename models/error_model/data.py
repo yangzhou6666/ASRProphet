@@ -245,8 +245,21 @@ def __get_error_sequence_between_words(reference, hypothesis):
 
 def __generate_error_sequence(reference_hypothesis_pair):
     reference, hypothesis = reference_hypothesis_pair
+    # reference: the ground truth text
+    # hypothesis: the transcribed text
+
     error_sequence = []
     reference_phonemes = get_phoneme_transcript(reference,markers=False)
+    hypothesis_phonemes = get_phoneme_transcript(hypothesis,markers=False)
+
+    print("The original phoneme list: ")
+    print(reference_phonemes)
+    print(hypothesis_phonemes)
+    print("<<<<<<<\n")
+    # covert the ground truth text into phonemes
+    # For Example:
+    # ['AH', 'N', 'AE', 'T', 'AH', 'M', 'IY', ' ', 'HH', 'AY', ' ', 'HH', 'AH', 'L', 'OW', ' ', 'D', 'IH', 'M', 'AA']
+
     aligner = PowerAligner(reference, hypothesis, lowercase=True, verbose=False, lexicon="lex/cmudict.rep.json")
     try:
         aligner.align()
@@ -255,7 +268,21 @@ def __generate_error_sequence(reference_hypothesis_pair):
         return None
 
     power_alignment = aligner.power_alignment
-    # print(power_alignment)
+    print(power_alignment)
+    '''
+    The data structure of power_alignment:
+    REF:  anatomy         hi  hello  democracy  
+    HYP:  and that to me      hello  de mo gracy
+    Eval: S               D   C      S    
+    '''
+
+    '''
+    Explaination for symbols:
+    S: Single word subsitutions
+    D: Deletion
+    I: Insertion, a hyoothesis word with no aligned reference word
+    C: Correct.
+    '''
     p_ref = [SOS] + power_alignment.ref() + [EOS]
     p_hyp = [SOS] + power_alignment.hyp() + [EOS]
     p_ops = ['C'] + power_alignment.align + ['C']
@@ -284,6 +311,7 @@ def __generate_error_sequence(reference_hypothesis_pair):
           ph_ref_word = [ref_word]
 
         if op == 'C':
+            # Correct. the words at the corresponding position are the SAME.
             assert ref_word == hyp_word
             #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
             ref_constructed += ph_ref_word
@@ -295,6 +323,7 @@ def __generate_error_sequence(reference_hypothesis_pair):
             hyp_pointer +=1
             ref_pointer +=1
         elif op == 'D':
+            # Deletion 
             #tp,tr,th,cm = _get_statistics(ref_word,'')
             error_sequence += [1]*len(ph_ref_word)
             ref_constructed += ph_ref_word
@@ -333,14 +362,18 @@ def __generate_error_sequence(reference_hypothesis_pair):
 
 
 if __name__ == '__main__':
-  
-  s1 = 'anatomy hi hello democracy'
-  s2 = 'and that to me hello de mo gracy'
 
-  p1 = get_phoneme_transcript(s1)
-  p2 = get_phoneme_transcript(s2)
+  ref = 'anatomy hi hello democracy'
+  hyp = 'and that to me hello de mo gracy'
 
-  error_sequence = __generate_error_sequence((s1,s2))
+  p1 = get_phoneme_transcript(ref)
+  p2 = get_phoneme_transcript(hyp)
+
+  error_sequence = __generate_error_sequence((ref,hyp))
+
+  print(error_sequence[0])
+
+
   
   '''
   ref = 'and take a break for the midday meals and return to resume work till evening'
