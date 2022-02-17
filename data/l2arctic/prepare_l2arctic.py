@@ -46,7 +46,7 @@ def prepare_tts_audio(path_to_l2arctic_release_v5):
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.7))
+        selection = ("selection", int(n * 0.75))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
@@ -101,7 +101,7 @@ def process(path_to_l2arctic_release_v5):
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.7))
+        selection = ("selection", int(n * 0.75))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
