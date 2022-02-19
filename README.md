@@ -78,7 +78,7 @@ Prepare `manifests` for the next experiments.
 
 ```
 bash generate_data.sh
-```
+
 cd models/deepspeech_asr/
 
 git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
