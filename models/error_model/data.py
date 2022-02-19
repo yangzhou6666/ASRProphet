@@ -366,7 +366,8 @@ def __generate_common_error_sequence(ref, asr_hyp, tts_hyp):
   error_sequence_asr, reference_phonemes = __generate_error_sequence((ref,asr_hyp))
   error_sequence_tts, reference_phonemes = __generate_error_sequence((ref,tts_hyp))
 
-  common_error_sequence = [1 if (error_sequence_asr[i] == error_sequence_tts[i]) else 0 for i in range(len(error_sequence_asr))]
+  common_error_sequence = [1 * i if i == j else 0 for i,j in zip(error_sequence_asr, error_sequence_tts)]
+
 
   return common_error_sequence, reference_phonemes
 
