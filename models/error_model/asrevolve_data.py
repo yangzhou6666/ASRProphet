@@ -17,6 +17,9 @@ from multiprocessing import Pool, Manager
 SUCCESSFUL_TEST_CASE = 0
 FAILED_TEST_CASE = 1
 
+def get_WER_from_para(para):
+  return float(para.strip().split('\n')[2][5:])
+
 def generate_asrevolve_training_data_from_hypotheses_file(path_hypotheses, skip_zero_CER=False):
   with open(path_hypotheses) as f:
     paragraphs = f.read().strip().split('\n\n')
