@@ -77,18 +77,23 @@ class HuggingFaceTransformer(Estimator):
             weight_decay=0.01,               # strength of weight decay
             logging_dir=self.logging_dir,            # directory for storing logs
             logging_steps=10,
+            load_best_model_at_end=True
         )
 
-        trainer = Trainer(
+        self.trainer = Trainer(
             # the instantiated 🤗 Transformers model to be trained
             model=self.model,
             args=training_args,                  # training arguments, defined above
             train_dataset=train_dataset         # training dataset
         )
 
-        trainer.train()
+        self.trainer.train()
+
+        self.tokenizer.save_pretrained(self.output_dir)
+        self.trainer.save_model(self.output_dir)
 
     def predict(self, X: [str]):
+        self.model.to(self.device)
         self.model.eval()
 
         test_texts = X
