@@ -30,6 +30,8 @@ def parse_args():
                         required=True, help='path to seed json file')
     parser.add_argument("--selection_json_file", type=str,
                         required=True, help='path to input file')
+    parser.add_argument("--random_json_file", type=str,
+                        required=True, help='path to input file')
     parser.add_argument("--finetuned_ckpt", default=None,
                         type=str, help='path to finetuned ckpt')
     parser.add_argument("--log_dir", type=str, required=True,
@@ -92,7 +94,10 @@ def main(args):
     torch.manual_seed(args.exp_id)
 
     seed_samples = [line for line in open(args.seed_json_file)]
-
+    random_samples_duration = sum([json.loads(line.strip())['duration'] for line in open(args.random_json_file)])
+    seed_duration = sum([json.loads(line.strip())['duration'] for line in open(args.seed_json_file)])
+    required_duration = random_samples_duration - seed_duration
+    assert required_duration > 0
     print('loading data....')
 
     texts, fpaths, durations = load_json_data(args.selection_json_file)
@@ -104,9 +109,14 @@ def main(args):
 
     texts, fpaths, probabilities, durations = sort(texts, fpaths, probabilities, durations)
 
-    samples = [
-        json.dumps({"text": text, "audio_filepath": fpath, "duration":duration}) + "\n" for text, fpath, duration in zip(texts[:args.num_sample], fpaths[:args.num_sample], durations[:args.num_sample])
-    ]
+    samples = []
+    selected_duration = 0.0
+    for text, fpath, duration in zip(texts, fpaths, durations):
+        samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
+        selected_duration += json.loads(samples[-1].strip())['duration']
+        if selected_duration >= required_duration:
+            break
+    print('sampled {} samples...'.format(len(samples)))
 
     output_json_file = os.path.join(args.output_json_path, str(
         args.num_sample), 'seed_' + str(args.exp_id), 'train.json')
