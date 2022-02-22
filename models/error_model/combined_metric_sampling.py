@@ -76,7 +76,7 @@ def normalized_json_transcript(json_str):
 
 
 class ErrorModelSampler():
-  def __init__(self, json_file, error_model_weights=None):
+  def __init__(self, json_file, error_model_weights=None, matcher_weights=None):
     self.json_file = json_file
     print('\tparsing json...')
     
@@ -91,6 +91,7 @@ class ErrorModelSampler():
     self.sent_wise_phone_freqs = self.get_sentence_wise_phone_freqs()
     self.phone_freqs = np.sum(np.array(self.sent_wise_phone_freqs),0)
     self.error_model_weights = error_model_weights
+    self.matcher_weights = matcher_weights
     self.acc_phone_freqs = np.zeros(len(self.phone_vocab))
 
   def get_phonemes(self, text):
@@ -121,7 +122,7 @@ class ErrorModelSampler():
     for i,sentence in enumerate(self.sentences):
       f_i = self.get_f(self.acc_phone_freqs)
       f_f = self.get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
-      score = (f_f - f_i) * self.error_model_weights[weight_id][i]
+      score = (f_f - f_i) * self.error_model_weights[weight_id][i] * self.matcher_weights[weight_id][i]
       #score = self.error_model_weights[weight_id][i]
       #score = self.error_model_weights[i]
       #score = (f_f - f_i)
@@ -145,6 +146,9 @@ class ErrorModelSampler():
     self.phone_sentences.pop(selected_sentence_idx)
     _ = [self.error_model_weights[w_idx].pop(selected_sentence_idx) 
          for w_idx in range(len(self.error_model_weights))]
+
+    _ = [self.matcher_weights[w_idx].pop(selected_sentence_idx) 
+         for w_idx in range(len(self.matcher_weights))]
     return selected_json_line
 
   def sample(self,duration):
@@ -178,6 +182,7 @@ def parse_args():
     parser.add_argument("--selection_json_file", type=str, help='path to json file from where sentences are selected')
     parser.add_argument("--seed_json_file", type=str, help='path to json file containing seed sentences')
     parser.add_argument("--error_model_weights", type=str, help='weights provided by error model inference')
+    parser.add_argument("--matcher_model_weights", type=str, help='weights provided by matcher inference')
     parser.add_argument("--random_json_path",type=str,
       help='path to dir containing json files for randomly selected sentences, used to ensure same amount of speech time')
     parser.add_argument("--output_json_path", type=str, 
@@ -193,17 +198,20 @@ def main(args):
   output_json_path = args.output_json_path
   seed_samples = [line for line in open(seed_json_file)]
   weights_file = args.error_model_weights
+  matcher_file = args.matcher_model_weights
   exp_id = args.exp_id
   for num_samples in [50, 100, 200, 500]:
     weights = pickle.load(open(weights_file,'rb'))
     weights_list = [weights]  
+    matcher_weights = pickle.load(open(matcher_file,'rb'))
+    matcher_weights_list = [matcher_weights]
     random_json_file = os.path.join(random_json_path,str(num_samples),'seed_'+exp_id,'train.json')
     random_samples_duration = get_json_duration(random_json_file)
     seed_duration = get_json_duration(seed_json_file)
     required_duration = random_samples_duration - seed_duration
     assert required_duration > 0
     output_json_file = os.path.join(output_json_path,str(num_samples),'seed_'+exp_id,'train.json')
-    sampler = ErrorModelSampler(selection_json_file, error_model_weights=weights_list)
+    sampler = ErrorModelSampler(selection_json_file, error_model_weights=weights_list, matcher_weights=matcher_weights_list)
     samples = get_samples(sampler, required_duration)
     dump_samples(seed_samples + samples,output_json_file)
 
