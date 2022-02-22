@@ -9,6 +9,7 @@ do
   do
     LR=3e-4
     echo $accent seed $seed
+    mkdir -p $PRETRAINED_CKPTS/asrevolve_error_models/quartznet/$accent/seed_"$seed"
     CUDA_VISIBLE_DEVICES=6 python3 -u train_error_model_asrevolve.py \
       --batch_size=10 \
       --num_epochs=200 \
