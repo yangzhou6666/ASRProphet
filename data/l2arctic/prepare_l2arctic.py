@@ -46,7 +46,7 @@ def prepare_tts_audio(path_to_l2arctic_release_v5):
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.75))
+        selection = ("selection", int(n * 0.70))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
@@ -101,7 +101,7 @@ def process(path_to_l2arctic_release_v5):
 
         n = len(data)
 
-        selection = ("selection", int(n * 0.75))
+        selection = ("selection", int(n * 0.70))
         seed = ("seed", int(n * 0.1))
         dev = ("dev", int(n * 0.1))
         test_size = n - selection[1] - seed[1] - dev[1]
@@ -123,7 +123,7 @@ def process(path_to_l2arctic_release_v5):
 
 def sample(path_to_l2arctic_release_v5):
     seeds = [1, 2, 3]
-    numbers = [50, 100, 200, 500]
+    numbers = [50, 75, 100, 150, 200, 300, 400, 500]
 
     ## load selection.json
     for name in os.listdir(path_to_l2arctic_release_v5):
@@ -163,7 +163,7 @@ def sample(path_to_l2arctic_release_v5):
 
 def sample_synthetic(path_to_l2arctic_release_v5):
     seeds = [1, 2, 3]
-    numbers = [50, 100, 200, 500]
+    numbers = [50, 75, 100, 150, 200, 300, 400, 500]
 
     ## load selection.json
     for name in os.listdir(path_to_l2arctic_release_v5):
