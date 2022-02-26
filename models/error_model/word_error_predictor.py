@@ -4,9 +4,14 @@ sys.path.append("..")
 from quartznet_asr.metrics import __levenshtein, word_error_rate
 from power import Levenshtein, ExpandedAlignment
 from power.aligner import PowerAligner
-from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainer, TrainingArguments, DataCollatorForTokenClassification
 import torch
 import re
+from datasets import Dataset, load_metric
+import pandas as pd
+import numpy as np
+
+
 def get_label(path: str):
     '''
     Given the path to the reference and transcriptions
@@ -60,22 +65,103 @@ def get_label(path: str):
     
     return inputs, labels
 
-if __name__ == "__main__":
-    path_to_result = '/workspace/data/l2arctic/processed/ASI/manifests/train/quartznet/error_model_tts/500/seed_1/test_out_ori.txt'
+def tokenize_and_align_labels(examples):
+    tokenized_inputs = tokenizer(examples["text"], truncation=True, is_split_into_words=True)
+    label_all_tokens = True
 
+    labels = []
+    for i, label in enumerate(examples["labels"]):
+        word_ids = tokenized_inputs.word_ids(batch_index=i)
+        previous_word_idx = None
+        label_ids = []
+        for word_idx in word_ids:
+            # Special tokens have a word id that is None. We set the label to -100 so they are automatically
+            # ignored in the loss function.
+            if word_idx is None:
+                label_ids.append(-100)
+            # We set the label for the first token of each word.
+            elif word_idx != previous_word_idx:
+                label_ids.append(label[word_idx])
+            # For the other tokens in a word, we set the label to either the current label or -100, depending on
+            # the label_all_tokens flag.
+            else:
+                label_ids.append(label[word_idx] if label_all_tokens else -100)
+            previous_word_idx = word_idx
+
+        labels.append(label_ids)
+
+    tokenized_inputs["labels"] = labels
+    return tokenized_inputs
+
+
+def compute_metrics(p):
+    predictions, labels = p
+    predictions = np.argmax(predictions, axis=2)
+
+    # Remove ignored index (special tokens)
+    true_predictions = [
+        [p for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+    true_labels = [
+        [l for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+
+    # results = metric.compute(predictions=true_predictions, references=true_labels)
+    # compute the accuracy
+    cor_cnt = 0
+    tot_cnt = 0
+    for i in range(len(true_predictions)):
+        for j in range(len(true_predictions[i])):
+            if true_predictions[i][j] == true_labels[i][j]:
+                cor_cnt += 1
+            tot_cnt += 1
+    acc = cor_cnt / tot_cnt
+
+    # To-do: recall, f1, accuracy
+    return {"accuracy": acc}
+
+if __name__ == "__main__":
+    path_to_result = '/workspace/data/l2arctic/processed/ASI/manifests/train/quartznet/error_model_tts/50/seed_1/test_out_ori.txt'
     inputs, labels = get_label(path_to_result)
-    
+
+    print(torch.cuda.is_available())
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    df = pd.DataFrame({"text": inputs, "labels": labels})
+    dataset = Dataset.from_pandas(df)
+    tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
+    print("Data loaded.")
+
+
     model = AutoModelForTokenClassification.from_pretrained("bert-base-uncased", num_labels=3)
 
-    for input, label in zip(inputs, labels):
-        if sum(label) == 0:
-            continue
-        input = " ".join(input)
-        tokenized_input = tokenizer(input, return_tensors="pt")
-        word_ids = tokenized_input.word_ids()
-        # align the labels
-        aligned_label = [-100 if i is None else label[i] for i in word_ids]
-        label = torch.tensor(aligned_label).unsqueeze(0)  # Batch size 1
+    metric = load_metric("seqeval")
 
-        outputs = model(**tokenized_input, labels=label)
+    args = TrainingArguments(
+        f"word_error_predictor",
+        evaluation_strategy = "epoch",
+        learning_rate=2e-5,
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=10,
+        weight_decay=0.01,
+        push_to_hub=False,
+    )
+
+    data_collator = DataCollatorForTokenClassification(tokenizer)
+
+    trainer = Trainer(
+        model,
+        args,
+        train_dataset=tokenized_datasets,
+        eval_dataset=tokenized_datasets,
+        data_collator=data_collator,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics
+    )
+
+    trainer.train()
+    trainer.evaluate()
+
+
