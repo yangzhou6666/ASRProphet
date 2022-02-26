@@ -11,6 +11,7 @@ from datasets import Dataset
 import pandas as pd
 import numpy as np
 import argparse
+import random
 
 def get_label(path: str):
     '''
@@ -95,7 +96,6 @@ def tokenize_and_align_labels(examples):
 
 def prepare_dataset(path: str):
     inputs, labels = get_label(path)
-    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     df = pd.DataFrame({"text": inputs, "labels": labels})
     dataset = Dataset.from_pandas(df)
     tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
@@ -116,12 +116,9 @@ def compute_metrics(p):
         for prediction, label in zip(predictions, labels)
     ]
 
-
     # compute the accuracy
     cor_cnt = 0
     tot_cnt = 0
-
-
     for i in range(len(true_predictions)):
         for j in range(len(true_predictions[i])):
             if true_predictions[i][j] == true_labels[i][j]:
@@ -160,24 +157,22 @@ def main(args):
     Function to train and save the model.
     '''
     random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
-if __name__ == "__main__":
-    path_to_trainset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/seed_out.txt'
-    path_to_testset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/dev_out.txt'
-
-    print(torch.cuda.is_available())
-    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-
-    train_data = prepare_dataset(path_to_trainset)
-    test_data = prepare_dataset(path_to_testset)
-
+    # prepare the dataset
+    train_dataset = prepare_dataset(args.train_path)
+    test_dataset = prepare_dataset(args.test_path)
     print("Data loaded.")
 
+    # load the model
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    model = AutoModelForTokenClassification.from_pretrained(args.model_name, num_labels=3)
 
-    model = AutoModelForTokenClassification.from_pretrained("bert-base-uncased", num_labels=3)
+    data_collator = DataCollatorForTokenClassification(tokenizer)
 
-
-    args = TrainingArguments(
+    # train the model
+    training_args = TrainingArguments(
         f"word_error_predictor",
         evaluation_strategy = "epoch",
         learning_rate=2e-5,
@@ -187,19 +182,23 @@ if __name__ == "__main__":
         weight_decay=0.01,
     )
 
-    data_collator = DataCollatorForTokenClassification(tokenizer)
-
     trainer = Trainer(
         model,
-        args,
-        train_dataset=train_data,
-        eval_dataset=test_data,
+        training_args,
+        train_dataset=train_dataset,
+        eval_dataset=test_dataset,
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
     )
 
     trainer.train()
-    trainer.evaluate()
 
+    # save the model
+    trainer.save_model(args.output_dir)
+
+if __name__ == "__main__":
+    args = parse_args()
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    main(args)
 
