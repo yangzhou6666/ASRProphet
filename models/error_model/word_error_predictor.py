@@ -4,8 +4,7 @@ sys.path.append("..")
 from quartznet_asr.metrics import __levenshtein, word_error_rate
 from power import Levenshtein, ExpandedAlignment
 from power.aligner import PowerAligner
-from transformers import AutoTokenizer
-from transformers import BertTokenizer, BertForTokenClassification
+from transformers import AutoTokenizer, AutoModelForTokenClassification
 import torch
 import re
 def get_label(path: str):
@@ -64,3 +63,19 @@ def get_label(path: str):
 if __name__ == "__main__":
     path_to_result = '/workspace/data/l2arctic/processed/ASI/manifests/train/quartznet/error_model_tts/500/seed_1/test_out_ori.txt'
 
+    inputs, labels = get_label(path_to_result)
+    
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    model = AutoModelForTokenClassification.from_pretrained("bert-base-uncased", num_labels=3)
+
+    for input, label in zip(inputs, labels):
+        if sum(label) == 0:
+            continue
+        input = " ".join(input)
+        tokenized_input = tokenizer(input, return_tensors="pt")
+        word_ids = tokenized_input.word_ids()
+        # align the labels
+        aligned_label = [-100 if i is None else label[i] for i in word_ids]
+        label = torch.tensor(aligned_label).unsqueeze(0)  # Batch size 1
+
+        outputs = model(**tokenized_input, labels=label)
