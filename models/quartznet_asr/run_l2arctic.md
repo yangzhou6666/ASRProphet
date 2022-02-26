@@ -2,8 +2,9 @@
 
 The following code takes `ASI` in the L2Arctic dataset as an example. Please kindly change 
 
-## Infer on seed+dev dataset
+# 1. Infer ASR on dataset
 
+## 1.1 Infer on `seed_plus_dev.json`
 Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
 
 ```
@@ -27,7 +28,9 @@ do
 done
 ```
 
-We can also evaluate the perform on synthetic seed and dev dataset.
+## 1.2 Infer on `seed.json` and `dev.json`
+
+The results will be used for training word error predictor.
 
 ```
 for accent in 'ASI' 'RRBI'
@@ -37,14 +40,25 @@ do
   echo $WAV_DIR/$accent/wav 
   python3 -u inference.py \
   --batch_size=16 \
-  --output_file=$DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_out_tts.txt \
+  --output_file=$DATA/$accent/manifests/quartznet_outputs/seed_out.txt \
   --wav_dir=$WAV_DIR \
-  --val_manifest=$DATA/$accent/manifests/seed_plus_dev_tts.json \
+  --val_manifest=$DATA/$accent/manifests/seed.json \
   --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
   --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-  > $DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_infer_log_tts.txt 
+  > $DATA/$accent/manifests/quartznet_outputs/seed_infer_log.txt 
+
+  python3 -u inference.py \
+  --batch_size=16 \
+  --output_file=$DATA/$accent/manifests/quartznet_outputs/dev_out.txt \
+  --wav_dir=$WAV_DIR \
+  --val_manifest=$DATA/$accent/manifests/dev.json \
+  --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+  --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+  > $DATA/$accent/manifests/quartznet_outputs/dev_infer_log.txt 
 done
 ```
+
+
 
 ## Infer on test dataset
 
@@ -88,7 +102,26 @@ done
 ```
 
 
-## Train Error Model
+# 2. Train Error Model
+
+## 2.1 Train word error predictor
+
+```
+for seed in 1 2 3
+do
+  for accent in "ASI" "RRBI"
+  do
+  mkdir -p $PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/best
+  python word_error_predictor.py \
+    --train_path=$DATA/$accent/manifests/quartznet_outputs/seed_out.txt \
+    --test_path=$DATA/$accent/manifests/quartznet_outputs/dev_out.txt \
+    --output_dir=$PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/best \
+    > $PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/training.log
+  done
+done
+```
+
+## ICASSP Baseline
 Please go to `/model/error_model` first.
 
 Notice: this step needs the hypotheses file (i.e, `seed_plus_dev_out.txt`) infered in previous steps. 
