@@ -7,10 +7,10 @@ from power.aligner import PowerAligner
 from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainer, TrainingArguments, DataCollatorForTokenClassification
 import torch
 import re
-from datasets import Dataset, load_metric
+from datasets import Dataset
 import pandas as pd
 import numpy as np
-
+import argparse
 
 def get_label(path: str):
     '''
@@ -143,9 +143,27 @@ def compute_metrics(p):
 
     return {"accuracy": acc, "precision": precision}
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train Word Error Predictor')
+    parser.add_argument("--batch_size", default=16, type=int, help='data batch size')
+    parser.add_argument("--train_path", type=str, required=True, help='path to training data')
+    parser.add_argument("--test_path", type=str, required=True, help='path to testing data')
+    parser.add_argument("--seed", default=42, type=int, help='seed')
+    parser.add_argument("--output_dir",default=None,type=str,help='path to store the predictor')
+    parser.add_argument("--model_name",default="bert-base-uncased",type=str,help='name of the pre-train model')
+    args=parser.parse_args()
+    return args
+
+
+def main(args):
+    '''
+    Function to train and save the model.
+    '''
+    random.seed(args.seed)
+
 if __name__ == "__main__":
-    path_to_trainset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/seed_plus_dev_out.txt'
-    path_to_testset = '/workspace/data/l2arctic/processed/ASI/manifests/train/random_tts/100/seed_1/test_out_ori.txt'
+    path_to_trainset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/seed_out.txt'
+    path_to_testset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/dev_out.txt'
 
     print(torch.cuda.is_available())
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -163,11 +181,10 @@ if __name__ == "__main__":
         f"word_error_predictor",
         evaluation_strategy = "epoch",
         learning_rate=2e-5,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
-        num_train_epochs=10,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        num_train_epochs=20,
         weight_decay=0.01,
-        push_to_hub=False,
     )
 
     data_collator = DataCollatorForTokenClassification(tokenizer)
