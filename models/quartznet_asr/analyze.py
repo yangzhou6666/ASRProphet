@@ -30,7 +30,7 @@ for dataset in ['ASI', 'RRBI']:
         tb.field_names = ['Dataset', 'Seed', 'Size', 'Ran-WER', 'Ran-CER']  
         for size in [50, 75, 100, 150, 200, 300, 400, 500]:
             size = str(size)
-            path_to_log = os.path.join(data_path, dataset, size, seed, 'error_model_tts', 'test_infer_log.txt')
+            path_to_log = os.path.join(data_path, dataset, size, seed, 'random_tts', 'test_infer_log.txt')
             try:
                 WER, CER = analyze_result(path_to_log)
             except:
