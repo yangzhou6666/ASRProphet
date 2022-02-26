@@ -9,8 +9,9 @@ from power.aligner import PowerAligner
 def get_label(path: str):
     '''
     Given the path to the reference and transcriptions
-    return the labels
+    return the model inputs and correpsonding labels
     '''
+    inputs = []
     labels = []
     with open(path_to_result, 'r') as f:
         for chunk in f.read().strip().split('\n\n'):
@@ -53,6 +54,7 @@ def get_label(path: str):
                     label.append(1)
             assert len(label) == len(alignment.ref())
             labels.append(label)
+            inputs.append(alignment.ref())
     
     return labels
 
