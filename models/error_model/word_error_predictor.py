@@ -19,7 +19,7 @@ def get_label(path: str):
     '''
     inputs = []
     labels = []
-    with open(path_to_result, 'r') as f:
+    with open(path, 'r') as f:
         for chunk in f.read().strip().split('\n\n'):
             data = chunk.split('\n')
             WER = float(data[1][5:])
@@ -93,6 +93,14 @@ def tokenize_and_align_labels(examples):
     tokenized_inputs["labels"] = labels
     return tokenized_inputs
 
+def prepare_dataset(path: str):
+    inputs, labels = get_label(path)
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    df = pd.DataFrame({"text": inputs, "labels": labels})
+    dataset = Dataset.from_pandas(df)
+    tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
+
+    return tokenized_datasets
 
 def compute_metrics(p):
     predictions, labels = p
@@ -108,10 +116,12 @@ def compute_metrics(p):
         for prediction, label in zip(predictions, labels)
     ]
 
-    # results = metric.compute(predictions=true_predictions, references=true_labels)
+
     # compute the accuracy
     cor_cnt = 0
     tot_cnt = 0
+
+
     for i in range(len(true_predictions)):
         for j in range(len(true_predictions[i])):
             if true_predictions[i][j] == true_labels[i][j]:
@@ -119,24 +129,35 @@ def compute_metrics(p):
             tot_cnt += 1
     acc = cor_cnt / tot_cnt
 
-    # To-do: recall, f1, accuracy
-    return {"accuracy": acc}
+    # compute precision
+    cor_1_cnt = 0
+    tot_1_cnt = 0.01
+    for i in range(len(true_predictions)):
+        for j in range(len(true_predictions[i])):
+            if true_predictions[i][j] == 1:
+                tot_1_cnt += 1
+                if true_labels[i][j] == 1:
+                    cor_1_cnt += 1
+    precision = cor_1_cnt / tot_1_cnt
+
+
+    return {"accuracy": acc, "precision": precision}
 
 if __name__ == "__main__":
-    path_to_result = '/workspace/data/l2arctic/processed/ASI/manifests/train/quartznet/error_model_tts/50/seed_1/test_out_ori.txt'
-    inputs, labels = get_label(path_to_result)
+    path_to_trainset = '/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/seed_plus_dev_out.txt'
+    path_to_testset = '/workspace/data/l2arctic/processed/ASI/manifests/train/random_tts/100/seed_1/test_out_ori.txt'
 
     print(torch.cuda.is_available())
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-    df = pd.DataFrame({"text": inputs, "labels": labels})
-    dataset = Dataset.from_pandas(df)
-    tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
+
+    train_data = prepare_dataset(path_to_trainset)
+    test_data = prepare_dataset(path_to_testset)
+
     print("Data loaded.")
 
 
     model = AutoModelForTokenClassification.from_pretrained("bert-base-uncased", num_labels=3)
 
-    metric = load_metric("seqeval")
 
     args = TrainingArguments(
         f"word_error_predictor",
@@ -154,8 +175,8 @@ if __name__ == "__main__":
     trainer = Trainer(
         model,
         args,
-        train_dataset=tokenized_datasets,
-        eval_dataset=tokenized_datasets,
+        train_dataset=train_data,
+        eval_dataset=test_data,
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
