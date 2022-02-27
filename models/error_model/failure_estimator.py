@@ -56,22 +56,25 @@ class HuggingFaceTransformer(Estimator):
 
         self.max_sequence_length = max_sequence_length
 
-    def fit(self, X: [str], y: [int]):
+    def fit(self, train_texts, train_labels, test_texts, test_labels):
 
         self.model.to(self.device)
         self.model.train()
-
-        train_texts = X
-        train_labels = y
 
         train_encodings = self.tokenizer(
             train_texts, truncation=True, padding=True, max_length=self.max_sequence_length)
         train_dataset = HuggingFaceDataset(train_encodings, train_labels)
 
+        test_encodings = self.tokenizer(
+            test_texts, truncation=True, padding=True, max_length=self.max_sequence_length)
+        test_dataset = HuggingFaceDataset(test_encodings, test_labels)
+
         training_args = TrainingArguments(
             output_dir=self.output_dir,          # output directory
-            num_train_epochs=5,              # total number of training epochs
-            per_device_train_batch_size=8,  # batch size per device during training
+            evaluation_strategy = "epoch",
+            save_strategy = "epoch",
+            num_train_epochs=20,              # total number of training epochs
+            per_device_train_batch_size=16,  # batch size per device during training
             per_device_eval_batch_size=64,   # batch size for evaluation
             learning_rate=5e-05,
             weight_decay=0.01,               # strength of weight decay
@@ -84,12 +87,13 @@ class HuggingFaceTransformer(Estimator):
             # the instantiated 🤗 Transformers model to be trained
             model=self.model,
             args=training_args,                  # training arguments, defined above
-            train_dataset=train_dataset         # training dataset
+            train_dataset=train_dataset,         # training dataset
+            eval_dataset=test_dataset
         )
 
         self.trainer.train()
 
-        self.tokenizer.save_pretrained(self.output_dir)
+        # self.tokenizer.save_pretrained(self.output_dir)
         self.trainer.save_model(self.output_dir)
 
     def predict(self, X: [str]):
@@ -101,6 +105,8 @@ class HuggingFaceTransformer(Estimator):
 
         test_encodings = self.tokenizer(
             test_texts, truncation=True, padding=True, max_length=self.max_sequence_length)
+        print(len(test_texts))
+        print(len(test_encodings))
         test_dataset = HuggingFaceDataset(test_encodings, test_labels)
         test_loader = torch.utils.data.DataLoader(
             test_dataset, batch_size=16, shuffle=False)
