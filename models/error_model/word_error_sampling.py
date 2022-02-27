@@ -13,6 +13,8 @@ import pandas as pd
 import numpy as np
 import argparse
 import random
+from tqdm import tqdm
+import torch.nn.functional as F
 
 
 def parse_args():
@@ -29,6 +31,8 @@ def parse_args():
                         help='saves logs in this directory')
     parser.add_argument("--num_sample", default=50, type=int,
                         help='number of selected samples')
+    parser.add_argument("--sampling", default="", type=str,
+                        help='sampling methods')
     parser.add_argument("--seed", default=1, type=int, help='seed id')
     parser.add_argument("--output_json_path", type=str,
                         required=True, help='json fpath to save the ranked texts')
@@ -67,7 +71,6 @@ def sort(texts, fpaths, probabilities, durations):
 
     return texts, fpaths, probabilities, durations
 
-
 def dump_samples(samples, filename):
     output_dir = os.path.split(filename)[0]
     os.makedirs(output_dir, exist_ok=True)
@@ -85,7 +88,7 @@ class TextDataset(torch.utils.data.Dataset):
         return item
 
     def __len__(self):
-        return len(self.encodings)
+        return len(self.encodings["input_ids"])
 
 def main(args):
     '''
@@ -108,43 +111,36 @@ def main(args):
     model = AutoModelForTokenClassification.from_pretrained(args.finetuned_ckpt)
     model.cuda()
     model.eval()
-    texts = []
-    print(test_texts)
-    for t in test_texts:
-        texts.append(tokenizer.tokenize(t))
-    print(len(texts))
-    test_encodings = tokenizer(test_texts, truncation=True, padding=True)
-    print(len(test_encodings))
+
+    test_encodings = tokenizer(test_texts, truncation=True)
+
     test_dataset = TextDataset(test_encodings)
     test_loader = torch.utils.data.DataLoader(
-            test_dataset, batch_size=32, shuffle=False)
+            test_dataset, batch_size=1, shuffle=False)
 
     res = []
 
-    for batch in test_loader:
+    for batch in tqdm(test_loader):
+
         input_ids = batch['input_ids'].cuda()
-        print(input_ids.shape)
-        exit()
         attention_mask = batch['attention_mask'].cuda()
         outputs = model(
-            input_ids, attention_mask=attention_mask)
-        print(outputs.logits.shape)
-        predictions = np.argmax(outputs, axis=1)
-        res.extend(predictions)
+            input_ids, attention_mask)
 
-    print(res)
-    exit()
+        probs = F.softmax(outputs.logits, -1)
+        error_probs = probs[:, :, 1]
+        res.append(error_probs[0].cpu().detach().numpy().tolist())
+    
+    if args.sampling == "sum":
+        res = [sum(n)/len(n) for n in res]
+    elif args.sampling == "num":
+        res = [sum(i>0.5 for i in n)/len(n) for n in res]
 
-    ## assume that 0 is the label for succesful
-    ## and 1 is the label for failed
-    # succesfull_probability = res[:, 0]
-    failed_probability = res[:, 1]
-
-    texts, fpaths, failed_probability, durations = sort(texts, fpaths, failed_probability, durations)
-
+    test_texts, fpaths, res, durations = sort(test_texts, fpaths, res, durations)
     samples = []
     selected_duration = 0.0
-    for text, fpath, duration in zip(texts, fpaths, durations):
+
+    for text, fpath, duration in zip(test_texts, fpaths, durations):
         samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
         selected_duration += json.loads(samples[-1].strip())['duration']
         if selected_duration >= required_duration:
@@ -152,7 +148,7 @@ def main(args):
     print('sampled {} samples...'.format(len(samples)))
 
     output_json_file = os.path.join(args.output_json_path, str(
-        args.num_sample), 'seed_' + str(args.exp_id), 'train.json')
+        args.num_sample), args.sampling, 'seed_' + str(args.seed), 'train.json')
 
     dump_samples(seed_samples + samples, output_json_file)
 
