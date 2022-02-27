@@ -19,8 +19,8 @@ do
       --hidden_size=64 \
       --input_size=64 \
       --weight_decay=0.001 \
-      --train_portion=0.8 \
-      --hypotheses_path=$DATA/$accent/manifests/quartznet_outputs/seed_plus_dev_out.txt \
+      --train_path=$DATA/$accent/manifests/quartznet_outputs/seed_out.txt \
+      --test_path=$DATA/$accent/manifests/quartznet_outputs/dev_out.txt \
       --lr_decay=warmup \
       --seed=1 \
       --output_dir=$PRETRAINED_CKPTS/asrevolve_error_models/quartznet/$accent/seed_"$seed"/best \
