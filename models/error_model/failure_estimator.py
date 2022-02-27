@@ -49,7 +49,7 @@ class HuggingFaceTransformer(Estimator):
             name, num_labels=num_labels)
 
         ## init tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(name)
+        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
         self.device = torch.device(
             'cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -105,8 +105,7 @@ class HuggingFaceTransformer(Estimator):
 
         test_encodings = self.tokenizer(
             test_texts, truncation=True, padding=True, max_length=self.max_sequence_length)
-        print(len(test_texts))
-        print(len(test_encodings))
+
         test_dataset = HuggingFaceDataset(test_encodings, test_labels)
         test_loader = torch.utils.data.DataLoader(
             test_dataset, batch_size=16, shuffle=False)
