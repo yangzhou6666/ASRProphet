@@ -23,22 +23,11 @@ from failure_estimator import HuggingFaceTransformer
 
 def parse_args():
     parser = argparse.ArgumentParser(description='asrevolve_error_model')
-    parser.add_argument("--batch_size", default=1, type=int, help='data batch size')
-    parser.add_argument("--num_epochs", default=200, type=int, help='number of training epochs. if number of steps if specified will overwrite this')
-    parser.add_argument("--train_freq", dest="train_frequency", default=20, type=int, help='number of iterations until printing training statistics on the past iteration')
-    parser.add_argument("--lr", default=3e-4, type=float, help='learning rate')
-    parser.add_argument("--weight_decay", default=1e-3, type=float, help='weight decay rate')
     parser.add_argument("--train_path", type=str, required=True, help='path to training data')
     parser.add_argument("--test_path", type=str, required=True, help='path to testing data')
-    parser.add_argument("--lr_decay", type=str, default='none', choices=['warmup','decay','none'], help='learning rate decay strategy')
     parser.add_argument("--output_dir", type=str, required=True, help='saves results in this directory')
     parser.add_argument("--log_dir", type=str, required=True, help='saves logs in this directory')
     parser.add_argument("--seed", default=42, type=int, help='seed')
-    parser.add_argument("--train_portion",default=0.65,type=float,help='portion of data used for training error model, rest is used as dev')
-    parser.add_argument("--pretrained_ckpt", default=None, type=str, help='path to pretrained ckpt')
-    parser.add_argument("--input_size",default=64,type=int,help='size of phone embeddings')
-    parser.add_argument("--hidden_size",default=64,type=int,help='size of hidden cells of lstm')
-    parser.add_argument("--num_layers",default=4,type=int,help='number of lstm layers')
     args=parser.parse_args()
     return args
 
