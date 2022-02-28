@@ -1,11 +1,13 @@
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
 declare -a accents=('ASI')
+declare -a num_samples=(50 75 100 150)
+
 WAV_DIR=$(cd ../../data/l2arctic/; pwd)
 
-for seed in 1 2 3
+for seed in 1
 do 
-  for size in 500
+  for size in "${num_samples[@]}"
   do
     for accent in "${accents[@]}"
     do
@@ -13,14 +15,15 @@ do
       echo 
       echo
       model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/asrevolve_tts
-      CUDA_VISIBLE_DEVICES=4 python3 -u inference.py \
+      mkdir -p $model_dir
+      python3 -u inference.py \
       --batch_size=64 \
       --output_file=$model_dir/test_out.txt \
       --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/test.json \
+      --val_manifest=$DATA/$accent/manifests/train/quartznet/asrevolve_error_model/$size/seed_"$seed"/train.json \
       --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$model_dir/best/Jasper.pt \
-      > $model_dir/test_infer_log.txt
+      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+      > $model_dir/test_infer_log_ori.txt
     done
   done
 done
