@@ -155,6 +155,8 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+    tokenizer = AutoTokenizer.from_pretrained(args.finetuned_ckpt)
     main(args)
+
+    
 
