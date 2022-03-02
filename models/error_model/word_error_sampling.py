@@ -90,6 +90,31 @@ class TextDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.encodings["input_ids"])
 
+class WordErrorSampler():
+    '''
+    The class for selecting test cases using the word-level error predictor
+    '''
+    def __init__(self, finetuned_ckpt) -> None:
+        # load the tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(finetuned_ckpt)
+        # load the model
+        self.model = AutoModelForTokenClassification.from_pretrained(finetuned_ckpt)
+        self.model.cuda()
+        self.model.eval()
+
+        # dataset
+    
+    def normal_sample(self):
+        pass
+
+    def sample_with_phone_enhancing(self):
+        pass
+
+    def sample_with_word_enhancing(self):
+        pass
+
+
+
 def main(args):
     '''
     Function to train and save the model.
