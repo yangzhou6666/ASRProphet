@@ -21,6 +21,7 @@ def parse_args():
 
     parser.register("type", "bool", lambda x: x.lower() in ("yes", "true", "t", "1"))
 
+    parser.add_argument("--wav_dir", type=str, help='directory to the wav file')
     parser.add_argument("--val_manifest", type=str, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--model", type=str, help='path to the model pbmm')
     parser.add_argument("--scorer", default=None, type=str, required=True, help='path to the model scorer')
@@ -58,7 +59,7 @@ def main(args):
     for line in file.readlines():
         js_instance = json.loads(line)
 
-        wav_path = js_instance["audio_filepath"]
+        wav_path = os.path.join(args.wav_dir, js_instance["audio_filepath"])
         transcription_path = wav_path[:-3] + args.model_tag + ".transcription.txt"
 
 

@@ -199,6 +199,7 @@ def main(args):
     # save the model
     trainer.save_model(args.output_dir)
 
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 if __name__ == "__main__":
     args = parse_args()
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
