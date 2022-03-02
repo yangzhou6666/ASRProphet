@@ -2,14 +2,8 @@ import os
 import sys
 import json
 sys.path.append("..")
-from scipy.special import softmax
-from quartznet_asr.metrics import __levenshtein, word_error_rate
-from power import Levenshtein, ExpandedAlignment
-from power.aligner import PowerAligner
-from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainer, TrainingArguments, DataCollatorForTokenClassification
+from transformers import AutoTokenizer, AutoModelForTokenClassification
 import torch
-import re
-import pandas as pd
 import numpy as np
 import argparse
 import random
@@ -189,41 +183,44 @@ class WordErrorSampler():
         # we need to compute it on the fly
 
         # rank the test cases based on the score
-        score = [sum(n)/len(n) for n in self.res]
-        test_texts, fpaths, score, durations = sort(self.selection_texts, self.selection_fpaths, score, self.selection_durations)
-        samples = []
-        selected_duration = 0.0
+        error_score = [sum(n)/len(n) for n in self.res]
+        test_texts, fpaths, error_score, durations = sort(self.selection_texts, self.selection_fpaths, error_score, self.selection_durations)
 
-        path_score = {}
-        for text, fpath, this_score in zip(test_texts, fpaths, score):
+        samples = [] # store the selected test cases
+        selected_duration = 0.0 # accumulative duration of selected test cases
+
+        path_score = {} # store the error score for each text (identified by path)
+        for fpath, this_score in zip(fpaths, error_score):
             path_score[fpath] = this_score
 
-
         while (selected_duration < required_duration and len(test_texts) > 0):
+            # ternimation condition: select enough duration + there are no more test cases
+
             # first, start with the case with the highest score
             text = test_texts.pop(0)
             fpath = fpaths.pop(0)
-            this_score = score.pop(0)
+            this_score = error_score.pop(0)
             duration = durations.pop(0)
 
-            selected_duration += duration
-
             samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
+            selected_duration += duration # update the total duration
 
             # after selecting a test case, we need to update the phoneme frequency
             self.acc_phone_freqs += self.sent_wise_phone_freqs[fpath]['freq']
 
             # update the score for the remaining test cases
             new_scores = []
-            for i in range(len(score)):
+            for i in range(len(test_texts)):
                 new_path = fpaths[i]
                 f_old = get_f(self.acc_phone_freqs)
-                f_new = get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[new_path]['freq'])
+                f_new = get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[new_path]['freq']) # the new frequency if this test case is selected
                 new_score = (f_new - f_old) * path_score[new_path]
+                # the score that consider the phone diversity enhancing
                 new_score = np.sum(new_score)
                 new_scores.append(new_score)
             
-            test_texts, fpaths, score, durations = sort(test_texts, fpaths, new_scores, durations)
+            assert len(new_scores) == len(test_texts)
+            test_texts, fpaths, error_score, durations = sort(test_texts, fpaths, new_scores, durations)
 
         return samples
 
@@ -242,15 +239,20 @@ class WordErrorSampler():
     def get_sentence_wise_phone_freqs(self):
         '''compute the phoneme frequency of each sentence'''
         self.phone_vocab = phone_vocab
-        self.acc_phone_freqs = np.zeros(len(self.phone_vocab))
-        self.sent_wise_phone_freqs = {}
+        self.acc_phone_freqs = np.zeros(len(self.phone_vocab)) 
+        # vector to store the accumulated phoneme frequency
+        self.sent_wise_phone_freqs = {} 
+        # a dictionary to store the phoneme frequency of each sentence
         self.phone_to_id = dict([(phone,i) for i,phone in enumerate(self.phone_vocab)])
+        # a dictionary to store the id of each phoneme
         for text, path in zip(self.selection_texts, self.selection_fpaths):
+            # for a text (and its path)
             freq = np.zeros(len(self.phone_vocab))
-            phones = self.get_phonemes(text)
+            phones = self.get_phonemes(text) # get the phoneme sequence
             for phone in phones:
                 freq[self.phone_to_id[phone]] +=1
-            self.sent_wise_phone_freqs[path] = {'freq': freq, 'phones': phones, 'text': text}
+                # update the frequency of each phoneme
+            self.sent_wise_phone_freqs[path] = {'freq': freq, 'phones': phones, 'text': text} # store the phoneme frequency of each sentence
 
         return self.sent_wise_phone_freqs
 
@@ -259,6 +261,8 @@ def main(args):
     '''
     Function to train and save the model.
     '''
+
+    # set the random seed
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -272,9 +276,13 @@ def main(args):
     print('loading data....')
 
     err_sampler = WordErrorSampler(args.finetuned_ckpt, args.selection_json_file)
+    # load the model
     err_sampler.load_model()
+    # load the data
     err_sampler.load_sampling_data()
+    # compute the phoneme frequency information
     err_sampler.get_sentence_wise_phone_freqs()
+    # sample the test cases
     samples = err_sampler.sample_with_phone_enhancing(required_duration)
 
     # dump the samples
