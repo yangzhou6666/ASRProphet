@@ -57,7 +57,8 @@ def main(args):
 
   json_path = args.json_path
 
-  device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+  # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+  device = "cpu"
 
   print('loading data....')
   data = load_phoneme_sequences([json_path],remove_duplicates=False)
