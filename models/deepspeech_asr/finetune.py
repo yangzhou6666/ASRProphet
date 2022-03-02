@@ -43,7 +43,7 @@ def finetune_deepspeech(train_csv_path, test_csv_path, gpu_id, load_checkpoint_d
         print(o)
     #     f.write(o + "\n")
 
-def create_csv_finetuning_format(json_fpath, csv_fpath):
+def create_csv_finetuning_format(json_fpath, csv_fpath, wav_dir):
     
     wav_paths = []
     references = []
@@ -53,7 +53,7 @@ def create_csv_finetuning_format(json_fpath, csv_fpath):
     for line in file.readlines():
         js_instance = json.loads(line)
 
-        wav_path = js_instance["audio_filepath"]
+        wav_path = os.path.join(wav_dir, js_instance["audio_filepath"])
         reference = js_instance["text"].lower()
 
         wav_paths.append(wav_path)
@@ -74,6 +74,8 @@ def parse_args():
                         help='relative path given dataset folder of training manifest file')
     parser.add_argument("--val_manifest", type=str, required=True,
                         help='relative path given dataset folder of evaluation manifest file')
+    parser.add_argument("--wav_dir", type=str, required=True,
+                        help='patht to the directory containing wav files')
     parser.add_argument("--load_checkpoint_dir", type=str, required=True,
                         help='deepspeech checkpoint dir to load')
     parser.add_argument("--save_checkpoint_dir", type=str, required=True,
@@ -99,8 +101,8 @@ def main(args):
     train_csv_path = os.path.join(args.output_dir, "train.csv")
     test_csv_path = os.path.join(args.output_dir, "test.csv")
     
-    create_csv_finetuning_format(args.train_manifest, train_csv_path)
-    create_csv_finetuning_format(args.val_manifest, test_csv_path)
+    create_csv_finetuning_format(args.train_manifest, train_csv_path, args.wav_dir)
+    create_csv_finetuning_format(args.val_manifest, test_csv_path, args.wav_dir)
 
     finetune_deepspeech(train_csv_path, test_csv_path, args.gpu_id, args.load_checkpoint_dir,
                         args.save_checkpoint_dir, args.output_dir, args.model_scorer, args.num_epochs, args.learning_rate)
