@@ -38,16 +38,10 @@ def parse_args():
                         required=True, help='path to seed json file')
     parser.add_argument("--selection_json_file", type=str,
                         required=True, help='path to input file')
-    parser.add_argument("--random_json_file", type=str,
+    parser.add_argument("--data_folder", type=str,
                         required=True, help='path to input file')
     parser.add_argument("--finetuned_ckpt", default=None,
                         type=str, help='path to finetuned ckpt')
-    parser.add_argument("--log_dir", type=str, required=True,
-                        help='saves logs in this directory')
-    parser.add_argument("--num_sample", default=50, type=int,
-                        help='number of selected samples')
-    parser.add_argument("--sampling", default="", type=str,
-                        help='sampling methods')
     parser.add_argument("--seed", default=1, type=int, help='seed id')
     parser.add_argument("--output_json_path", type=str,
                         required=True, help='json fpath to save the ranked texts')
@@ -182,6 +176,9 @@ class WordErrorSampler():
         # we cannot pre-compute a static metric for all texts in advance
         # we need to compute it on the fly
 
+        self.get_sentence_wise_phone_freqs()
+        # initialize the all the frequency inforamtion for each run.
+
         # rank the test cases based on the score
         error_score = [sum(n)/len(n) for n in self.res]
         test_texts, fpaths, error_score, durations = sort(self.selection_texts, self.selection_fpaths, error_score, self.selection_durations)
@@ -257,41 +254,50 @@ class WordErrorSampler():
         return self.sent_wise_phone_freqs
 
 
+def compute_required_duration(seed_json_file, random_json_file):
+    '''compute the required duration for samping new test cases'''
+    random_samples_duration = sum([json.loads(line.strip())['duration'] for line in open(random_json_file)])
+    seed_duration = sum([json.loads(line.strip())['duration'] for line in open(seed_json_file)])
+    required_duration = random_samples_duration - seed_duration
+
+    return required_duration
+
+
 def main(args):
     '''
     Function to train and save the model.
     '''
-
     # set the random seed
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-
-    # compute the required duration to be sampled
-    seed_samples = [line for line in open(args.seed_json_file)]
-    random_samples_duration = sum([json.loads(line.strip())['duration'] for line in open(args.random_json_file)])
-    seed_duration = sum([json.loads(line.strip())['duration'] for line in open(args.seed_json_file)])
-    required_duration = random_samples_duration - seed_duration
-    assert required_duration > 0
-    print('loading data....')
 
     err_sampler = WordErrorSampler(args.finetuned_ckpt, args.selection_json_file)
     # load the model
     err_sampler.load_model()
     # load the data
     err_sampler.load_sampling_data()
-    # compute the phoneme frequency information
-    err_sampler.get_sentence_wise_phone_freqs()
     # sample the test cases
-    samples = err_sampler.sample_with_phone_enhancing(required_duration)
 
-    # dump the samples
+    for num_sample in [50, 75, 100, 150, 200, 300, 400, 500]:
+        for sampling_method in ["p_enhance"]:
+            random_json_file = os.path.join(args.data_folder, str(num_sample), "seed_" + str(args.seed), "train.json")
+            required_duration = compute_required_duration(args.seed_json_file, random_json_file)
+            assert required_duration > 0
 
-    exit()
-    output_json_file = os.path.join(args.output_json_path, str(
-        args.num_sample), args.sampling, 'seed_' + str(args.seed), 'train.json')
+            if sampling_method == "p_enhance":
+                samples = err_sampler.sample_with_phone_enhancing(required_duration)
+            else:
+                raise NotImplementedError
 
-    dump_samples(seed_samples + samples, output_json_file)
+            # dump the samples to a file
+            output_json_file = os.path.join(args.output_json_path, str(
+                num_sample), sampling_method, 'seed_' + str(args.seed), 'train.json')
+            seed_samples = [line for line in open(args.seed_json_file)]
+            # merge the seed samples with the new samples
+
+            dump_samples(seed_samples + samples, output_json_file)
+            print(f"{num_sample} samples are dumped to {output_json_file}")
 
 
 if __name__ == "__main__":
