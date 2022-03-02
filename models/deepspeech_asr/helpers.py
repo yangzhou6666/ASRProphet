@@ -15,11 +15,50 @@ def print_dict(d):
         print(fmtString % keyPair)
 
 
-def print_sentence_wise_wer(hypotheses, references, tts_preds, output_file, input_file):
+def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
     
     ## ensure that the number of transcriptions are equal to the number of ground-truth texts
     assert len(hypotheses) == len(references)
 
+
+    wav_filenames = []
+    with open(input_file, "r", encoding="utf-8") as f:
+        wav_filenames = [json.loads(line.strip())[
+            "audio_filepath"] for line in f]
+
+    ## ensure that all audio files are processed
+    assert len(hypotheses) == len(wav_filenames)
+
+    wers = []
+    cers = []
+
+    for hyp, ref in zip(hypotheses, references):
+        wers.append(f_wer(hyp, ref))
+        cers.append(f_cer(hyp, ref))
+
+    with open(output_file, 'w') as f:
+        for hyp, ref, wer, cer, wav_filename in zip(hypotheses, references, wers, cers, wav_filenames):
+            f.write(wav_filename+"\n")
+            f.write("WER: "+str(wer)+'\n')
+            f.write("CER: " + str(cer) + '\n')
+            f.write("Ref: "+ref+'\n')
+            f.write("Hyp: "+hyp+'\n')
+            f.write('\n')
+    
+        print('\n')
+        print('\n')
+        print('================================ \n')
+        print("Average WER: " + str(sum(wers)/len(wers)) + '\n')
+        print("Average CER: " + str(sum(cers)/len(cers)) + '\n')
+
+
+    return wav_filenames
+
+
+def print_sentence_wise_wer_with_tts(hypotheses, references, tts_preds, output_file, input_file):
+
+    ## ensure that the number of transcriptions are equal to the number of ground-truth texts
+    assert len(hypotheses) == len(references)
 
     wav_filenames = []
     with open(input_file, "r", encoding="utf-8") as f:
@@ -45,13 +84,12 @@ def print_sentence_wise_wer(hypotheses, references, tts_preds, output_file, inpu
             f.write("Hyp: "+hyp+'\n')
             f.write("TTS: "+tts+'\n')
             f.write('\n')
-    
+
         print('\n')
         print('\n')
         print('================================ \n')
         print("Average WER: " + str(sum(wers)/len(wers)) + '\n')
         print("Average CER: " + str(sum(cers)/len(cers)) + '\n')
-
 
     return wav_filenames
 

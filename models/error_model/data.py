@@ -306,7 +306,7 @@ def __generate_error_sequence(reference_hypothesis_pair):
 
         if op == 'C':
             # Correct. the words at the corresponding position are the SAME.
-            assert ref_word == hyp_word
+            # assert ref_word == hyp_word
             #tp,tr,th,cm = _get_statistics(ref_word, hyp_word)
             ref_constructed += ph_ref_word
             error_sequence += [0]*len(ph_ref_word)
