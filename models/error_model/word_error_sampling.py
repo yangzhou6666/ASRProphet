@@ -94,23 +94,72 @@ class WordErrorSampler():
     '''
     The class for selecting test cases using the word-level error predictor
     '''
-    def __init__(self, finetuned_ckpt) -> None:
-        # load the tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(finetuned_ckpt)
+    def __init__(self, finetuned_ckpt, selection_json_file) -> None:
+        '''load required parameters'''
+
+        # path to the finetuned model
+        self.finetuned_ckpt = finetuned_ckpt
+        # path to the selection json file (the json file that contains the test cases)
+        self.selection_json_file = selection_json_file
+
+    def load_model(self):
+        '''Load tokenizer and model'''
+
+        # load tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(self.finetuned_ckpt)
         # load the model
-        self.model = AutoModelForTokenClassification.from_pretrained(finetuned_ckpt)
+        self.model = AutoModelForTokenClassification.from_pretrained(self.finetuned_ckpt)
         self.model.cuda()
         self.model.eval()
 
-        # dataset
+    def load_sampling_data(self):
+        '''Load the data for sampling'''
+
+        # load the selection data
+        self.selection_texts, self.selection_fpaths, self.selection_durations = format_data(self.selection_json_file)
+
+        # tokenize the selection data
+        test_encodings = self.tokenizer(self.selection_texts, truncation=True)
+        test_dataset = TextDataset(test_encodings)
+
+        # prepare data loader
+        test_loader = torch.utils.data.DataLoader(
+                test_dataset, batch_size=1, shuffle=False)
+
+        self.res = []
+        # score for each test case
+        for batch in tqdm(test_loader):
+            input_ids = batch['input_ids'].cuda()
+            attention_mask = batch['attention_mask'].cuda()
+            outputs = self.model(
+                input_ids, attention_mask)
+
+            probs = F.softmax(outputs.logits, -1)
+            error_probs = probs[:, :, 1]
+            self.res.append(error_probs[0].cpu().detach().numpy().tolist())
     
-    def normal_sample(self):
+    def normal_sample(self, required_duration: float):
+        '''select the test cases based on sum of their error score'''
+        score = [sum(n)/len(n) for n in self.res]
+
+        test_texts, fpaths, score, durations = sort(self.selection_texts, self.selection_fpaths, score, self.selection_durations)
+        samples = []
+        selected_duration = 0.0
+
+        for text, fpath, duration in zip(test_texts, fpaths, durations):
+            samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
+            selected_duration += json.loads(samples[-1].strip())['duration']
+            if selected_duration >= required_duration:
+                break
+
+        print('sampled {} samples...'.format(len(samples)))
+
+        return samples
+
+    def sample_with_phone_enhancing(self, duration: float):
         pass
 
-    def sample_with_phone_enhancing(self):
-        pass
-
-    def sample_with_word_enhancing(self):
+    def sample_with_word_enhancing(self, duration: float):
         pass
 
 
@@ -130,48 +179,12 @@ def main(args):
     assert required_duration > 0
     print('loading data....')
 
-    test_texts, fpaths, durations = format_data(args.selection_json_file)
+    err_sampler = WordErrorSampler(args.finetuned_ckpt, args.selection_json_file)
+    err_sampler.load_model()
+    err_sampler.load_sampling_data()
+    samples = err_sampler.normal_sample(required_duration)
 
-    print("Data loaded.")
-    model = AutoModelForTokenClassification.from_pretrained(args.finetuned_ckpt)
-    model.cuda()
-    model.eval()
-
-    test_encodings = tokenizer(test_texts, truncation=True)
-
-    test_dataset = TextDataset(test_encodings)
-    test_loader = torch.utils.data.DataLoader(
-            test_dataset, batch_size=1, shuffle=False)
-
-    res = []
-
-    for batch in tqdm(test_loader):
-
-        input_ids = batch['input_ids'].cuda()
-        attention_mask = batch['attention_mask'].cuda()
-        outputs = model(
-            input_ids, attention_mask)
-
-        probs = F.softmax(outputs.logits, -1)
-        error_probs = probs[:, :, 1]
-        res.append(error_probs[0].cpu().detach().numpy().tolist())
-    
-    if args.sampling == "sum":
-        res = [sum(n)/len(n) for n in res]
-    elif args.sampling == "num":
-        res = [sum(i>0.5 for i in n)/len(n) for n in res]
-
-    test_texts, fpaths, res, durations = sort(test_texts, fpaths, res, durations)
-    samples = []
-    selected_duration = 0.0
-
-    for text, fpath, duration in zip(test_texts, fpaths, durations):
-        samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
-        selected_duration += json.loads(samples[-1].strip())['duration']
-        if selected_duration >= required_duration:
-            break
-    print('sampled {} samples...'.format(len(samples)))
-
+    # dump the samples
     output_json_file = os.path.join(args.output_json_path, str(
         args.num_sample), args.sampling, 'seed_' + str(args.seed), 'train.json')
 
