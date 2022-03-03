@@ -10,27 +10,6 @@ import random
 import string
 from tqdm import tqdm
 import torch.nn.functional as F
-from g2p_en import G2p
-
-labels = [" ", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "'"]
-punctuation = string.punctuation
-punctuation = punctuation.replace("+", "")
-punctuation = punctuation.replace("&", "")
-for l in labels:
-    punctuation = punctuation.replace(l, "")
-table = str.maketrans(punctuation, " " * len(punctuation))
-
-
-MASK = '<mask>'
-SOS = '<s>'
-EOS = '</s>'
-
-
-get_phoneme_seq = G2p()
-phone_vocab = get_phoneme_seq.phonemes[0:4]
-phone_vocab += np.unique([item if len(item)!=3 else item[:-1] for item in get_phoneme_seq.phonemes[4:]]).tolist()
-phone_vocab += [MASK, ' ']
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train Word Error Predictor')
@@ -170,17 +149,17 @@ class WordErrorSampler():
 
         return samples
 
-    def sample_with_phone_enhancing(self, required_duration: float):
-        '''select the test cases based on sum of their error score and consider the phone diversisty enhancing'''
+    def sample_with_sub_word_enhancing(self, required_duration: float):
+        '''select the test cases based on sum of their error score and consider the subword diversisty enhancing'''
 
         # we cannot pre-compute a static metric for all texts in advance
         # we need to compute it on the fly
 
-        self.get_sentence_wise_phone_freqs()
+        self.get_sentence_wise_subword_freqs()
         # initialize the all the frequency inforamtion for each run.
 
         # rank the test cases based on the score
-        error_score = [sum(n)/len(n) for n in self.res]
+        error_score = self.res
         test_texts, fpaths, error_score, durations = sort(self.selection_texts, self.selection_fpaths, error_score, self.selection_durations)
 
         samples = [] # store the selected test cases
@@ -202,17 +181,22 @@ class WordErrorSampler():
             samples.append(json.dumps({"text": text, "audio_filepath": fpath, "duration": duration}) + "\n")
             selected_duration += duration # update the total duration
 
-            # after selecting a test case, we need to update the phoneme frequency
-            self.acc_phone_freqs += self.sent_wise_phone_freqs[fpath]['freq']
+            # after selecting a test case, we need to update the sub word frequency
+            self.acc_subtoken_freqs += self.sent_wise_subtoken_freqs[fpath]['freq']
 
             # update the score for the remaining test cases
             new_scores = []
             for i in range(len(test_texts)):
                 new_path = fpaths[i]
-                f_old = get_f(self.acc_phone_freqs)
-                f_new = get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[new_path]['freq']) # the new frequency if this test case is selected
-                new_score = (f_new - f_old) * path_score[new_path]
-                # the score that consider the phone diversity enhancing
+
+                text_subwords = self.tokenizer.encode(test_texts[i])
+                subwords_weights = np.zeros(len(self.subtoken_vocab))
+                for index, n in enumerate(text_subwords):
+                    subwords_weights[n] = path_score[new_path][index]
+                f_old = get_f(self.acc_subtoken_freqs)
+                f_new = get_f(self.acc_subtoken_freqs + self.sent_wise_subtoken_freqs[new_path]['freq']) # the new frequency if this test case is selected
+                new_score = (f_new - f_old) * subwords_weights
+                # the score that consider the sub-word diversity enhancing
                 new_score = np.sum(new_score)
                 new_scores.append(new_score)
             
@@ -223,35 +207,29 @@ class WordErrorSampler():
 
 
 
-    def sample_with_word_enhancing(self, duration: float):
-        pass
 
-    def get_phonemes(self, text):
-        '''compute the phoneme frequency of a text'''
-        phone_list = get_phoneme_seq(text)
-        phone_list = [item if len(item)!=3 else item[:-1] for item in phone_list]
-        phone_list = [item for item in phone_list if item not in {"'"}]
-        return phone_list
+    def get_subtokens(self, text):
+        '''compute the sub token frequency of a text'''
+        subtoken_list = self.tokenizer.tokenize(text)
+        return subtoken_list
 
-    def get_sentence_wise_phone_freqs(self):
-        '''compute the phoneme frequency of each sentence'''
-        self.phone_vocab = phone_vocab
-        self.acc_phone_freqs = np.zeros(len(self.phone_vocab)) 
-        # vector to store the accumulated phoneme frequency
-        self.sent_wise_phone_freqs = {} 
-        # a dictionary to store the phoneme frequency of each sentence
-        self.phone_to_id = dict([(phone,i) for i,phone in enumerate(self.phone_vocab)])
-        # a dictionary to store the id of each phoneme
+    def get_sentence_wise_subword_freqs(self):
+        '''compute the sub word frequency of each sentence'''
+        self.subtoken_vocab = self.tokenizer.vocab
+        self.acc_subtoken_freqs = np.zeros(len(self.subtoken_vocab)) 
+        # vector to store the accumulated sub word frequency
+        self.sent_wise_subtoken_freqs = {} 
+        # a dictionary to store the sub word frequency of each sentence
         for text, path in zip(self.selection_texts, self.selection_fpaths):
             # for a text (and its path)
-            freq = np.zeros(len(self.phone_vocab))
-            phones = self.get_phonemes(text) # get the phoneme sequence
-            for phone in phones:
-                freq[self.phone_to_id[phone]] +=1
-                # update the frequency of each phoneme
-            self.sent_wise_phone_freqs[path] = {'freq': freq, 'phones': phones, 'text': text} # store the phoneme frequency of each sentence
+            freq = np.zeros(len(self.subtoken_vocab))
+            subtokens = self.get_subtokens(text) # get the subtoken sequence
+            for subtoken in subtokens:
+                freq[self.subtoken_vocab[subtoken]] +=1
+                # update the frequency of each sub token
+            self.sent_wise_subtoken_freqs[path] = {'freq': freq, 'subtokens': subtokens, 'text': text} # store the subtoken frequency of each sentence
 
-        return self.sent_wise_phone_freqs
+        return self.sent_wise_subtoken_freqs
 
 
 def compute_required_duration(seed_json_file, random_json_file):
@@ -280,13 +258,13 @@ def main(args):
     # sample the test cases
 
     for num_sample in [50, 75, 100, 150, 200, 300, 400, 500]:
-        for sampling_method in ["p_enhance"]:
+        for sampling_method in ["word_enhance"]:
             random_json_file = os.path.join(args.data_folder, str(num_sample), "seed_" + str(args.seed), "train.json")
             required_duration = compute_required_duration(args.seed_json_file, random_json_file)
             assert required_duration > 0
 
-            if sampling_method == "p_enhance":
-                samples = err_sampler.sample_with_phone_enhancing(required_duration)
+            if sampling_method == "word_enhance":
+                samples = err_sampler.sample_with_sub_word_enhancing(required_duration)
             else:
                 raise NotImplementedError
 
