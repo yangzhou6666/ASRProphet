@@ -150,22 +150,7 @@ wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0
 # extract the tar.gz file
 ```
 
-Prepare code for fine-tuning
-
-```
-cd models/deepspeech_asr/
-
-git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
-
-#read the readme from the project
-#build the docker image
-cd FineTuneDeepSpeech
-docker build -t <your username>/traindeepspeech .
-
-#run the docker
-docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
-```
-
+Please follow [this procedure](https://github.com/mhilmiasyrofi/FineTuneDeepSpeech/tree/asr_debugger) to prepare the environment for fine-tuning
 
 
 # Usage
