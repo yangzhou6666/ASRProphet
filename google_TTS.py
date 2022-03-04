@@ -1,11 +1,11 @@
 import os
-
+import google
+from google.cloud import texttospeech
 
 TTS_CONFIG = {'en-GB-Wavenet-A': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-GB-Wavenet-B': {'language_code': 'en-GB', 'gender': 'MALE'}, 'en-GB-Wavenet-C': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-GB-Wavenet-D': {'language_code': 'en-GB', 'gender': 'MALE'}, 'en-GB-Wavenet-F': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-US-Wavenet-G': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Wavenet-H': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Wavenet-I': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Wavenet-J': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Wavenet-A': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Wavenet-B': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Wavenet-C': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Wavenet-D': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Wavenet-E': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Wavenet-F': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-AU-Wavenet-A': {'language_code': 'en-AU', 'gender': 'FEMALE'}, 'en-AU-Wavenet-B': {'language_code': 'en-AU', 'gender': 'MALE'}, 'en-AU-Wavenet-C': {'language_code': 'en-AU', 'gender': 'FEMALE'}, 'en-AU-Wavenet-D': {'language_code': 'en-AU', 'gender': 'MALE'}, 'en-IN-Wavenet-D': {'language_code': 'en-IN', 'gender': 'FEMALE'}, 'en-IN-Wavenet-A': {'language_code': 'en-IN', 'gender': 'FEMALE'}, 'en-IN-Wavenet-B': {'language_code': 'en-IN', 'gender': 'MALE'}, 'en-IN-Wavenet-C': {'language_code': 'en-IN', 'gender': 'MALE'}, 'en-AU-Standard-A': {'language_code': 'en-AU', 'gender': 'FEMALE'}, 'en-AU-Standard-B': {'language_code': 'en-AU', 'gender': 'MALE'}, 'en-AU-Standard-C': {'language_code': 'en-AU', 'gender': 'FEMALE'}, 'en-AU-Standard-D': {'language_code': 'en-AU', 'gender': 'MALE'}, 'en-GB-Standard-A': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-GB-Standard-B': {'language_code': 'en-GB', 'gender': 'MALE'}, 'en-GB-Standard-C': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-GB-Standard-D': {'language_code': 'en-GB', 'gender': 'MALE'}, 'en-GB-Standard-F': {'language_code': 'en-GB', 'gender': 'FEMALE'}, 'en-IN-Standard-D': {'language_code': 'en-IN', 'gender': 'FEMALE'}, 'en-IN-Standard-A': {'language_code': 'en-IN', 'gender': 'FEMALE'}, 'en-IN-Standard-B': {'language_code': 'en-IN', 'gender': 'MALE'}, 'en-IN-Standard-C': {'language_code': 'en-IN', 'gender': 'MALE'}, 'en-US-Standard-A': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Standard-B': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Standard-C': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Standard-D': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Standard-E': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Standard-F': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Standard-G': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Standard-H': {'language_code': 'en-US', 'gender': 'FEMALE'}, 'en-US-Standard-I': {'language_code': 'en-US', 'gender': 'MALE'}, 'en-US-Standard-J': {'language_code': 'en-US', 'gender': 'MALE'}}
 
 def list_voices():
     """Lists the available voices."""
-    from google.cloud import texttospeech
 
     client = texttospeech.TextToSpeechClient()
 
@@ -64,6 +64,9 @@ def synthesize_text(text, output_path, config_name, language_code, gender):
         request={"input": input_text, "voice": voice, "audio_config": audio_config}
     )
 
+    
+    output_path = output_path.replace(".wav", ".mp3")
+
     # The response's audio_content is binary.
     with open(output_path, "wb") as out:
         out.write(response.audio_content)
@@ -74,28 +77,35 @@ if __name__=='__main__':
     language_code = TTS_CONFIG[config_name]["language_code"]
     gender = TTS_CONFIG[config_name]["gender"]
 
+    path_to_dataset = "./data/l2arctic/l2arctic_release_v5"
+    selected_sub_dataset = ["ASI", "RRBI"]
 
-    path_to_dataset = "/Users/zhouyang/Downloads/l2arctic_release_v5"
     api_call_limit = 1000000
     word_count = 0
     for sub_dataset in os.listdir(path_to_dataset):
-        if len(sub_dataset.split('.')) > 1:
-            continue
-        path_to_synthetic = os.path.join(path_to_dataset, sub_dataset, 'synthetic_wav', '-'.join([config_name, gender]))
-        path_to_text = os.path.join(path_to_dataset, sub_dataset, 'transcript')
-        os.makedirs(path_to_synthetic, exist_ok=True)
 
-        
-        for text_id in os.listdir(path_to_text):
-            with open(os.path.join(path_to_text, text_id)) as f:
-                transcript = f.read()
-                word_count += len(transcript.split())
-                if word_count > api_call_limit:
-                    print("Reach API call limits.")
-                    exit()
-                path_to_save_audio = os.path.join(path_to_synthetic, text_id.split('.')[0] + ".wav")
-                if not os.path.exists(path_to_save_audio):
-                    # if query APIs if the file is not generated.
-                    synthesize_text(transcript, path_to_save_audio, config_name, language_code, gender)
+        if sub_dataset in selected_sub_dataset:
+
+            if len(sub_dataset.split('.')) > 1:
+                continue
+            
+            # path_to_synthetic = os.path.join(path_to_dataset, sub_dataset, 'synthetic_wav', '-'.join([config_name, gender]))
+            path_to_synthetic = os.path.join(path_to_dataset, sub_dataset, 'TTS')
+            path_to_text = os.path.join(path_to_dataset, sub_dataset, 'transcript')
+            
+            os.makedirs(path_to_synthetic, exist_ok=True)
+
+            
+            for text_id in os.listdir(path_to_text):
+                with open(os.path.join(path_to_text, text_id)) as f:
+                    transcript = f.read()
+                    word_count += len(transcript.split())
+                    if word_count > api_call_limit:
+                        print("Reach API call limits.")
+                        exit()
+                    path_to_save_audio = os.path.join(path_to_synthetic, text_id.split('.')[0] + ".wav")
+                    if not os.path.exists(path_to_save_audio):
+                        # if query APIs if the file is not generated.
+                        synthesize_text(transcript, path_to_save_audio, config_name, language_code, gender)
 
 
