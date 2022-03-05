@@ -82,6 +82,7 @@ done
 
 Let's also try on the synthetic test set.
 
+
 ```
 for accent in "${accents[@]}"
 do
@@ -90,12 +91,29 @@ do
   echo $WAV_DIR/$accent/wav 
   python3 -u inference.py \
   --wav_dir=$WAV_DIR \
-  --output_file=$DATA/$accent/manifests/deepspeech_outputs/original_test_out_out_tts.txt \
+  --output_file=$DATA/$accent/manifests/deepspeech_outputs/original_test_out_tts.txt \
   --val_manifest=$DATA/$accent/manifests/test_tts.json \
   --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
   --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
   --model_tag=deepspeech-0.9.3 \
   > $DATA/$accent/manifests/deepspeech_outputs/original_test_infer_log_tts.txt
+done
+```
+
+```
+for accent in "${accents[@]}"
+do
+  mkdir -p $DATA/$accent/manifests/deepspeech_outputs
+  echo $accent
+  echo $WAV_DIR/$accent/wav 
+  python3 -u inference.py \
+  --wav_dir=$WAV_DIR \
+  --output_file=$DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_out_tts.txt \
+  --val_manifest=$DATA/$accent/manifests/seed_plus_dev_tts.json \
+  --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+  --model_tag=deepspeech-0.9.3 \
+  > $DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_infer_log_tts.txt
 done
 ```
 
@@ -279,15 +297,6 @@ do
 done
 ```
 
-
-
-
-
-
-
-
-
-
 ### Measure original model performance on the selected audio
 
 ```
@@ -298,16 +307,14 @@ do
     for accent in 'ASI' 'RRBI'
     do
       echo $accent $seed $size
-      echo 
-      echo
       python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$DATA/$accent/manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/test_out_ori.txt \
       --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/train.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-      > $DATA/$accent/manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/test_out_ori_log.txt
+      --val_manifest=$DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/train.json \
+      --output_file=$DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/test_out_ori.txt \
+      --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+      --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      --model_tag=deepspeech-0.9.3 \
+      > $DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/
     done
   done
 done
