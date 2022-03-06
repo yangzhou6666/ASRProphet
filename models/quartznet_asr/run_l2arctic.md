@@ -142,41 +142,30 @@ do
 done
 ```
 
-### 2.1.2 Sampling `real` audio
+### 2.1.2 Sampling `real` audio and evaluation
 
 ```
 for seed in 1 2 3
 do
-  for num_sample in 50 75 100 150 200 300 400 500
+  for accent in 'RRBI'
   do
-    for accent in "ASI" "RRBI"
-    do
-      for method in "sum" "num"
-      do
-        echo $accent seed $seed num_sample $num_sample method $method
-        python3 -u word_error_sampling.py \
-          --seed_json_file=$DATA/$accent/manifests/seed.json \
-          --random_json_file=$DATA/$accent/manifests/train/random/"$num_sample"/seed_"$seed"/train.json \
-          --selection_json_file=$DATA/$accent/manifests/selection.json \
-          --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/best \
-          --log_dir=$PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/train_log \
-          --num_sample=$num_sample \
-          --sampling=$method \
-          --output_json_path=$DATA/$accent/manifests/train/quartznet/word_error_predictor \
-          --seed=$seed
-      done
-    done
+    echo $accent seed $seed
+    CUDA_VISIBLE_DEVICES=2 python3 -u word_error_sampling.py \
+      --seed_json_file=$DATA/$accent/manifests/seed.json \
+      --data_folder=$DATA/$accent/manifests/train/random/ \
+      --selection_json_file=$DATA/$accent/manifests/selection.json \
+      --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/best \
+      --output_json_path=$DATA/$accent/manifests/train/quartznet/word_error_predictor_real \
+      --seed=$seed &
   done
 done
 ```
 
 
-### 2.1.3 Evaluating ASR performance on sampled dataset
-
 ```
-for seed in 2 3
+for seed in 1 2 3
 do
-  for num_sample in 50 75 100 150 200 300 400 500
+  for size in 50 75 100 150 200 300 400 500
   do
     for accent in 'ASI' 'RRBI'
     do
@@ -199,152 +188,57 @@ do
 done
 ```
 
-## 2.2 ICASSP Baseline
-Please go to `/model/error_model` first.
-
-### 2.2.1 Training the error model
-
-Notice: this step needs the hypotheses file (i.e, `seed_out.txt` and `dev_out.txt`) infered in previous steps. 
+### 2.1.3 Sampling `synthetic` audio and evaluation
 
 ```
 for seed in 1 2 3
 do
-  for accent in 'ASI' 'RRBI'
+  for accent in "ASI" "RRBI"
   do
     echo $accent seed $seed
-    mkdir -p $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/
-    python3 -u train_error_model.py \
-      --batch_size=16 \
-      --train_path=$DATA/$accent/manifests/quartznet_outputs/seed_out.txt \
-      --test_path=$DATA/$accent/manifests/quartznet_outputs/dev_out.txt \
-      --lr_decay=warmup \
-      --seed=$seed \
-      --output_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/recent \
-      --best_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
-    > $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/train_log.txt 
-  echo
-  done 
-done 
-```
-
-
-### 2.2.2 Infer the error model on the dataset for selection
-
-Before using the error model to select test cases, we need to first infer the model on all the texts and store the results.
-
-```
-for seed in 1 2 3
-do
-  for accent in 'ASI' 'RRBI'
-  do
-    echo $accent seed $seed
-    python3 -u infer_error_model.py \
-      --batch_size=64 \
-      --json_path=$DATA/$accent/manifests/selection.json \
-      --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt \
-      --output_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
-    > $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/infer_log.txt
-  echo
-  done
-done
-```
-
-
-
-
-### 2.2.3 Using the error model for sampling `real` audio (RQ1)
-
-
-```
-for seed in 1 2 3
-do
-  for accent in 'ASI' 'RRBI'
-  do
-    echo $accent seed $seed
-    python3 -u error_model_sampling.py \
-      --selection_json_file=$DATA/$accent/manifests/selection.json \
+    CUDA_VISIBLE_DEVICES=5 python3 -u word_error_sampling.py \
       --seed_json_file=$DATA/$accent/manifests/seed.json \
-      --error_model_weights=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/weights.pkl \
-      --random_json_path=$DATA/$accent/manifests/train/random \
-      --output_json_path=$DATA/$accent/manifests/train/quartznet/error_model \
-      --exp_id=$seed
-  echo
-  done
-done
-```
-
-#### No enhancing
-```
-for seed in 1 2 3
-do
-  for accent in 'ASI' 'RRBI'
-  do
-    echo $accent seed $seed
-    python3 -u error_model_sampling.py \
-      --selection_json_file=$DATA/$accent/manifests/selection.json \
-      --seed_json_file=$DATA/$accent/manifests/seed.json \
-      --error_model_weights=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/weights.pkl \
-      --random_json_path=$DATA/$accent/manifests/train/random \
-      --output_json_path=$DATA/$accent/manifests/train/quartznet/error_model_no_diversity \
-      --exp_id=$seed
-  echo
+      --data_folder=$DATA/$accent/manifests/train/random/ \
+      --selection_json_file=$DATA/$accent/manifests/selection_tts.json \
+      --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/quartznet/$accent/seed_"$seed"/best \
+      --output_json_path=$DATA/$accent/manifests/train/quartznet/word_error_predictor_tts \
+      --seed=$seed &
   done
 done
 ```
 
 
-Evaluation
 
 ```
-for seed in 1 2 3
+for seed in 1
 do
   for size in 50 75 100 150 200 300 400 500
   do
-    for accent in 'ASI' 'RRBI'
+    for accent in "RRBI"
     do
-      echo $accent $seed $size
-      echo 
-      echo
-      python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/test_out_ori.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/train.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-      > $DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/test_out_ori_log.txt
+      for method in "word_enhance"
+      do
+        echo $accent seed $seed size $size method $method
+        echo 
+        echo
+        python3 -u inference.py \
+        --batch_size=64 \
+        --output_file=$DATA/$accent/manifests/train/quartznet/word_error_predictor_tts/$size/$method/seed_"$seed"/test_out_ori.txt \
+        --wav_dir=$WAV_DIR \
+        --val_manifest=$DATA/$accent/manifests/train/quartznet/word_error_predictor_tts/$size/$method/seed_"$seed"/train.json \
+        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+        > $DATA/$accent/manifests/train/quartznet/word_error_predictor_tts/$size/$method/seed_"$seed"/test_out_ori_log.txt
+      done
     done
   done
-done
-```
-
-```
-for seed in 1 2 3
-do
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$DATA/$accent/manifests/train/quartznet/error_model_no_diversity/$size/seed_"$seed"/test_out_ori.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/train/quartznet/error_model_no_diversity/$size/seed_"$seed"/train.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-      > $DATA/$accent/manifests/train/quartznet/error_model_no_diversity/$size/seed_"$seed"/test_out_ori_log.txt
-    done
-  done
-done
+done & 
 ```
 
 
-## 2.3 ASREvolve
+## 2.2 ASREvolve
 
-### 2.3.1 Training
+### 2.2.1 Training
 
 ```
 for seed in {1..3}
@@ -364,7 +258,7 @@ do
 done 
 ```
 
-### 2.3.2 Using ASREvolve for sampling
+### 2.2.2 Using ASREvolve for sampling
 
 ```
 for seed in 1 2 3
@@ -374,26 +268,26 @@ do
     for accent in 'ASI' 'RRBI'
     do
       echo $accent seed $seed
-      python3 -u error_model_sampling_asrevolve.py \
+      CUDA_VISIBLE_DEVICES=3 python3 -u error_model_sampling_asrevolve.py \
         --seed_json_file=$DATA/$accent/manifests/seed.json \
-        --random_json_file=$DATA/$accent/manifests/train/random_tts/"$num_sample"/seed_"$seed"/train.json \
-        --selection_json_file=$DATA/$accent/manifests/selection_tts.json \
+        --random_json_file=$DATA/$accent/manifests/train/random/"$num_sample"/seed_"$seed"/train.json \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
         --finetuned_ckpt=$PRETRAINED_CKPTS/asrevolve_error_models/quartznet/$accent/seed_"$seed"/best \
         --log_dir=$PRETRAINED_CKPTS/asrevolve_error_models/quartznet/$accent/seed_"$seed"/train_log \
         --num_sample=$num_sample \
-        --output_json_path=$DATA/$accent/manifests/train/quartznet/asrevolve_error_model \
+        --output_json_path=$DATA/$accent/manifests/train/quartznet/asrevolve_error_model_real \
         --exp_id=$seed
     done
-  done
-done
+  done &
+done 
 ```
 
-### 2.3.3 Measure original model performance on the selected audio
+### 2.2.3 Measure original model performance on the selected audio
 
 ```
-for seed in 1 2 3
+for seed in 1
 do
-  for num_sample in 50 75 100 150 200 300 400 500
+  for size in 50 75 100 150 200 300 400 500
   do
     for accent in 'ASI' 'RRBI'
     do
@@ -415,61 +309,14 @@ done
 
 
 
-### Error Model + Matcher
+
+# 3. Fine-Tune ASR Models
+
+
+## 3.1 Train on ASREvolve data
 
 ```
-for seed in {1..3}
-do
-  for accent in 'ASI' 'RRBI'
-  do
-    echo $accent seed $seed
-    python3 -u combined_metric_sampling.py \
-      --selection_json_file=$DATA/$accent/manifests/selection_tts.json \
-      --seed_json_file=$DATA/$accent/manifests/seed.json \
-      --error_model_weights=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best/weights.pkl \
-      --matcher_model_weights=$PRETRAINED_CKPTS/matcher/quartznet/$accent/seed_"$seed"/best/weights.pkl \
-      --random_json_path=$DATA/$accent/manifests/train/random_tts \
-      --output_json_path=$DATA/$accent/manifests/train/quartznet/matcher \
-      --exp_id=$seed
-  echo
-  done
-done
-```
-
-
-
-Evaluation
-
-```
-for seed in 1 2 3
-do
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$DATA/$accent/manifests/train/quartznet/matcher/$size/seed_"$seed"/test_out_ori.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/train/quartznet/matcher/$size/seed_"$seed"/train.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-      > $DATA/$accent/manifests/train/quartznet/matcher/$size/seed_"$seed"/test_out_ori_log.txt
-    done
-  done
-done
-```
-
-
-## Using error-model selected audio to fine-tune and evaluation
-
-Let's go back to `model/quartznet_asr` folder to fine-tune ASR models. We first fine-tune on synthetic data selected by the error model obtained in the previous step. The selected data is stored in `manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/train.json`.
-
-```
-for seed in {1..3}
+for seed in 3
 do 
   for size in 50 75 100 150 200 300 400 500
   do
@@ -478,145 +325,7 @@ do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/error_model_tts
-      mkdir -p $model_dir
-      python3 -u finetune.py \
-        --batch_size=16 \
-        --num_epochs=100 \
-        --eval_freq=1 \
-        --train_freq=30 \
-        --lr=1e-5 \
-        --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model_tts/$size/seed_"$seed"/train.json \
-        --val_manifest=$DATA/$accent/manifests/dev.json \
-        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-        --output_dir=$model_dir/recent \
-        --best_dir=$model_dir/best \
-        --early_stop_patience=10 \
-        --zero_infinity \
-        --save_after_each_epoch \
-        --turn_bn_eval \
-        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-        --lr_decay=warmup \
-        --seed=42 \
-        --optimizer=novograd \
-      > $model_dir/train_log.txt
-
-      echo $accent $seed $size
-      echo 
-      echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/error_model_tts
-      python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$model_dir/test_out.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/test.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$model_dir/best/Jasper.pt \
-      > $model_dir/test_infer_log.txt
-    done
-  done
-done
-```
-
-
-
-## Using error model + matcher selected audio to fine-tune and evaluation
-
-
-```
-for seed in {1..3}
-do 
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/matcher
-      mkdir -p $model_dir
-      CUDA_VISIBLE_DEVICES=6 python3 -u finetune.py \
-        --batch_size=16 \
-        --num_epochs=100 \
-        --eval_freq=1 \
-        --train_freq=30 \
-        --lr=1e-5 \
-        --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/train/quartznet/matcher/$size/seed_"$seed"/train.json \
-        --val_manifest=$DATA/$accent/manifests/dev.json \
-        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-        --output_dir=$model_dir/recent \
-        --best_dir=$model_dir/best \
-        --early_stop_patience=10 \
-        --zero_infinity \
-        --save_after_each_epoch \
-        --turn_bn_eval \
-        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-        --lr_decay=warmup \
-        --seed=42 \
-        --optimizer=novograd \
-      > $model_dir/train_log.txt
-
-      echo $accent $seed $size
-      echo 
-      echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/matcher
-      CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$model_dir/test_out.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/test.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$model_dir/best/Jasper.pt \
-      > $model_dir/test_infer_log.txt
-    done
-  done
-done
-```
-
-
-## Using randomly selected audio to fine-tune and evaluation
-
-
-Evaluating original performance on randomly selected data.
-
-```
-for seed in 1 2 3
-do
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      python3 -u inference.py \
-      --batch_size=64 \
-      --output_file=$DATA/$accent/manifests/train/random_tts/$size/seed_"$seed"/test_out_ori.txt \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/train/random_tts/$size/seed_"$seed"/train.json \
-      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
-      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
-      > $DATA/$accent/manifests/train/random_tts/$size/seed_"$seed"/test_out_ori_log.txt
-    done
-  done
-done
-```
-
-We also fine-tune the model on randomly selected data.
-
-```
-for seed in {1..3}
-do 
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/random_tts
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/asrevolve_error_model_all_tts
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=2 python3 -u finetune.py \
         --batch_size=16 \
@@ -625,8 +334,8 @@ do
         --train_freq=30 \
         --lr=1e-5 \
         --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/train/random_tts/$size/seed_"$seed"/train.json \
-        --val_manifest=$DATA/$accent/manifests/dev.json \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/asrevolve_error_model/$size/seed_"$seed"/train_tts.json \
+        --val_manifest=$DATA/$accent/manifests/dev_tts.json \
         --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
         --output_dir=$model_dir/recent \
         --best_dir=$model_dir/best \
@@ -636,14 +345,22 @@ do
         --turn_bn_eval \
         --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
         --lr_decay=warmup \
-        --seed=42 \
+        --seed=$seed \
         --optimizer=novograd \
       > $model_dir/train_log.txt
 
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/random_tts
+      CUDA_VISIBLE_DEVICES=2 python3 -u inference.py \
+      --batch_size=64 \
+      --output_file=$model_dir/test_out_tts.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test_tts.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$model_dir/best/Jasper.pt \
+      > $model_dir/test_infer_log_tts.txt
+
       CUDA_VISIBLE_DEVICES=2 python3 -u inference.py \
       --batch_size=64 \
       --output_file=$model_dir/test_out.txt \
@@ -654,22 +371,87 @@ do
       > $model_dir/test_infer_log.txt
     done
   done
-done
+done &
 ```
 
-## Train on ASREvolve data
+
+
+
+## Train on word-error data (synthetic)
 
 ```
-for seed in {1..3}
+for accent in 'ASI' 'RRBI'
 do 
-  for size in 50 75 100 150 200 300 400 500
+  for seed in 3
   do
-    for accent in 'ASI' 'RRBI'
+    for size in 50 75 100 150 200 300 400 500
     do
       echo $accent $seed $size
       echo 
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/asrevolve_tts
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/word_error_predictor_all_tts/word_enhance
+      mkdir -p $model_dir
+      CUDA_VISIBLE_DEVICES=6 python3 -u finetune.py \
+        --batch_size=16 \
+        --num_epochs=100 \
+        --eval_freq=1 \
+        --train_freq=30 \
+        --lr=1e-5 \
+        --wav_dir=$WAV_DIR \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/word_error_predictor_tts/$size/word_enhance/seed_"$seed"/train_tts.json \
+        --val_manifest=$DATA/$accent/manifests/dev_tts.json \
+        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+        --output_dir=$model_dir/recent \
+        --best_dir=$model_dir/best \
+        --early_stop_patience=10 \
+        --zero_infinity \
+        --save_after_each_epoch \
+        --turn_bn_eval \
+        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+        --lr_decay=warmup \
+        --seed=$seed \
+        --optimizer=novograd \
+      > $model_dir/train_log.txt
+
+      echo $accent $seed $size
+      echo 
+      echo
+      CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
+      --batch_size=64 \
+      --output_file=$model_dir/test_out.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$model_dir/best/Jasper.pt \
+      > $model_dir/test_infer_log.txt
+
+      CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
+      --batch_size=64 \
+      --output_file=$model_dir/test_out_tts.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test_tts.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$model_dir/best/Jasper.pt \
+      > $model_dir/test_infer_log_tts.txt
+    done
+  done
+done & 
+```
+
+
+## Train on ICASSP sampling (real)
+
+```
+for seed in 3
+do 
+  for size in 50 75 100 150
+  do
+    for accent in 'ASI'
+    do
+      echo $accent $seed $size
+      echo 
+      echo
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=5 python3 -u finetune.py \
         --batch_size=16 \
@@ -678,7 +460,7 @@ do
         --train_freq=30 \
         --lr=1e-5 \
         --wav_dir=$WAV_DIR \
-        --train_manifest=$DATA/$accent/manifests/train/quartznet/asrevolve_error_model/$size/seed_"$seed"/train.json \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model/$size/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
         --output_dir=$model_dir/recent \
@@ -689,26 +471,12 @@ do
         --turn_bn_eval \
         --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
         --lr_decay=warmup \
-        --seed=42 \
+        --seed=$seed \
         --optimizer=novograd \
       > $model_dir/train_log.txt
-    done
-  done
-done
-```
 
 
-for seed in {1..3}
-do 
-  for size in 50 75 100 150 200 300 400 500
-  do
-    for accent in 'ASI' 'RRBI'
-    do
-      echo $accent $seed $size
-      echo 
-      echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/asrevolve_tts
-      CUDA_VISIBLE_DEVICES=1 python3 -u inference.py \
+      CUDA_VISIBLE_DEVICES=5 python3 -u inference.py \
       --batch_size=64 \
       --output_file=$model_dir/test_out.txt \
       --wav_dir=$WAV_DIR \
@@ -716,6 +484,59 @@ do
       --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
       --ckpt=$model_dir/best/Jasper.pt \
       > $model_dir/test_infer_log.txt
-    done
+    done 
   done
-done
+done & 
+```
+
+## Train on Word Error Data (real)
+
+```
+for seed in 3
+do 
+  for size in 50 75 100 150
+  do
+    for accent in 'ASI'
+    do
+      echo $accent $seed $size
+      echo 
+      echo
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/word_enhance
+      mkdir -p $model_dir
+      CUDA_VISIBLE_DEVICES=6 python3 -u finetune.py \
+        --batch_size=16 \
+        --num_epochs=100 \
+        --eval_freq=1 \
+        --train_freq=30 \
+        --lr=1e-5 \
+        --wav_dir=$WAV_DIR \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/word_error_predictor_real/$size/word_enhance/seed_"$seed"/train_mix.json \
+        --val_manifest=$DATA/$accent/manifests/dev.json \
+        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+        --output_dir=$model_dir/recent \
+        --best_dir=$model_dir/best \
+        --early_stop_patience=10 \
+        --zero_infinity \
+        --save_after_each_epoch \
+        --turn_bn_eval \
+        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+        --lr_decay=warmup \
+        --seed=$seed \
+        --optimizer=novograd \
+      > $model_dir/train_log.txt
+
+      echo $accent $seed $size
+      echo 
+      echo
+      CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
+      --batch_size=64 \
+      --output_file=$model_dir/test_out.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$model_dir/best/Jasper.pt \
+      > $model_dir/test_infer_log.txt  
+    done 
+  done
+done  &
+```
