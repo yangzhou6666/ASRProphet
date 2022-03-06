@@ -299,12 +299,87 @@ do
       echo $accent $seed $size
       python3 -u inference.py \
       --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/train/deepspeech/error_model/$size/seed_"$seed"/train.json \
+      --output_file=$DATA/$accent/manifests/train/deepspeech/error_model/$size/seed_"$seed"/test_out_ori.txt \
+      --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+      --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      --model_tag=deepspeech-0.9.3 \
+      > $DATA/$accent/manifests/train/deepspeech/error_model/$size/seed_"$seed"/test_out_ori_log.txt
+    done
+  done
+done
+```
+
+```
+for seed in 1 2 3
+do
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RRBI'
+    do
+      echo $accent $seed $size
+      python3 -u inference.py \
+      --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/train.json \
       --output_file=$DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/test_out_ori.txt \
       --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
       --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
       --model_tag=deepspeech-0.9.3 \
-      > $DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/
+      > $DATA/$accent/manifests/train/deepspeech/error_model_tts/$size/seed_"$seed"/test_out_ori_log.txt
+    done
+  done
+done
+```
+
+```
+for seed in 1 2 3
+do
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RRBI'
+    do
+      echo $accent $seed $size
+      python3 -u inference.py \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/train/deepspeech/asrevolve_error_model/$size/seed_"$seed"/train.json \
+      --output_file=$DATA/$accent/manifests/train/deepspeech/asrevolve_error_model/$size/seed_"$seed"/test_out_ori.txt \
+      --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+      --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      --model_tag=deepspeech-0.9.3 \
+      > $DATA/$accent/manifests/train/deepspeech/asrevolve_error_model/$size/seed_"$seed"/test_out_ori_log.txt
+    done
+  done
+done
+```
+
+## Train on ASREvolve data
+
+
+Please ensure the `gpu_id` with the docker container name
+
+```
+for seed in 1 2 3
+do 
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RRBI'
+    do
+      echo $accent $seed $size
+      echo
+      model_dir=$PRETRAINED_CKPTS/deepspeech/finetuned/$accent/$size/seed_"$seed"/asrevolve_tts
+      mkdir -p $model_dir
+      CUDA_VISIBLE_DEVICES=3 python3 -u finetune.py \
+        --train_manifest=$DATA/$accent/manifests/train/deepspeech/asrevolve_error_model/$size/seed_"$seed"/train.json \
+        --val_manifest=$DATA/$accent/manifests/dev.json \
+        --wav_dir=$WAV_DIR \
+        --output_dir=$model_dir/recent \
+        --load_checkpoint_dir=$PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/ \
+        --save_checkpoint_dir=$model_dir \
+        --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+        --gpu_id=5 \
+        --num_epochs=100 \
+        --learning_rate=1e-4 \
+      > $model_dir/train_log.txt
     done
   done
 done
