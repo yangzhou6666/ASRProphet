@@ -173,7 +173,7 @@ Assuming that the seed is `1`, the model will be saved under `/models/pretrained
 ## Infer the error model on the dataset for selection
 
 ```
-for seed in {1..3}
+for seed in 1 2 3
 do
   for accent in "${accents[@]}"
   do
@@ -196,7 +196,7 @@ done
 
 ```
 echo 
-for seed in {1..3}
+for seed in 1 2 3
 do
   for accent in 'ASI' 'RRBI'
   do
@@ -225,7 +225,7 @@ done
 ```
 
 ```
-for seed in {1..3}
+for seed in 1 2 3
 do
   for accent in 'ASI' 'RRBI'
   do
@@ -247,25 +247,15 @@ done
 ## Training the error estimator from ASREvolve
 
 
-for seed in {1..3}
+for seed in 1 2 3
 do
   for accent in 'ASI' 'RRBI'
   do
-    LR=3e-4
     echo $accent seed $seed
     mkdir -p $PRETRAINED_CKPTS/asrevolve_error_models/deepspeech/$accent/seed_"$seed"
     CUDA_VISIBLE_DEVICES=2 python3 -u train_error_model_asrevolve.py \
-      --batch_size=10 \
-      --num_epochs=200 \
-      --train_freq=20 \
-      --lr=$LR \
-      --num_layers=4 \
-      --hidden_size=64 \
-      --input_size=64 \
-      --weight_decay=0.001 \
-      --train_portion=0.8 \
-      --hypotheses_path=$DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_out.txt \
-      --lr_decay=warmup \
+      --train_path=$DATA/$accent/manifests/deepspeech_outputs/seed_out.txt \
+      --test_path=$DATA/$accent/manifests/deepspeech_outputs/dev_out.txt \
       --seed=1 \
       --output_dir=$PRETRAINED_CKPTS/asrevolve_error_models/deepspeech/$accent/seed_"$seed"/best \
       --log_dir=$PRETRAINED_CKPTS/asrevolve_error_models/deepspeech/$accent/seed_"$seed"/train_log \
