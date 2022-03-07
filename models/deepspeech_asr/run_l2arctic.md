@@ -385,4 +385,24 @@ do
 done
 ```
 
-
+```
+for seed in 1 2 3
+do 
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RRBI'
+    do
+      echo $accent $seed $size
+      model_dir=$PRETRAINED_CKPTS/deepspeech/finetuned/$accent/$size/seed_"$seed"/asrevolve_tts
+      python3 -u inference.py \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test.json \
+      --output_file=$model_dir/test_out.txt \
+      --model=$model_dir/recent/output_graph.pbmm \
+      --model_tag=deepspeech-finetuned-asrevolve_tts-size_"$size"-seed_"$seed" \
+      --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      > $model_dir/test_infer_log.txt
+    done
+  done
+done
+```
