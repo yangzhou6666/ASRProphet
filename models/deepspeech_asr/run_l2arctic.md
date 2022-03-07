@@ -64,7 +64,7 @@ done
 Let's try on the test set.
 
 ```
-for accent in 'ASI' 'RBBI'
+for accent in 'ASI' 'RRBI'
 do
   mkdir -p $DATA/$accent/manifests/deepspeech_outputs
   echo $accent
@@ -256,7 +256,7 @@ for seed in 1 2 3
 do 
   for size in 50 75 100 150 200 300 400 500
   do
-    for accent in 'ASI' 'RBBI'
+    for accent in 'ASI' 'RRBI'
     do
       echo $accent $seed $size
       echo 
@@ -285,7 +285,7 @@ for seed in 1 2 3
 do 
   for size in 50 75 100 150 200 300 400 500
   do
-    for accent in 'ASI' 'RBBI'
+    for accent in 'ASI' 'RRBI'
     do
       echo $accent $seed $size
       echo 
@@ -313,7 +313,7 @@ for seed in 1 2 3
 do 
   for size in 50 75 100 150 200 300 400 500
   do
-    for accent in 'ASI' 'RBBI'
+    for accent in 'ASI' 'RRBI'
     do
       echo $accent $seed $size
       echo 
@@ -342,7 +342,7 @@ for seed in 1 2 3
 do 
   for size in 50 75 100 150 200 300 400 500
   do
-    for accent in 'ASI' 'RBBI'
+    for accent in 'ASI' 'RRBI'
     do
       echo $accent $seed $size
       echo 
