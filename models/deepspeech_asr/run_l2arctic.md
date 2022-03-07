@@ -246,9 +246,10 @@ done
 
 # 3. Fine-Tune ASR Models
 
+Please ensure the `gpu_id` is exaactly the same with the docker container name
+
 ## Train on ICASSP sampling (real)
 
-Please ensure the `gpu_id` is exaactly the same with the docker container name
 
 ```
 for seed in 1 2 3
@@ -303,6 +304,64 @@ do
   done
 done
 ```
+
+
+## Train on Word Error Data (real)
+
+```
+for seed in 1 2 3
+do 
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RBBI'
+    do
+      echo $accent $seed $size
+      echo 
+      echo
+      model_dir=$PRETRAINED_CKPTS/deepspeech/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/word_enhance
+      mkdir -p $model_dir
+      CUDA_VISIBLE_DEVICES=3 python3 -u finetune.py \
+        --train_manifest=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_real/$size/word_enhance/seed_"$seed"/train.json \
+        --val_manifest=$DATA/$accent/manifests/dev.json \
+        --wav_dir=$WAV_DIR \
+        --output_dir=$model_dir/recent \
+        --load_checkpoint_dir=$PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/ \
+        --save_checkpoint_dir=$model_dir \
+        --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+        --gpu_id=5 \
+        --num_epochs=100 \
+        --learning_rate=1e-4 \
+      > $model_dir/train_log.txt
+    done 
+  done
+done
+```
+
+```
+for seed in 1 2 3
+do 
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in 'ASI' 'RBBI'
+    do
+      echo $accent $seed $size
+      echo 
+      echo
+      model_dir=$PRETRAINED_CKPTS/deepspeech/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/word_enhance
+      mkdir -p $model_dir
+      python3 -u inference.py \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test.json \
+      --output_file=$model_dir/test_out.txt \
+      --model=$model_dir/recent/output_graph.pbmm \
+      --model_tag=deepspeech-finetuned-word_error_real_mix-size_"$size"-seed_"$seed" \
+      --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      > $model_dir/test_infer_log.txt
+    done 
+  done
+done
+```
+
 
 ## ICASSP Baseline
 Please go to `/model/error_model` first.
