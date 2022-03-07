@@ -176,9 +176,9 @@ done
 ```
 
 ```
-for seed in 1
+for seed in 1 2 3
 do
-  for size in 50 75 100 150 200
+  for size in 50 75 100 150 200 300 400 500
   do
     for accent in 'ASI'
     do
@@ -197,6 +197,51 @@ do
     done
   done
 done
+```
+
+### 2.1.3 Sampling `synthetic` audio and evaluation
+
+```
+for seed in 1 2 3
+do
+  for accent in "ASI"
+  do
+    echo $accent seed $seed
+    CUDA_VISIBLE_DEVICES=5 python3 -u word_error_sampling.py \
+      --seed_json_file=$DATA/$accent/manifests/seed.json \
+      --data_folder=$DATA/$accent/manifests/train/random/ \
+      --selection_json_file=$DATA/$accent/manifests/selection_tts.json \
+      --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best \
+      --output_json_path=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_tts \
+      --seed=$seed &
+  done
+done
+```
+
+```
+for seed in 1 2 3
+do
+  for size in 50 75 100 150 200 300 400 500
+  do
+    for accent in "ASI"
+    do
+      for method in "word_enhance"
+      do
+        echo $accent seed $seed size $size method $method
+        echo 
+        echo
+        python3 -u inference.py \
+        --wav_dir=$WAV_DIR \
+        --output_file=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_tts/$size/$method/seed_"$seed"/test_out_ori.txt \
+        --val_manifest=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_tts/$size/$method/seed_"$seed"/train.json \
+        --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+        --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+        --model_tag=deepspeech-0.9.3 \
+        > $DATA/$accent/manifests/train/deepspeech/word_error_predictor_tts/$size/$method/seed_"$seed"/test_out_ori_log.txt
+      done
+    done
+  done
+done & 
 ```
 
 ## ICASSP Baseline
