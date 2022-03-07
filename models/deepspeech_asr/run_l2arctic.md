@@ -64,14 +64,14 @@ done
 Let's try on the test set.
 
 ```
-for accent in "${accents[@]}"
+for accent in 'ASI' 'RBBI'
 do
   mkdir -p $DATA/$accent/manifests/deepspeech_outputs
   echo $accent
   echo $WAV_DIR/$accent/wav 
   python3 -u inference.py \
   --wav_dir=$WAV_DIR \
-  --output_file=$DATA/$accent/manifests/deepspeech_outputs/original_test_out_out.txt \
+  --output_file=$DATA/$accent/manifests/deepspeech_outputs/original_test_out.txt \
   --val_manifest=$DATA/$accent/manifests/test.json \
   --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
   --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
