@@ -119,7 +119,9 @@ done
 
 # 2. Train Error Model
 
-## 2.1 Train word error predictor
+## 2.1 Word error predictor
+
+### 2.1.1 Training
 
 ```
 for seed in 1 2 3
@@ -132,6 +134,67 @@ do
     --test_path=$DATA/$accent/manifests/deepspeech_outputs/dev_out.txt \
     --output_dir=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best \
     > $PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/training.log
+  done
+done
+```
+
+Evaluate the model's performance, including accuracy and precision.
+
+```
+for seed in 1 2 3
+do
+  for accent in "ASI"
+  do
+  echo $accent seed $seed
+  echo 
+  python evaluate_word_err_model.py \
+    --train_path=$DATA/$accent/manifests/deepspeech_outputs/seed_out.txt \
+    --test_path=$DATA/$accent/manifests/deepspeech_outputs/dev_out.txt \
+    --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best
+  done
+done
+```
+
+### 2.1.2 Sampling `real` audio and evaluation
+
+
+```
+for seed in 1 2 3
+do
+  for accent in 'ASI'
+  do
+    echo $accent seed $seed
+    CUDA_VISIBLE_DEVICES=2 python3 -u word_error_sampling.py \
+      --seed_json_file=$DATA/$accent/manifests/seed.json \
+      --data_folder=$DATA/$accent/manifests/train/random/ \
+      --selection_json_file=$DATA/$accent/manifests/selection.json \
+      --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best \
+      --output_json_path=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_real \
+      --seed=$seed &
+  done
+done
+```
+
+```
+for seed in 1
+do
+  for size in 50 75 100 150 200
+  do
+    for accent in 'ASI'
+    do
+      for method in "word_enhance"
+      do
+        echo $accent seed $seed size $size method $method
+        python3 -u inference.py \
+        --wav_dir=$WAV_DIR \
+        --output_file=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori.txt \
+        --val_manifest=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_real/$size/$method/seed_"$seed"/train.json \
+        --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
+        --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+        --model_tag=deepspeech-0.9.3 \
+        > $DATA/$accent/manifests/train/deepspeech/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori_log.txt
+      done
+    done
   done
 done
 ```
@@ -384,6 +447,7 @@ do
   done
 done
 ```
+
 
 ```
 for seed in 1 2 3
