@@ -80,42 +80,6 @@ do
 done
 ```
 
-Let's also try on the synthetic test set.
-
-
-```
-for accent in "${accents[@]}"
-do
-  mkdir -p $DATA/$accent/manifests/deepspeech_outputs
-  echo $accent
-  echo $WAV_DIR/$accent/wav 
-  python3 -u inference.py \
-  --wav_dir=$WAV_DIR \
-  --output_file=$DATA/$accent/manifests/deepspeech_outputs/original_test_out_tts.txt \
-  --val_manifest=$DATA/$accent/manifests/test_tts.json \
-  --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
-  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
-  --model_tag=deepspeech-0.9.3 \
-  > $DATA/$accent/manifests/deepspeech_outputs/original_test_infer_log_tts.txt
-done
-```
-
-```
-for accent in "${accents[@]}"
-do
-  mkdir -p $DATA/$accent/manifests/deepspeech_outputs
-  echo $accent
-  echo $WAV_DIR/$accent/wav 
-  python3 -u inference.py \
-  --wav_dir=$WAV_DIR \
-  --output_file=$DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_out_tts.txt \
-  --val_manifest=$DATA/$accent/manifests/seed_plus_dev_tts.json \
-  --model=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.pbmm \
-  --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
-  --model_tag=deepspeech-0.9.3 \
-  > $DATA/$accent/manifests/deepspeech_outputs/seed_plus_dev_infer_log_tts.txt
-done
-```
 
 # 2. Train Error Model
 
