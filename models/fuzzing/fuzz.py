@@ -5,9 +5,20 @@ nltk.download('punkt')
 import torch
 from transformers import BertTokenizer, BertForMaskedLM
 from transformers import AutoTokenizer, AutoModelForTokenClassification
-
+from tqdm import tqdm
 from torch.nn import functional as F
 
+class TextDataset(torch.utils.data.Dataset):
+    def __init__(self, encodings):
+        self.encodings = encodings
+
+    def __getitem__(self, idx):
+        item = {key: torch.tensor(val[idx])
+                for key, val in self.encodings.items()}
+        return item
+
+    def __len__(self):
+        return len(self.encodings["input_ids"])
 
 def get_nouns_list(text):
     '''
@@ -61,6 +72,8 @@ if __name__=='__main__':
     # load the word error predictor
     predictor_tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     predictor_model = AutoModelForTokenClassification.from_pretrained(checkpoint, num_labels=3)
+    predictor_model.cuda()
+    predictor_model.eval()
 
     for noun in nouns:
         position = noun[0]
@@ -83,9 +96,23 @@ if __name__=='__main__':
             print("sub:", sub)
             print("context:", context)
             # get the label of the substitue
-            label = predictor_model(predictor_tokenizer.encode_plus(context, return_tensors="pt"))
-            print("label:", label)
+            test_encodings = predictor_tokenizer([context], truncation=True)
+            test_dataset = TextDataset(test_encodings)
 
+            # prepare data loader
+            test_loader = torch.utils.data.DataLoader(
+                    test_dataset, batch_size=1, shuffle=False)
+            res = []
+            # score for each test case
+            for batch in tqdm(test_loader):
+                input_ids = batch['input_ids'].cuda()
+                attention_mask = batch['attention_mask'].cuda()
+                outputs = predictor_model(input_ids, attention_mask)
 
+                probs = F.softmax(outputs.logits, -1)
+                error_probs = probs[:, :, 1]
+                res.append(error_probs[0].cpu().detach().numpy().tolist())
+            # get the score of the substitue
+            print(res)
 
 
