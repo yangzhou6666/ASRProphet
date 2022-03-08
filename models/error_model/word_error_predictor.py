@@ -170,10 +170,12 @@ def main(args):
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, num_labels=3)
 
     data_collator = DataCollatorForTokenClassification(tokenizer)
+    
+    accent = args.train_path.split("/manifests")[0].split('/')[-1]
 
     # train the model
     training_args = TrainingArguments(
-        f"word_error_predictor",
+        f"word_error_predictor/{accent}/{args.seed}",
         evaluation_strategy = "epoch",
         save_strategy = "epoch",
         learning_rate=2e-5,
