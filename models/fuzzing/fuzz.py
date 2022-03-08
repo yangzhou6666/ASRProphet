@@ -9,6 +9,8 @@ from tqdm import tqdm
 from torch.nn import functional as F
 import argparse
 
+filter_words = ['.', ',', '?', '!', ':', ';', '"', "'", '-', '_', '(', ')', '[', ']', '{', '}', '#', '@', '$', '%', '^', '&', '*', '+', '=', '<', '>', '/', '\\', '|', '~', '`', '\t', '\n', '\r']
+
 class TextDataset(torch.utils.data.Dataset):
     def __init__(self, encodings):
         self.encodings = encodings
@@ -74,7 +76,10 @@ def get_substitues_from_BERT(text, position, tokenizer, k=20):
     substitues = []
     for token in top_k:
         token = token.item()
-        substitues.append((tokenizer.decode([token])))
+        token = tokenizer.decode([token])
+        if token in filter_words or '#' in token:
+            continue
+        substitues.append(token)
     
     return substitues
 
