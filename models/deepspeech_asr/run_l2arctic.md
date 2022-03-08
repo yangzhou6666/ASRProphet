@@ -93,7 +93,7 @@ do
   for accent in 'ASI' 'RRBI'
   do
   mkdir -p $PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best
-  python word_error_predictor.py \
+  CUDA_VISIBLE_DEVICES=6 python word_error_predictor.py \
     --train_path=$DATA/$accent/manifests/deepspeech_outputs/seed_out.txt \
     --test_path=$DATA/$accent/manifests/deepspeech_outputs/dev_out.txt \
     --output_dir=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best \
@@ -111,7 +111,7 @@ do
   do
   echo $accent seed $seed
   echo 
-  python evaluate_word_err_model.py \
+  CUDA_VISIBLE_DEVICES=6 python evaluate_word_err_model.py \
     --train_path=$DATA/$accent/manifests/deepspeech_outputs/seed_out.txt \
     --test_path=$DATA/$accent/manifests/deepspeech_outputs/dev_out.txt \
     --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/deepspeech/$accent/seed_"$seed"/best
@@ -128,7 +128,7 @@ do
   for accent in 'ASI' 'RRBI'
   do
     echo $accent seed $seed
-    CUDA_VISIBLE_DEVICES=2 python3 -u word_error_sampling.py \
+    CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
       --seed_json_file=$DATA/$accent/manifests/seed.json \
       --data_folder=$DATA/$accent/manifests/train/random/ \
       --selection_json_file=$DATA/$accent/manifests/selection.json \
@@ -195,15 +195,13 @@ done
 
 Before using the error model to select test cases, we need to first infer the model on all the texts and store the results.
 
-
-
 ```
 for seed in 1 2 3
 do
-  for accent in "${accents[@]}"
+  for accent in 'ASI' 'RRBI'
   do
     echo $accent seed $seed
-    python3 -u infer_error_model.py \
+    CUDA_VISIBLE_DEVICES=3 python3 -u infer_error_model.py \
       --batch_size=64 \
       --num_layers=4 \
       --hidden_size=64 \
