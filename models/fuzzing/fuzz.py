@@ -10,6 +10,7 @@ from tqdm import tqdm
 from torch.nn import functional as F
 import argparse
 import os
+import re
 
 filter_words = ['.', ',', '?', '!', ':', ';', '"', "'", '-', '_', '(', ')', '[', ']', '{', '}', '#', '@', '$', '%', '^', '&', '*', '+', '=', '<', '>', '/', '\\', '|', '~', '`', '\t', '\n', '\r']
 
@@ -217,9 +218,11 @@ if __name__=='__main__':
     if os.path.exists(os.path.join(data_folder, 'replacement.json')):
         os.remove(os.path.join(data_folder, 'replacement.json'))
 
-    transcription_path = "/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/original_test_out.txt"
+    transcription_path = "/workspace/data/l2arctic/processed/RRBI/manifests/quartznet_outputs/original_test_out.txt"
     wav_text_pairs = load_text_from_file(transcription_path)
     for wav_id, text in wav_text_pairs.items():
+        if "'" in text:
+            continue
         fuzz(text, wav_id)
 
 
