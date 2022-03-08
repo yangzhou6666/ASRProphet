@@ -7,6 +7,7 @@ from transformers import BertTokenizer, BertForMaskedLM
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from tqdm import tqdm
 from torch.nn import functional as F
+import argparse
 
 class TextDataset(torch.utils.data.Dataset):
     def __init__(self, encodings):
@@ -115,23 +116,21 @@ def get_err_score_for_one_position(text, mask_position, substitues):
 
     return substitues, contexts, scores
 
-if __name__=='__main__':
-    # obtain the list of nouns
-    text = "Perhaps she had already met her fate a little deeper in the forest"
+def load_text_from_file(fpath):
+    correct_texts = {}
+    with open(fpath, 'r') as f:
+        for chunk in f.read().strip().split('\n\n'):
+            data = chunk.split('\n')
+            id = data[0]
+            WER = float(data[1][5:])
+            ref = data[3][5:]
+            if WER < 0.001:
+                correct_texts[id] = ref
+    return correct_texts
+
+def fuzz(text):
     nouns = get_nouns_list(text)
     print(nouns)
-
-    # get substitues from BERT
-    model_name = "bert-base-uncased"
-    tokenizer = BertTokenizer.from_pretrained(model_name)
-    mlm_model = BertForMaskedLM.from_pretrained(model_name)
-
-    # load the word error predictor
-    checkpoint = "../error_model/word_error_predictor/EBVS/1/checkpoint-42"
-    predictor_tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-    predictor_model = AutoModelForTokenClassification.from_pretrained(checkpoint, num_labels=3)
-    predictor_model.cuda()
-    predictor_model.eval()
 
     for noun in nouns:
         position = noun[0] # get the position of the noun in the sentence
@@ -144,6 +143,45 @@ if __name__=='__main__':
         ranked_substitues, contexts, scores = get_err_score_for_one_position(text, position, substitues) # get ranked list of error score for each substitue
         for sub, ctx in zip(ranked_substitues, contexts):
             print(replace_token_in_text(text, position, sub))
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Fuzzing the ASR models')
+    parser.add_argument("--seed_json_file", type=str,
+                        required=True, help='path to seed json file')
+    parser.add_argument("--selection_json_file", type=str,
+                        required=True, help='path to input file')
+    parser.add_argument("--data_folder", type=str,
+                        required=True, help='path to input file')
+    parser.add_argument("--finetuned_ckpt", default=None,
+                        type=str, help='path to finetuned ckpt')
+    parser.add_argument("--seed", default=1, type=int, help='seed id')
+    parser.add_argument("--output_json_path", type=str,
+                        required=True, help='json fpath to save the ranked texts')
+    args=parser.parse_args()
+    return args
+
+if __name__=='__main__':
+    # get substitues from BERT
+    model_name = "bert-base-uncased"
+    tokenizer = BertTokenizer.from_pretrained(model_name)
+    mlm_model = BertForMaskedLM.from_pretrained(model_name)
+
+    # load the word error predictor
+    checkpoint = "../error_model/word_error_predictor/EBVS/1/checkpoint-42"
+    predictor_tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+    predictor_model = AutoModelForTokenClassification.from_pretrained(checkpoint, num_labels=3)
+    predictor_model.cuda()
+    predictor_model.eval()
+
+    # obtain the list of nouns
+    data_path = "/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/original_test_out.txt"
+    wav_text_pairs = load_text_from_file(data_path)
+    text_list = [wav_text_pairs[wav] for wav in wav_text_pairs]
+    for text in text_list:
+        fuzz(text)
+
+
 
 
 
