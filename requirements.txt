@@ -27,3 +27,5 @@ jiwer
 google
 google-cloud
 google-cloud-texttospeech
+tensorboard
+deepspeech
