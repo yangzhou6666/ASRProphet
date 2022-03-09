@@ -32,11 +32,17 @@ def gather_result(asr:str, dataset:str, tool:str):
     """
     data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
     
-    df = pd.DataFrame(columns=['Dataset', 'Seed', 'Size', 'WER', 'CER'])
+    sizes = [50, 75, 100, 150, 200, 300, 400, 500]
+
+    wers = {}
+    cers = {}
+
     
     for seed in [1, 2, 3]:
+        wers[f"seed_{seed}"] = []
+        cers[f"seed_{seed}"] = []
         
-        for size in [50, 75, 100, 150, 200, 300, 400, 500]:
+        for size in sizes:
             size = str(size)
             
             if tool == "error_model":
@@ -52,16 +58,30 @@ def gather_result(asr:str, dataset:str, tool:str):
                 print(path_to_log)
                 WER = -1
                 CER = -1
+            
+            wers[f"seed_{seed}"].append(WER)
+            cers[f"seed_{seed}"].append(CER)
         
-            df = df.append({
-                        "Dataset": dataset,
-                        "Seed": seed, 
-                        "Size": size, 
-                        "WER": WER, 
-                        "CER": CER
-                        }
-                        , ignore_index=True)
-
+            # df = df.append({
+            #             "Dataset": dataset,
+            #             "Seed": seed, 
+            #             "Size": size, 
+            #             "WER": WER, 
+            #             "CER": CER
+            #             }
+            #             , ignore_index=True)
+    
+    df = pd.DataFrame(data={
+                        'Dataset':[dataset]*len(sizes), 
+                        'Size': sizes, 
+                        'WER_Seed1': wers["seed_1"],
+                        'WER_Seed2': wers["seed_2"],
+                        'WER_Seed3': wers["seed_3"],
+                        'CER_Seed1': cers["seed_1"],
+                        'CER_Seed2': cers["seed_2"],
+                        'CER_Seed3': cers["seed_3"]
+    })
+                        
     return df
 
 
@@ -71,6 +91,10 @@ if __name__ == "__main__":
     datasets = ["ASI", "RRBI"]
     tools = ["error_model", "word_error_predictor_real"]
     
+    asrs = ["deepspeech"]
+    datasets = ["ASI"]
+    tools = ["error_model"]
+
     for asr in asrs :
         for dataset in datasets :
             for tool in tools :
