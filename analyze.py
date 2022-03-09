@@ -1,5 +1,8 @@
 import prettytable as pt
 import os
+import pandas as pd
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def analyze_result(log_path):
@@ -29,10 +32,10 @@ def gather_result(asr:str, dataset:str, tool:str):
     """
     
     data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
+    df = pd.DataFrame(columns=['Dataset', 'Seed', 'Size', 'WER', 'CER'])
+    
     for seed in [1, 2, 3]:
         
-        tb = pt.PrettyTable()
-        tb.field_names = ['Dataset', 'Seed', 'Size', 'WER', 'CER']  
         for size in [50, 75, 100, 150, 200, 300, 400, 500]:
             size = str(size)
             path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
@@ -42,13 +45,23 @@ def gather_result(asr:str, dataset:str, tool:str):
                 print(path_to_log)
                 WER = -1
                 CER = -1
-            tb.add_row([dataset, seed, size, WER, CER])
+        
+            df = df.append({
+                        "Dataset": dataset,
+                        "Seed": seed, 
+                        "Size": size, 
+                        "WER": WER, 
+                        "CER": CER
+                        }
+                        , ignore_index=True)
 
-        print(tb)
+    return df
 
 
 if __name__ == "__main__":
     asr = "deepspeech"
     dataset = "ASI"
     tool = "error_model"
-    gather_result(asr, dataset, tool)
+    df = gather_result(asr, dataset, tool)
+
+    print(df)
