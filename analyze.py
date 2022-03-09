@@ -1,6 +1,7 @@
 import prettytable as pt
 import os
 import pandas as pd
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -62,24 +63,25 @@ def gather_result(asr:str, dataset:str, tool:str):
             wers[f"seed_{seed}"].append(WER)
             cers[f"seed_{seed}"].append(CER)
         
-            # df = df.append({
-            #             "Dataset": dataset,
-            #             "Seed": seed, 
-            #             "Size": size, 
-            #             "WER": WER, 
-            #             "CER": CER
-            #             }
-            #             , ignore_index=True)
+    wers_sum = np.mean([[float(x) for x in wers["seed_1"]], [float(x) for x in wers["seed_2"]], [float(x) for x in wers["seed_3"]]],
+                        axis=0)
     
+    wers_sum = [round(x, 2) for x in wers_sum]
+    cers_sum = np.mean([[float(x) for x in cers["seed_1"]], [float(x) for x in cers["seed_2"]], [float(x) for x in cers["seed_3"]]],
+                        axis=0)
+    cers_sum = [round(x, 2) for x in cers_sum]
+
     df = pd.DataFrame(data={
                         'Dataset':[dataset]*len(sizes), 
                         'Size': sizes, 
                         'WER_Seed1': wers["seed_1"],
                         'WER_Seed2': wers["seed_2"],
                         'WER_Seed3': wers["seed_3"],
+                        'WER_Avg': wers_sum,
                         'CER_Seed1': cers["seed_1"],
                         'CER_Seed2': cers["seed_2"],
-                        'CER_Seed3': cers["seed_3"]
+                        'CER_Seed3': cers["seed_3"],
+                        'CER_Avg': cers_sum
     })
                         
     return df
