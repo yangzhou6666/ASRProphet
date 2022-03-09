@@ -63,5 +63,7 @@ if __name__ == "__main__":
     dataset = "ASI"
     tool = "error_model"
     df = gather_result(asr, dataset, tool)
+    os.makedirs("result", exist_ok=True)
+    df.to_csv(f"result/{asr}_{dataset}_{tool}.csv")
 
     print(df)
