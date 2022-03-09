@@ -174,11 +174,12 @@ def fuzz(text, wav_path):
                 'text': new_text,
                 'root_id': root_id,
                 'sub_id': sub_id,
-                'wav_path': new_wav_path,
+                'audio_filepath': new_wav_path,
                 'position': position,
                 'original_word': word,
                 'substitute': sub,
-                'score': scores[i]
+                'score': scores[i],
+                'duration': 10.0
             }
             with open(os.path.join(data_folder, 'replacement.json'), 'a') as f:
                 f.write(json.dumps(data) + '\n')
@@ -207,7 +208,8 @@ if __name__=='__main__':
     mlm_model = BertForMaskedLM.from_pretrained(model_name)
 
     # load the word error predictor
-    checkpoint = "../error_model/word_error_predictor/EBVS/1/checkpoint-42"
+    checkpoint = "/workspace/models/pretrained_checkpoints/word_error_predictor/quartznet/ASI/seed_1/best"
+    
     predictor_tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     predictor_model = AutoModelForTokenClassification.from_pretrained(checkpoint, num_labels=3)
     predictor_model.cuda()
@@ -218,7 +220,7 @@ if __name__=='__main__':
     if os.path.exists(os.path.join(data_folder, 'replacement.json')):
         os.remove(os.path.join(data_folder, 'replacement.json'))
 
-    transcription_path = "/workspace/data/l2arctic/processed/RRBI/manifests/quartznet_outputs/original_test_out.txt"
+    transcription_path = "/workspace/data/l2arctic/processed/ASI/manifests/quartznet_outputs/original_test_out.txt"
     wav_text_pairs = load_text_from_file(transcription_path)
     for wav_id, text in wav_text_pairs.items():
         if "'" in text:
