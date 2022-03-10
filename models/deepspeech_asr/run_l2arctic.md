@@ -311,6 +311,7 @@ do
       --model=$model_dir/recent/output_graph.pbmm \
       --model_tag=deepspeech-finetuned-icassp_real_mix-size_"$size"-seed_"$seed" \
       --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      --overwrite \
       > $model_dir/test_infer_log.txt
     done 
   done
@@ -368,6 +369,7 @@ do
       --model=$model_dir/recent/output_graph.pbmm \
       --model_tag=deepspeech-finetuned-word_error_real_mix-size_"$size"-seed_"$seed" \
       --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
+      --overwrite \
       > $model_dir/test_infer_log.txt
     done 
   done
