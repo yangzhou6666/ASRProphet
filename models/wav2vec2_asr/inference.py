@@ -24,7 +24,7 @@ def parse_args():
 def main(args):
     models = {"wav2vec": "facebook/wav2vec2-base-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
-    model = AutoModelForCTC.from_pretrained("./test/best")
+    model = AutoModelForCTC.from_pretrained(models[args.model])
     feature_extractor = Wav2Vec2Processor.from_pretrained(models[args.model])
 
 
