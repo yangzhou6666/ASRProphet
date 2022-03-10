@@ -274,14 +274,15 @@ do
       echo 
       echo
       model_dir=$PRETRAINED_CKPTS/deepspeech/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
-      mkdir -p $model_dir
+      rm -r $model_dir/
+      mkdir -p $model_dir/checkpoints/
+      cp -r $PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/* $model_dir/checkpoints/
       CUDA_VISIBLE_DEVICES=3 python3 -u finetune.py \
         --train_manifest=$DATA/$accent/manifests/train/deepspeech/error_model/$size/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --wav_dir=$WAV_DIR \
-        --output_dir=$model_dir/best \
-        --load_checkpoint_dir=$PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/ \
-        --save_checkpoint_dir=$model_dir \
+        --checkpoint_dir=$model_dir/checkpoints/ \
+        --export_dir=$model_dir/best \
         --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
         --gpu_id=5 \
         --num_epochs=100 \
