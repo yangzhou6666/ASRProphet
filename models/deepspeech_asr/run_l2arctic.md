@@ -279,7 +279,7 @@ do
         --train_manifest=$DATA/$accent/manifests/train/deepspeech/error_model/$size/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --wav_dir=$WAV_DIR \
-        --output_dir=$model_dir/recent \
+        --output_dir=$model_dir/best \
         --load_checkpoint_dir=$PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/ \
         --save_checkpoint_dir=$model_dir \
         --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
@@ -308,7 +308,7 @@ do
       --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/test.json \
       --output_file=$model_dir/test_out.txt \
-      --model=$model_dir/recent/output_graph.pbmm \
+      --model=$model_dir/best/output_graph.pbmm \
       --model_tag=deepspeech-finetuned-icassp_real_mix-size_"$size"-seed_"$seed" \
       --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
       --overwrite \
@@ -337,7 +337,7 @@ do
         --train_manifest=$DATA/$accent/manifests/train/deepspeech/word_error_predictor_real/$size/word_enhance/seed_"$seed"/train.json \
         --val_manifest=$DATA/$accent/manifests/dev.json \
         --wav_dir=$WAV_DIR \
-        --output_dir=$model_dir/recent \
+        --output_dir=$model_dir/best \
         --load_checkpoint_dir=$PRETRAINED_CKPTS/deepspeech/checkpoints/deepspeech-0.9.3-checkpoint/ \
         --save_checkpoint_dir=$model_dir \
         --model_scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
@@ -366,7 +366,7 @@ do
       --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/test.json \
       --output_file=$model_dir/test_out.txt \
-      --model=$model_dir/recent/output_graph.pbmm \
+      --model=$model_dir/best/output_graph.pbmm \
       --model_tag=deepspeech-finetuned-word_error_real_mix-size_"$size"-seed_"$seed" \
       --scorer=$PRETRAINED_CKPTS/deepspeech/deepspeech-0.9.3-models.scorer \
       --overwrite \
