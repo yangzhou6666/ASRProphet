@@ -275,7 +275,18 @@ def main(args):
             # merge the seed samples with the new samples
 
             dump_samples(seed_samples + samples, output_json_file)
-            print(f"{num_sample} samples are dumped to {output_json_file}")
+            print(f"{len(seed_samples + samples)} samples are dumped to {output_json_file}")
+
+            output_json_file = os.path.join(args.output_json_path, str(
+                num_sample), sampling_method, 'seed_' + str(args.seed), 'train_no_seed.json')
+            seed_samples = [line for line in open(args.seed_json_file)]
+            # merge the seed samples with the new samples
+
+            dump_samples(samples, output_json_file)
+            print(f"{len(samples)} samples are dumped to {output_json_file}")
+
+
+
 
 
 if __name__ == "__main__":
