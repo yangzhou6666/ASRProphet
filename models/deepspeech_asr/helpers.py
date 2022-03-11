@@ -2,33 +2,10 @@ import string
 import re
 import jiwer
 from enum import Enum
-from typing import List
 from metrics import word_error_rate, f_wer, f_cer
 import json
 from normalise import normalise, tokenize_basic
 import Levenshtein as Lev
-
-
-def __levenshtein(a: List, b: List) -> int:
-    """Calculates the Levenshtein distance between a and b.
-    """
-    n, m = len(a), len(b)
-    if n > m:
-        # Make sure n <= m, to use O(min(n,m)) space
-        a, b = b, a
-        n, m = m, n
-
-    current = list(range(n + 1))
-    for i in range(1, m + 1):
-        previous, current = current, [i] + [0] * n
-        for j in range(1, n + 1):
-            add, delete = previous[j] + 1, current[j - 1] + 1
-            change = previous[j - 1]
-            if a[j - 1] != b[i - 1]:
-                change = change + 1
-            current[j] = min(add, delete, change)
-
-    return current[n]
 
 def print_dict(d):
     maxLen = max([len(ii) for ii in d.keys()])
@@ -36,45 +13,7 @@ def print_dict(d):
     print('Arguments:')
     for keyPair in sorted(d.items()):
         print(fmtString % keyPair)
-
-def word_error_rate(hypotheses: List[str], references: List[str], use_cer=False) -> float:
-    """
-    Computes Average Word Error rate between two texts represented as
-    corresponding lists of string. Hypotheses and references must have same
-    length.
-    Args:
-      hypotheses: list of hypotheses
-      references: list of references
-      use_cer: bool, set True to enable cer
-    Returns:
-      (float) average word error rate
-    """
-    scores = 0
-    words = 0
-    wer_list = []
-    if len(hypotheses) != len(references):
-        raise ValueError(
-            "In word error rate calculation, hypotheses and reference"
-            " lists must have the same number of elements. But I got:"
-            "{0} and {1} correspondingly".format(len(hypotheses), len(references))
-        )
-    for h, r in zip(hypotheses, references):
-        if use_cer:
-            h_list = list(h)
-            r_list = list(r)
-        else:
-            h_list = h.split()
-            r_list = r.split()
-        words += len(r_list)
-        scores += __levenshtein(h_list, r_list)
-        wer_list.append((1.0*__levenshtein(h_list, r_list))/(len(r_list)+1e-20))
-    if words != 0:
-        wer = 1.0 * scores / words
-    else:
-        wer = float('inf')
-    return wer, wer_list, scores, words
-
-
+        
 def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
     
     ## ensure that the number of transcriptions are equal to the number of ground-truth texts

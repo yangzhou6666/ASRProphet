@@ -29,6 +29,9 @@ def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
     ## ensure that all audio files are processed
     assert len(hypotheses) == len(wav_filenames)
 
+    WER, wer_list, scores, num_words = word_error_rate(hypotheses=hypotheses, references=references)
+    CER, _,_,_ = word_error_rate(hypotheses=hypotheses, references=references, use_cer=True)
+
     wers = []
     cers = []
 
@@ -45,12 +48,12 @@ def print_sentence_wise_wer(hypotheses, references, output_file, input_file):
             f.write("Hyp: "+hyp+'\n')
             f.write('\n')
     
-        print('\n')
-        print('\n')
-        print('================================ \n')
-        print("Average WER: " + str(sum(wers)/len(wers)) + '\n')
-        print("Average CER: " + str(sum(cers)/len(cers)) + '\n')
-
+    print('\n')
+    print('\n')
+    WER = 100 * WER
+    CER = 100 * CER
+    print("\n\n==========>>>>>>Evaluation Greedy WER: {:.2f}\n".format(WER))
+    print("\n\n==========>>>>>>Evaluation Greedy CER: {:.2f}\n".format(CER))
 
     return wav_filenames
 
@@ -104,8 +107,8 @@ def preprocess_text(text: str) -> str:
     text = remove_hex(text)
     text = remove_punctuation(text)
 
-    ## it takes long time to normalize
-    ## skip this first
+    # it takes long time to normalize
+    # skip this first
     try:
         text = normalize_text(text)
     except:
