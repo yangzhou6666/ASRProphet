@@ -207,6 +207,9 @@ def main(args):
     samples = get_samples(sampler, required_duration)
     dump_samples(seed_samples + samples,output_json_file)
 
+    output_json_file = os.path.join(output_json_path,str(num_samples),'seed_'+exp_id,'train_no_seed.json')
+    dump_samples(samples,output_json_file)
+
 if __name__=="__main__":
   args = parse_args()
   print_dict(vars(args))
