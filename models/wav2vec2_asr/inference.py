@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument("--wav_dir", type=str, help='directory to the wav file')
     parser.add_argument("--val_manifest", type=str, required=True, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--output_file", default="out.txt", type=str)
+    parser.add_argument("--checkpoint", default="", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
     parser.add_argument("--seed", default=42, type=int, help='seed')
     return parser.parse_args()
@@ -26,7 +27,8 @@ def main(args):
               "hubert": "facebook/hubert-large-ls960-ft"}
     model = AutoModelForCTC.from_pretrained(models[args.model])
     feature_extractor = Wav2Vec2Processor.from_pretrained(models[args.model])
-
+    if args.checkpoint:
+        model = AutoModelForCTC.from_pretrained(args.checkpoint)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
