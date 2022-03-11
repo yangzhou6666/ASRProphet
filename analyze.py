@@ -31,7 +31,14 @@ def gather_result(asr:str, dataset:str, tool:str):
         dataset: dataset name
         tool: tool name
     """
-    data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
+    if tool in ["error_model", "word_error_predictor_real"] :
+        data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
+    elif tool in ["icassp_real_mix", "word_error_real_mix"] :
+        data_path = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/"
+    else :
+        raise ValueError(f"Undefined tool name: {tool}")
+    
+    
     
     sizes = [50, 75, 100, 150, 200, 300, 400, 500]
 
@@ -50,6 +57,10 @@ def gather_result(asr:str, dataset:str, tool:str):
                 path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
             elif tool == "word_error_predictor_real" :
                 path_to_log = os.path.join(data_path, size, "word_enhance", f"seed_{seed}", "test_out_ori_log.txt")
+            elif tool == "icassp_real_mix":
+                path_to_log = os.path.join(data_path, size,f"seed_{seed}", tool, "test_infer_log.txt")
+            elif tool ==  "word_error_real_mix" :
+                path_to_log = os.path.join(data_path, size,f"seed_{seed}", tool, "word_enhance", "test_infer_log.txt")
             else :
                 raise ValueError("Undefined tool")
 
@@ -89,13 +100,28 @@ def gather_result(asr:str, dataset:str, tool:str):
 
 if __name__ == "__main__":
 
+    ## RQ1 Measure the WER and CER using the original model
     asrs = ["deepspeech"]
     datasets = ["ASI", "RRBI"]
     tools = ["error_model", "word_error_predictor_real"]
     
+    ## RQ1 Measure the WER and CER using the fine-tuned model
     asrs = ["deepspeech"]
-    datasets = ["ASI"]
-    tools = ["error_model"]
+    datasets = ["ASI", "RRBI"]
+    tools = ["icassp_real_mix", "word_error_real_mix"]
+    
+    # asrs = ["deepspeech"]
+    # datasets = ["ASI", "RRBI"]
+    # tools = ["icassp_real_mix"]
+    
+    # asrs = ["deepspeech"]
+    # datasets = ["ASI", "RRBI"]
+    # tools = ["word_error_real_mix"]
+    
+
+    # asrs = ["deepspeech"]
+    # datasets = ["ASI"]
+    # tools = ["error_model"]
 
     for asr in asrs :
         for dataset in datasets :
