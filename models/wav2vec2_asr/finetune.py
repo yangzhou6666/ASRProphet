@@ -111,21 +111,20 @@ def main(args):
 
         return {"wer": WER*100}
 
+    accent = args.train_manifest.split("/manifests")[0].split('/')[-1]
+
     training_args = TrainingArguments(
-        output_dir="./test",
-        group_by_length=True,
-        per_device_train_batch_size=32,
+        output_dir=f"tmp/{accent}/{args.model}/{args.seed}",
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=32,
         evaluation_strategy="epoch",
         save_strategy = "epoch",
-        num_train_epochs=30,
-        gradient_checkpointing=True, 
-        save_steps=500,
-        eval_steps=500,
-        logging_steps=500,
+        num_train_epochs=5,
+        fp16=True,
+        # gradient_checkpointing=True,
+        group_by_length=True,
         learning_rate=1e-4,
         weight_decay=0.005,
-        warmup_steps=1000,
-        save_total_limit=2,
         load_best_model_at_end=True
         )
     
