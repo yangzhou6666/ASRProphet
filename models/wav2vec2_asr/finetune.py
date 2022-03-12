@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--val_manifest", type=str, required=True, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--output_dir", default="./", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
+    parser.add_argument("--lr", default=2e-5, type=float)
     parser.add_argument("--seed", default=42, type=int, help='seed')
     return parser.parse_args()
 
@@ -123,7 +124,7 @@ def main(args):
         fp16=True,
         # gradient_checkpointing=True,
         group_by_length=True,
-        learning_rate=1e-4,
+        learning_rate=args.lr,
         weight_decay=0.005,
         load_best_model_at_end=True
         )
