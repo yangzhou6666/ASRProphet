@@ -39,9 +39,9 @@ def get_label(path: str):
 
             '''
             The data structure of alignment:
-            REF:  anatomy         hi  hello  democracy  
-            HYP:  and that to me      hello  de mo gracy
-            Eval: S               D   C      S    
+            REF:  or   have  they  already  devised      one
+            HYP:       they  have  already  devised  to  one
+            Eval: D    S     S     C        C        I   C   
             '''
 
             '''
@@ -96,6 +96,7 @@ def tokenize_and_align_labels(examples):
 
 def prepare_dataset(path: str):
     inputs, labels = get_label(path)
+    exit()
     df = pd.DataFrame({"text": inputs, "labels": labels})
     dataset = Dataset.from_pandas(df)
     tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
