@@ -39,9 +39,9 @@ def get_label(path: str):
 
             '''
             The data structure of alignment:
-            REF:  or   have  they  already  devised      one
-            HYP:       they  have  already  devised  to  one
-            Eval: D    S     S     C        C        I   C   
+            REF:  i  answer  the  question  on  the  spur  of  the  moment
+            HYP:  i  answer  the  question      in   spot  of  the  moment
+            Eval: C  C       C    C         D   S    S     C   C    C    
             '''
 
             '''
