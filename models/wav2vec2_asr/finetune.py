@@ -18,11 +18,15 @@ def parse_args():
     parser.add_argument("--val_manifest", type=str, required=True, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--output_dir", default="./", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
+    parser.add_argument("--lr", default=2e-5, type=float)
     parser.add_argument("--seed", default=42, type=int, help='seed')
     return parser.parse_args()
 
 
 def main(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     models = {"wav2vec": "facebook/wav2vec2-base-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
 
@@ -72,9 +76,7 @@ def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
     model.freeze_feature_extractor()
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+
 
     def add_prefix(example):
         example['audio_filepath'] = os.path.join(args.wav_dir, example['audio_filepath'])
@@ -123,7 +125,7 @@ def main(args):
         fp16=True,
         # gradient_checkpointing=True,
         group_by_length=True,
-        learning_rate=1e-4,
+        learning_rate=args.lr,
         weight_decay=0.005,
         load_best_model_at_end=True
         )

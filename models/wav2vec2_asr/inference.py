@@ -23,6 +23,9 @@ def parse_args():
 
 
 def main(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     models = {"wav2vec": "facebook/wav2vec2-base-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
     model = AutoModelForCTC.from_pretrained(models[args.model])
@@ -32,9 +35,6 @@ def main(args):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
 
     references = []
     predictions = []
