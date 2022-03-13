@@ -24,6 +24,9 @@ def parse_args():
 
 
 def main(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     models = {"wav2vec": "facebook/wav2vec2-base-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
 
@@ -73,9 +76,7 @@ def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
     model.freeze_feature_extractor()
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+
 
     def add_prefix(example):
         example['audio_filepath'] = os.path.join(args.wav_dir, example['audio_filepath'])
