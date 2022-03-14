@@ -263,8 +263,7 @@ done
 
 ## Train on ICASSP sampling (real)
 
-"" ""  ""  ""  ""  ""
-"ABA" "BWC" "EBVS" "HJK" "HKK" "HQTV" "LXC" "NJS" "SKA" "THV"
+
 ```
 for seed in 1 2 3
 do
@@ -313,7 +312,7 @@ do
 done  &
 ```
 
-## Train on ICASSP no seed.
+## Train on ICASSP no seed. (don't run it for now)
 
 
 ASI RRBI TNI SVBI
@@ -368,8 +367,8 @@ done  &
 
 ## Train on Word Error Data (real)
 
-"" ""  ""  "" ""  ""  ""  ""  ""
-ASI RRBI TNI SVBI
+
+"ABA" "BWC" "EBVS" "HJK" "HKK" "HQTV" "LXC" "NJS" "SKA" "THV"
 ```
 for accent in "SVBI"
 do
@@ -419,7 +418,7 @@ done  &
 ```
 
 
-## Train on Word Error Data (no seed)
+## Train on Word Error Data (no seed) (don't run it for now)
 
 "" ""  ""  "" ""  ""  ""  ""  ""
 ASI RRBI TNI SVBI
