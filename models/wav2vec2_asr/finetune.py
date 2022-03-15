@@ -114,9 +114,10 @@ def main(args):
         return {"wer": WER*100}
 
     accent = args.train_manifest.split("/manifests")[0].split('/')[-1]
+    method = args.output_dir.split(args.model)[1].split("/")[1]
 
     training_args = TrainingArguments(
-        output_dir=f"tmp/{accent}/{args.model}/{args.seed}",
+        output_dir=f"tmp/{accent}/{method}/{args.model}/{args.seed}",
         per_device_train_batch_size=8,
         per_device_eval_batch_size=32,
         evaluation_strategy="epoch",
