@@ -96,7 +96,6 @@ def tokenize_and_align_labels(examples):
 
 def prepare_dataset(path: str):
     inputs, labels = get_label(path)
-    exit()
     df = pd.DataFrame({"text": inputs, "labels": labels})
     dataset = Dataset.from_pandas(df)
     tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)

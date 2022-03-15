@@ -167,5 +167,7 @@ models/pretrained_checkpoints/*
 data/
 .DS_Store
 models/error_model/word_error_predictor/
+
 models/wav2vec2_asr/tmp
-result
+models/huggingface/
+result/
