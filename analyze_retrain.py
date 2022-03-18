@@ -94,25 +94,43 @@ def gather_result(asr:str, dataset:str, tool:str):
     return df
 
 
+def get_original_performance(asr:str, dataset:str):
+    """get wer and cer from the original model
+    
+    Args:
+        asr: asr name
+        dataset: dataset name
+    """
+    
+    path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_test_infer_log.txt"
+
+    try:
+        WER, CER = analyze_result(path_to_log)
+    except:
+        # print(path_to_log)
+        WER = -1
+        CER = -1
+         
+    return WER, CER
+
+
 if __name__ == "__main__":
 
     asrs = ["quartznet"]
-    datasets = ["NJS"]
+    datasets = ["TXHC"]
     tools = [ "error_model", "word_error_predictor_real"]
-
-    # "error_model_no_seed","word_error_predictor_real_no_seed"
     
-    # asrs = ["quartznet"]
-    # datasets = ["ASI"]
-    # tools = ["error_model"]
-
     for asr in asrs :
         for dataset in datasets :
+            wer, cer = get_original_performance(asr, dataset)
+
             for tool in tools :
         
                 print()
                 print("ASR \t\t: ", asr)
                 print("Dataset \t: ", dataset)
+                print("Original WER\t: ", wer)
+                print("Original CER\t: ", cer)
                 print("Tool \t\t: ", tool)
 
                 df = gather_result(asr, dataset, tool)
