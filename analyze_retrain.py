@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 import warnings
+from typing import List
+
 warnings.filterwarnings("ignore")
 
 
@@ -93,6 +95,25 @@ def gather_result(asr:str, dataset:str, tool:str):
                         
     return df
 
+def combine_result(wer:str, cer:str, datas: List[pd.DataFrame])-> pd.DataFrame:
+    """combine results from various tools into one dataframe
+    :param wer: wer of the original model
+    :param cer: cer of the original model
+    :param datas: result from various tool
+    :return: combined dataframe
+    """
+    data = {"Size": datas[0]["Size"],
+            "WER": [wer]*len(datas[0]["Dataset"]),
+            "CER": [cer]*len(datas[0]["Dataset"])}
+
+    combined_df = pd.DataFrame(data)
+
+    for i, df in enumerate(datas):
+        for col in ['WER_Seed1', 'WER_Seed2', 'WER_Seed3', 'WER_Avg', 'CER_Seed1', 'CER_Seed2', 'CER_Seed3', 'CER_Avg'] :
+            combined_df[f"{col}_t{i}"] = df[col]
+
+    return combined_df
+
 
 def get_original_performance(asr:str, dataset:str):
     """get wer and cer from the original model
@@ -116,13 +137,21 @@ def get_original_performance(asr:str, dataset:str):
 
 if __name__ == "__main__":
 
-    asrs = ["quartznet"]
-    datasets = ["TXHC"]
+    # TXHC YDCK ERMS MBMPS PNV TLV
+
+    # asrs = ["quartznet"]
+    # datasets = ["TLV"]
+    # tools = [ "error_model", "word_error_predictor_real"]
+    
+    asrs = ["hubert"]
+    datasets = ["YBAA", "ZHAA", "NCC", "TXHC", "YDCK", "YKWK", "ERMS", "MBMPS", "PNV", "TLV"]
     tools = [ "error_model", "word_error_predictor_real"]
     
     for asr in asrs :
         for dataset in datasets :
             wer, cer = get_original_performance(asr, dataset)
+
+            dfs = []
 
             for tool in tools :
         
@@ -138,3 +167,8 @@ if __name__ == "__main__":
 
                 os.makedirs("result/RQ2", exist_ok=True)
                 df.to_csv(f"result/RQ2/{asr}_{dataset}_{tool}.csv")
+
+                dfs.append(df)
+            
+            combined_df = combine_result(wer, cer, dfs)
+            print(combined_df)
