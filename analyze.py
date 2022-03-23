@@ -1,3 +1,4 @@
+from typing import List
 import prettytable as pt
 import os
 import pandas as pd
@@ -91,25 +92,59 @@ def gather_result(asr:str, dataset:str, tool:str):
                         
     return df
 
+def combine_result(datas: List[pd.DataFrame])-> pd.DataFrame:
+    """combine results from various tools into one dataframe
+    :param wer: wer of the original model
+    :param cer: cer of the original model
+    :param datas: result from various tool
+    :return: combined dataframe
+    """
+    data = {"Size": datas[0]["Size"]}
+
+    combined_df = pd.DataFrame(data)
+
+    for i, df in enumerate(datas):
+        for col in ['WER_Seed1', 'WER_Seed2', 'WER_Seed3', 'WER_Avg', 'CER_Seed1', 'CER_Seed2', 'CER_Seed3', 'CER_Avg'] :
+            combined_df[f"{col}_t{i}"] = df[col]
+
+    return combined_df
 
 if __name__ == "__main__":
 
     ## RQ1 Measure the WER and CER using the original model
-    asrs = ["quartznet"]
-    datasets = ["ASI", "RRBI"]
+    asrs = ["hubert"]
+    datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
     tools = ["error_model", "word_error_predictor_real"]
+ 
+    # asrs = ["quartznet"]
+    # datasets = ["ASI"]
+    # tools = ["error_model", "word_error_predictor_real"]
+    
+    
 
     for asr in asrs :
         for dataset in datasets :
+
+            dfs = []
+
             for tool in tools :
         
-                print()
-                print("ASR \t\t: ", asr)
-                print("Dataset \t: ", dataset)
-                print("Tool \t\t: ", tool)
-
                 df = gather_result(asr, dataset, tool)
-                print(df)
+                
+                # print()
+                # print("ASR \t\t: ", asr)
+                # print("Dataset \t: ", dataset)
+                # print("Tool \t\t: ", tool)
+                # print(df)
 
                 os.makedirs("result", exist_ok=True)
                 df.to_csv(f"result/{asr}_{dataset}_{tool}.csv")
+
+                dfs.append(df)
+
+            combined_df = combine_result(dfs)
+            
+            print()
+            print("ASR \t\t: ", asr)
+            print("Dataset \t: ", dataset)
+            print(combined_df)
