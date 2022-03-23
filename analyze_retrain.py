@@ -171,4 +171,8 @@ if __name__ == "__main__":
                 dfs.append(df)
             
             combined_df = combine_result(wer, cer, dfs)
+            
+            print()
+            print("ASR \t\t: ", asr)
+            print("Dataset \t: ", dataset)
             print(combined_df)
