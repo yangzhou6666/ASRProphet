@@ -95,12 +95,12 @@ def main(args):
     train_dataset = load_dataset("json", data_files=data_files, split="train")
     train_dataset = train_dataset.map(add_prefix)
     train_dataset = train_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
-    train_dataset = train_dataset.map(prepare_dataset, num_proc=4)
+    train_dataset = train_dataset.map(prepare_dataset, num_proc=1)
 
     eval_dataset = load_dataset("json", data_files=data_files, split="validation")
     eval_dataset = eval_dataset.map(add_prefix)
     eval_dataset = eval_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
-    eval_dataset = eval_dataset.map(prepare_dataset, num_proc=4)
+    eval_dataset = eval_dataset.map(prepare_dataset, num_proc=1)
 
     def compute_metrics(pred):
         pred_logits = pred.predictions
