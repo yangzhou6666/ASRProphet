@@ -61,19 +61,21 @@ def gather_result(asr:str, dataset:str, tool:str):
 
             try:
                 WER, CER = analyze_result(path_to_log)
+                WER = float(WER)
+                CER = float(CER)
             except:
                 print(path_to_log)
                 WER = -1
                 CER = -1
-            
+
             wers[f"seed_{seed}"].append(WER)
             cers[f"seed_{seed}"].append(CER)
         
-    wers_sum = np.mean([[float(x) for x in wers["seed_1"]], [float(x) for x in wers["seed_2"]], [float(x) for x in wers["seed_3"]]],
+    wers_sum = np.mean([[x for x in wers["seed_1"]], [x for x in wers["seed_2"]], [x for x in wers["seed_3"]]],
                         axis=0)
     
     wers_sum = [round(x, 2) for x in wers_sum]
-    cers_sum = np.mean([[float(x) for x in cers["seed_1"]], [float(x) for x in cers["seed_2"]], [float(x) for x in cers["seed_3"]]],
+    cers_sum = np.mean([[x for x in cers["seed_1"]], [x for x in cers["seed_2"]], [x for x in cers["seed_3"]]],
                         axis=0)
     cers_sum = [round(x, 2) for x in cers_sum]
 
