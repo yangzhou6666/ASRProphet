@@ -52,13 +52,13 @@ def gather_result(asr:str, dataset:str, tool:str):
             
             
             if tool == "error_model":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_mix/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_mix/test_infer_log.txt"
             elif tool == "word_error_predictor_real" :
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/test_infer_log.txt"
             elif tool == "word_error_predictor_real_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
             elif tool == "error_model_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
             else :
                 raise ValueError("Undefined tool")
 
@@ -137,15 +137,15 @@ def get_original_performance(asr:str, dataset:str):
 
 if __name__ == "__main__":
 
-    # TXHC YDCK ERMS MBMPS PNV TLV
-
+    
     # asrs = ["quartznet"]
-    # datasets = ["TLV"]
+    # datasets = ["SVBI", "HJK"]
     # tools = [ "error_model", "word_error_predictor_real"]
     
     asrs = ["hubert"]
-    datasets = ["YBAA", "ZHAA", "NCC", "TXHC", "YDCK", "YKWK", "ERMS", "MBMPS", "PNV", "TLV"]
+    datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
     tools = [ "error_model", "word_error_predictor_real"]
+    
     
     for asr in asrs :
         for dataset in datasets :
@@ -155,15 +155,14 @@ if __name__ == "__main__":
 
             for tool in tools :
         
-                print()
-                print("ASR \t\t: ", asr)
-                print("Dataset \t: ", dataset)
-                print("Original WER\t: ", wer)
-                print("Original CER\t: ", cer)
-                print("Tool \t\t: ", tool)
-
                 df = gather_result(asr, dataset, tool)
-                print(df)
+                # print()
+                # print("ASR \t\t: ", asr)
+                # print("Dataset \t: ", dataset)
+                # print("Original WER\t: ", wer)
+                # print("Original CER\t: ", cer)
+                # print("Tool \t\t: ", tool)
+                # print(df)
 
                 os.makedirs("result/RQ2", exist_ok=True)
                 df.to_csv(f"result/RQ2/{asr}_{dataset}_{tool}.csv")
