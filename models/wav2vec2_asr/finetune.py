@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument("--output_dir", default="./", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
     parser.add_argument("--lr", default=2e-5, type=float)
+    parser.add_argument("--batch_size", default=8, type=int, help='batch_size')
     parser.add_argument("--seed", default=42, type=int, help='seed')
     return parser.parse_args()
 
@@ -71,6 +72,7 @@ def main(args):
 
             return batch
 
+    
     data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -93,12 +95,12 @@ def main(args):
     train_dataset = load_dataset("json", data_files=data_files, split="train")
     train_dataset = train_dataset.map(add_prefix)
     train_dataset = train_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
-    train_dataset = train_dataset.map(prepare_dataset, num_proc=4)
+    train_dataset = train_dataset.map(prepare_dataset, num_proc=1)
 
     eval_dataset = load_dataset("json", data_files=data_files, split="validation")
     eval_dataset = eval_dataset.map(add_prefix)
     eval_dataset = eval_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
-    eval_dataset = eval_dataset.map(prepare_dataset, num_proc=4)
+    eval_dataset = eval_dataset.map(prepare_dataset, num_proc=1)
 
     def compute_metrics(pred):
         pred_logits = pred.predictions
@@ -118,8 +120,8 @@ def main(args):
 
     training_args = TrainingArguments(
         output_dir=f"tmp/{accent}/{method}/{args.model}/{args.seed}",
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=32,
+        per_device_train_batch_size=args.batch_size,
+        per_device_eval_batch_size=args.batch_size,
         evaluation_strategy="epoch",
         save_strategy = "epoch",
         num_train_epochs=5,

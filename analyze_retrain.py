@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 import warnings
+from typing import List
+
 warnings.filterwarnings("ignore")
 
 
@@ -50,13 +52,13 @@ def gather_result(asr:str, dataset:str, tool:str):
             
             
             if tool == "error_model":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_mix/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_mix/test_infer_log.txt"
             elif tool == "word_error_predictor_real" :
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/test_infer_log.txt"
             elif tool == "word_error_predictor_real_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
             elif tool == "error_model_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/quartznet/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
             else :
                 raise ValueError("Undefined tool")
 
@@ -93,30 +95,83 @@ def gather_result(asr:str, dataset:str, tool:str):
                         
     return df
 
+def combine_result(wer:str, cer:str, datas: List[pd.DataFrame])-> pd.DataFrame:
+    """combine results from various tools into one dataframe
+    :param wer: wer of the original model
+    :param cer: cer of the original model
+    :param datas: result from various tool
+    :return: combined dataframe
+    """
+    data = {"Size": datas[0]["Size"],
+            "WER": [wer]*len(datas[0]["Dataset"]),
+            "CER": [cer]*len(datas[0]["Dataset"])}
+
+    combined_df = pd.DataFrame(data)
+
+    for i, df in enumerate(datas):
+        for col in ['WER_Seed1', 'WER_Seed2', 'WER_Seed3', 'WER_Avg', 'CER_Seed1', 'CER_Seed2', 'CER_Seed3', 'CER_Avg'] :
+            combined_df[f"{col}_t{i}"] = df[col]
+
+    return combined_df
+
+
+def get_original_performance(asr:str, dataset:str):
+    """get wer and cer from the original model
+    
+    Args:
+        asr: asr name
+        dataset: dataset name
+    """
+    
+    path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_test_infer_log.txt"
+
+    try:
+        WER, CER = analyze_result(path_to_log)
+    except:
+        # print(path_to_log)
+        WER = -1
+        CER = -1
+         
+    return WER, CER
+
 
 if __name__ == "__main__":
 
-    asrs = ["quartznet"]
-    datasets = ["NJS"]
-    tools = [ "error_model", "word_error_predictor_real"]
-
-    # "error_model_no_seed","word_error_predictor_real_no_seed"
     
     # asrs = ["quartznet"]
-    # datasets = ["ASI"]
-    # tools = ["error_model"]
-
+    # datasets = ["SVBI", "HJK"]
+    # tools = [ "error_model", "word_error_predictor_real"]
+    
+    asrs = ["hubert"]
+    datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
+    tools = [ "error_model", "word_error_predictor_real"]
+    
+    
     for asr in asrs :
         for dataset in datasets :
+            wer, cer = get_original_performance(asr, dataset)
+
+            dfs = []
+
             for tool in tools :
         
-                print()
-                print("ASR \t\t: ", asr)
-                print("Dataset \t: ", dataset)
-                print("Tool \t\t: ", tool)
-
                 df = gather_result(asr, dataset, tool)
-                print(df)
+                # print()
+                # print("ASR \t\t: ", asr)
+                # print("Dataset \t: ", dataset)
+                # print("Original WER\t: ", wer)
+                # print("Original CER\t: ", cer)
+                # print("Tool \t\t: ", tool)
+                # print(df)
 
                 os.makedirs("result/RQ2", exist_ok=True)
                 df.to_csv(f"result/RQ2/{asr}_{dataset}_{tool}.csv")
+
+                dfs.append(df)
+            
+            combined_df = combine_result(wer, cer, dfs)
+            
+            print()
+            print("ASR \t\t: ", asr)
+            print("Dataset \t: ", dataset)
+            print(combined_df)

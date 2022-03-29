@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument("--checkpoint", default="", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
     parser.add_argument("--seed", default=42, type=int, help='seed')
+    parser.add_argument("--batch_size", default=32, type=int, help='seed')
     return parser.parse_args()
 
 
@@ -58,7 +59,7 @@ def main(args):
     dataset = dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
     dataset = preprocess_function(dataset[::])
 
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=32)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size)
 
     with torch.no_grad():
         for batch in tqdm(dataloader):

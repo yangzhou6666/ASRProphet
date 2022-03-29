@@ -1,3 +1,4 @@
+from typing import List
 import prettytable as pt
 import os
 import pandas as pd
@@ -33,8 +34,6 @@ def gather_result(asr:str, dataset:str, tool:str):
     """
     if tool in ["error_model", "word_error_predictor_real"] :
         data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
-    elif tool in ["icassp_real_mix", "word_error_real_mix"] :
-        data_path = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/"
     else :
         raise ValueError(f"Undefined tool name: {tool}")
     
@@ -57,28 +56,26 @@ def gather_result(asr:str, dataset:str, tool:str):
                 path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
             elif tool == "word_error_predictor_real" :
                 path_to_log = os.path.join(data_path, size, "word_enhance", f"seed_{seed}", "test_out_ori_log.txt")
-            elif tool == "icassp_real_mix":
-                path_to_log = os.path.join(data_path, size,f"seed_{seed}", tool, "test_infer_log.txt")
-            elif tool ==  "word_error_real_mix" :
-                path_to_log = os.path.join(data_path, size,f"seed_{seed}", tool, "word_enhance", "test_infer_log.txt")
             else :
                 raise ValueError("Undefined tool")
 
             try:
                 WER, CER = analyze_result(path_to_log)
+                WER = float(WER)
+                CER = float(CER)
             except:
                 print(path_to_log)
                 WER = -1
                 CER = -1
-            
+
             wers[f"seed_{seed}"].append(WER)
             cers[f"seed_{seed}"].append(CER)
         
-    wers_sum = np.mean([[float(x) for x in wers["seed_1"]], [float(x) for x in wers["seed_2"]], [float(x) for x in wers["seed_3"]]],
+    wers_sum = np.mean([[x for x in wers["seed_1"]], [x for x in wers["seed_2"]], [x for x in wers["seed_3"]]],
                         axis=0)
     
     wers_sum = [round(x, 2) for x in wers_sum]
-    cers_sum = np.mean([[float(x) for x in cers["seed_1"]], [float(x) for x in cers["seed_2"]], [float(x) for x in cers["seed_3"]]],
+    cers_sum = np.mean([[x for x in cers["seed_1"]], [x for x in cers["seed_2"]], [x for x in cers["seed_3"]]],
                         axis=0)
     cers_sum = [round(x, 2) for x in cers_sum]
 
@@ -97,43 +94,59 @@ def gather_result(asr:str, dataset:str, tool:str):
                         
     return df
 
+def combine_result(datas: List[pd.DataFrame])-> pd.DataFrame:
+    """combine results from various tools into one dataframe
+    :param wer: wer of the original model
+    :param cer: cer of the original model
+    :param datas: result from various tool
+    :return: combined dataframe
+    """
+    data = {"Size": datas[0]["Size"]}
+
+    combined_df = pd.DataFrame(data)
+
+    for i, df in enumerate(datas):
+        for col in ['WER_Seed1', 'WER_Seed2', 'WER_Seed3', 'WER_Avg', 'CER_Seed1', 'CER_Seed2', 'CER_Seed3', 'CER_Avg'] :
+            combined_df[f"{col}_t{i}"] = df[col]
+
+    return combined_df
 
 if __name__ == "__main__":
 
     ## RQ1 Measure the WER and CER using the original model
-    asrs = ["deepspeech"]
-    datasets = ["ASI", "RRBI"]
+    asrs = ["hubert"]
+    datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
     tools = ["error_model", "word_error_predictor_real"]
-    
-    ## RQ1 Measure the WER and CER using the fine-tuned model
-    asrs = ["deepspeech"]
-    datasets = ["ASI", "RRBI"]
-    tools = ["icassp_real_mix", "word_error_real_mix"]
-    
-    # asrs = ["deepspeech"]
-    # datasets = ["ASI", "RRBI"]
-    # tools = ["icassp_real_mix"]
-    
-    # asrs = ["deepspeech"]
-    # datasets = ["ASI", "RRBI"]
-    # tools = ["word_error_real_mix"]
-    
-
-    # asrs = ["deepspeech"]
+ 
+    # asrs = ["quartznet"]
     # datasets = ["ASI"]
-    # tools = ["error_model"]
+    # tools = ["error_model", "word_error_predictor_real"]
+    
+    
 
     for asr in asrs :
         for dataset in datasets :
+
+            dfs = []
+
             for tool in tools :
         
-                print()
-                print("ASR \t\t: ", asr)
-                print("Dataset \t: ", dataset)
-                print("Tool \t\t: ", tool)
-
                 df = gather_result(asr, dataset, tool)
-                print(df)
+                
+                # print()
+                # print("ASR \t\t: ", asr)
+                # print("Dataset \t: ", dataset)
+                # print("Tool \t\t: ", tool)
+                # print(df)
 
                 os.makedirs("result", exist_ok=True)
                 df.to_csv(f"result/{asr}_{dataset}_{tool}.csv")
+
+                dfs.append(df)
+
+            combined_df = combine_result(dfs)
+            
+            print()
+            print("ASR \t\t: ", asr)
+            print("Dataset \t: ", dataset)
+            print(combined_df)
