@@ -27,10 +27,14 @@ def main(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    
     models = {"wav2vec": "facebook/wav2vec2-large-960h",
-              "hubert": "facebook/hubert-large-ls960-ft"}
+              "hubert": "facebook/hubert-large-ls960-ft",
+              "wavlm": "patrickvonplaten/wavlm-libri-clean-100h-base-plus"}
+
     model = AutoModelForCTC.from_pretrained(models[args.model])
     feature_extractor = Wav2Vec2Processor.from_pretrained(models[args.model])
+    
     if args.checkpoint:
         model = AutoModelForCTC.from_pretrained(args.checkpoint)
 
