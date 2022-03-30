@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument("--checkpoint", default="", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
     parser.add_argument("--seed", default=42, type=int, help='seed')
-    parser.add_argument("--batch_size", default=32, type=int, help='seed')
+    parser.add_argument("--batch_size", default=8, type=int, help='seed')
     return parser.parse_args()
 
 
@@ -27,7 +27,7 @@ def main(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    models = {"wav2vec": "facebook/wav2vec2-base-960h",
+    models = {"wav2vec": "facebook/wav2vec2-large-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
     model = AutoModelForCTC.from_pretrained(models[args.model])
     feature_extractor = Wav2Vec2Processor.from_pretrained(models[args.model])
