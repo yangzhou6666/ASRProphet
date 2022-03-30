@@ -28,7 +28,7 @@ def main(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    models = {"wav2vec": "facebook/wav2vec2-base-960h",
+    models = {"wav2vec": "facebook/wav2vec2-large-960h",
               "hubert": "facebook/hubert-large-ls960-ft"}
 
     feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(models[args.model])
@@ -119,7 +119,7 @@ def main(args):
     method = args.output_dir.split(args.model)[1].split("/")[1]
 
     training_args = TrainingArguments(
-        output_dir=f"tmp/{accent}/{method}/{args.model}/{args.seed}",
+        output_dir=f"{args.output_dir}/tmp_checkpoints/",
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         evaluation_strategy="epoch",
