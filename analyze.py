@@ -37,14 +37,12 @@ def gather_result(asr:str, dataset:str, tool:str):
     else :
         raise ValueError(f"Undefined tool name: {tool}")
     
-    
-    
-    sizes = [50, 75, 100, 150, 200, 300, 400, 500]
+
+    sizes = [100, 200, 300, 400]
 
     wers = {}
     cers = {}
 
-    
     for seed in [1, 2, 3]:
         wers[f"seed_{seed}"] = []
         cers[f"seed_{seed}"] = []
@@ -113,16 +111,22 @@ def combine_result(datas: List[pd.DataFrame])-> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    ## RQ1 Measure the WER and CER using the original model
-    asrs = ["hubert"]
-    datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
-    tools = ["error_model", "word_error_predictor_real"]
- 
-    # asrs = ["quartznet"]
-    # datasets = ["ASI"]
+    ## RQ1 
+    # Measure the WER and CER using the original model
+    
+    # asrs = ["hubert"]
+    # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
     # tools = ["error_model", "word_error_predictor_real"]
-    
-    
+
+    asrs = ["wav2vec"]
+    datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    tools = ["error_model", "word_error_predictor_real"]
+
+    asrs = ["wavlm"]
+    datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    tools = ["error_model", "word_error_predictor_real"]
+
+
 
     for asr in asrs :
         for dataset in datasets :
@@ -149,4 +153,25 @@ if __name__ == "__main__":
             print()
             print("ASR \t\t: ", asr)
             print("Dataset \t: ", dataset)
-            print(combined_df)
+            columns = ["WER_Seed1_t0", "WER_Seed2_t0",   "WER_Seed3_t0",   "WER_Avg_t0",   "CER_Seed1_t0",   "CER_Seed2_t0",   "CER_Seed3_t0",   "CER_Avg_t0",   "WER_Seed1_t1",   "WER_Seed2_t1",   "WER_Seed3_t1",   "WER_Avg_t1",   "CER_Seed1_t1",   "CER_Seed2_t1",   "CER_Seed3_t1",   "CER_Avg_t1"]
+            combined_df = combined_df[columns]
+            combined_df.rename(columns={
+                "WER_Seed1_t0": "W1_0", 
+                "WER_Seed2_t0": "W2_0",
+                "WER_Seed3_t0": "W3_0",
+                "WER_Avg_t0": "Wa_0",
+                "CER_Seed1_t0": "C1_0",
+                "CER_Seed2_t0": "C2_0",
+                "CER_Seed3_t0": "C3_0",
+                "CER_Avg_t0": "Ca_0",
+                "WER_Seed1_t1":"W1_1",
+                "WER_Seed2_t1":"W2_1",
+                "WER_Seed3_t1":"W3_1",
+                "WER_Avg_t1":"Wa_1",
+                "CER_Seed1_t1":"C1_1",
+                "CER_Seed2_t1":"C2_1",
+                "CER_Seed3_t1":"C3_1",
+                "CER_Avg_t1":"Ca_1",
+            }, inplace=True)
+            print(combined_df.to_string(index=False))
+
