@@ -29,9 +29,12 @@ def main(args):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     
-    models = {"wav2vec": "facebook/wav2vec2-large-960h",
-              "hubert": "facebook/hubert-large-ls960-ft",
-              "wavlm": "patrickvonplaten/wavlm-libri-clean-100h-base-plus"}
+    models = {
+                "wav2vec-base": "facebook/wav2vec2-base-960h",
+                "wav2vec": "facebook/wav2vec2-large-960h",
+                "hubert": "facebook/hubert-large-ls960-ft",
+                "wavlm": "patrickvonplaten/wavlm-libri-clean-100h-base-plus"
+            }
 
     feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(models[args.model])
     tokenizer = Wav2Vec2CTCTokenizer.from_pretrained(models[args.model])
