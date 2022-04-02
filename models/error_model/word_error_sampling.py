@@ -13,6 +13,8 @@ import torch.nn.functional as F
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train Word Error Predictor')
+    parser.add_argument("--sampling_method", default='word_enhance', type=str,
+                        required=True, help='sampling method')
     parser.add_argument("--seed_json_file", type=str,
                         required=True, help='path to seed json file')
     parser.add_argument("--selection_json_file", type=str,
@@ -257,36 +259,36 @@ def main(args):
     err_sampler.load_sampling_data()
     # sample the test cases
 
-    for num_sample in [50, 75, 100, 150, 200, 300, 400, 500]:
-        for sampling_method in ["word_enhance"]:
-            random_json_file = os.path.join(args.data_folder, str(num_sample), "seed_" + str(args.seed), "train.json")
-            required_duration = compute_required_duration(args.seed_json_file, random_json_file)
-            assert required_duration > 0
+    sampling_method = args.sampling_method
 
-            if sampling_method == "word_enhance":
-                samples = err_sampler.sample_with_sub_word_enhancing(required_duration)
-            else:
-                raise NotImplementedError
+    for num_sample in [100, 200, 300, 400]:
+        random_json_file = os.path.join(args.data_folder, str(num_sample), "seed_" + str(args.seed), "train.json")
+        required_duration = compute_required_duration(args.seed_json_file, random_json_file)
+        assert required_duration > 0
 
-            # dump the samples to a file
-            output_json_file = os.path.join(args.output_json_path, str(
-                num_sample), sampling_method, 'seed_' + str(args.seed), 'train.json')
-            seed_samples = [line for line in open(args.seed_json_file)]
-            # merge the seed samples with the new samples
+        if sampling_method == "word_enhance":
+            samples = err_sampler.sample_with_sub_word_enhancing(required_duration)
+        elif sampling_method == "no_word_enhance":
+            samples = err_sampler.normal_sample(required_duration)
+        else:
+            raise NotImplementedError
 
-            dump_samples(seed_samples + samples, output_json_file)
-            print(f"{len(seed_samples + samples)} samples are dumped to {output_json_file}")
+        # dump the samples to a file
+        output_json_file = os.path.join(args.output_json_path, str(
+            num_sample), sampling_method, 'seed_' + str(args.seed), 'train.json')
+        seed_samples = [line for line in open(args.seed_json_file)]
+        # merge the seed samples with the new samples
 
-            output_json_file = os.path.join(args.output_json_path, str(
-                num_sample), sampling_method, 'seed_' + str(args.seed), 'train_no_seed.json')
-            seed_samples = [line for line in open(args.seed_json_file)]
-            # merge the seed samples with the new samples
+        dump_samples(seed_samples + samples, output_json_file)
+        print(f"{len(seed_samples + samples)} samples are dumped to {output_json_file}")
 
-            dump_samples(samples, output_json_file)
-            print(f"{len(samples)} samples are dumped to {output_json_file}")
+        output_json_file = os.path.join(args.output_json_path, str(
+            num_sample), sampling_method, 'seed_' + str(args.seed), 'train_no_seed.json')
+        seed_samples = [line for line in open(args.seed_json_file)]
+        # merge the seed samples with the new samples
 
-
-
+        dump_samples(samples, output_json_file)
+        print(f"{len(samples)} samples are dumped to {output_json_file}")
 
 
 if __name__ == "__main__":
