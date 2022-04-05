@@ -175,7 +175,7 @@ def main(args):
 
     # train the model
     training_args = TrainingArguments(
-        f"word_error_predictor/{accent}/{args.seed}",
+        f"{args.output_dir}/tmp_checkpoints/",
         evaluation_strategy = "epoch",
         save_strategy = "epoch",
         learning_rate=2e-5,
