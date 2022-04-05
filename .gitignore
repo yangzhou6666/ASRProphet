@@ -171,3 +171,5 @@ models/error_model/word_error_predictor/
 models/wav2vec2_asr/tmp
 models/huggingface/
 result/
+
+huggingface_cache/
