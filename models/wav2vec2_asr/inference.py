@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--output_file", default="out.txt", type=str)
     parser.add_argument("--checkpoint", default="", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
+    parser.add_argument("--cache_dir", required=True, type=str)
     parser.add_argument("--seed", default=42, type=int, help='seed')
     parser.add_argument("--batch_size", default=8, type=int, help='seed')
     return parser.parse_args()
@@ -61,7 +62,11 @@ def main(args):
         ).input_values
         return inputs
 
-    dataset = load_dataset("json", data_files={"validation": args.val_manifest}, split="validation")
+    dataset = load_dataset("json", 
+                        data_files={"validation": args.val_manifest}, split="validation",
+                        cache_dir=args.cache_dir
+                        )
+    
     dataset = dataset.map(add_prefix)
     dataset = dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
     dataset = preprocess_function(dataset[::])
