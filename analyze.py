@@ -43,14 +43,7 @@ def gather_result(asr:str, dataset:str, tool:str):
         dataset: dataset name
         tool: tool name
     """
-    if tool in ["error_model"] :
-        data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
-    elif tool in ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"] :
-        data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/word_error_predictor_real/"
-    else :
-        raise ValueError(f"Undefined tool name: {tool}")
     
-
     sizes = [100, 200, 300, 400]
 
     wers = {}
@@ -63,12 +56,14 @@ def gather_result(asr:str, dataset:str, tool:str):
         for size in sizes:
             size = str(size)
             
-            if tool in ["error_model"] :
+            if tool in ["error_model", "asrevolve_error_model_real"] :
+                data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
                 path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
             elif tool in ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"] :
+                data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/word_error_predictor_real/"
                 path_to_log = os.path.join(data_path, size, tool.split("/")[-1], f"seed_{seed}", "test_out_ori_log.txt")
             else :
-                raise ValueError("Undefined tool")
+                raise ValueError(f"Undefined tool name: {tool}")
 
             try:
                 WER, CER = analyze_result(path_to_log)
@@ -105,12 +100,10 @@ def gather_result(asr:str, dataset:str, tool:str):
                         
     return df
 
-def combine_result(datas: List[pd.DataFrame])-> pd.DataFrame:
+def combine_tools(datas: List[pd.DataFrame])-> pd.DataFrame:
     """combine results from various tools into one dataframe
-    :param wer: wer of the original model
-    :param cer: cer of the original model
     :param datas: result from various tool
-    :return: combined dataframe
+    :return: horisontally combined dataframe
     """
     data = {"Size": datas[0]["Size"]}
 
@@ -122,6 +115,24 @@ def combine_result(datas: List[pd.DataFrame])-> pd.DataFrame:
 
     return combined_df
 
+def combine_dataset(dataset_names, datas: List[pd.DataFrame])-> pd.DataFrame:
+    """combine results from various datasets into one dataframe
+    :param datas: result from various dataset
+    :return: vertically combined dataframe
+    """
+    
+    for i in range(len(datas)) :
+        datas[i]["Name"] = dataset_names[i]
+    
+        cols = datas[i].columns.to_list()
+        cols = cols[-1:] + cols[:-1]
+        datas[i] = datas[i][cols]
+        
+    result = pd.concat(datas)
+
+    return result
+
+
 if __name__ == "__main__":
 
     ## RQ1 
@@ -129,13 +140,18 @@ if __name__ == "__main__":
     
     asrs = ["hubert"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"]
+    # tools = ["error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    datasets = ["YBAA"]
+    tools = ["asrevolve_error_model_real"]
 
     # asrs = ["wav2vec-base"]
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"]
+    # tools = ["error_model", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
 
     for asr in asrs :
+        
+        dataframes = []
+        
         for dataset in datasets :
 
             dfs = []
@@ -155,11 +171,18 @@ if __name__ == "__main__":
 
                 dfs.append(df)
 
-            combined_df = combine_result(dfs)
+            combined_df = combine_tools(dfs)
             
-            print()
-            print("ASR \t\t: ", asr)
-            print("Dataset \t: ", dataset)
-            combined_df.drop(columns=["Size"], inplace=True)
-            print(combined_df.to_string(index=False))
+            # print()
+            # print("ASR \t\t: ", asr)
+            # print("Dataset \t: ", dataset)
+            # combined_df.drop(columns=["Size"], inplace=True)
+            # print(combined_df.to_string(index=False))
+            
+            dataframes.append(combined_df)
+            
+        print()
+        print()
+        result = combine_dataset(datasets, dataframes)
+        print(result.to_string(index=False))
 
