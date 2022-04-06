@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--val_manifest", type=str, required=True, help='relative path to evaluation dataset manifest file')
     parser.add_argument("--output_dir", default="./", type=str)
     parser.add_argument("--model", default="wav2vec", type=str)
+    parser.add_argument("--cache_dir", required=True, type=str)
     parser.add_argument("--lr", default=2e-5, type=float)
     parser.add_argument("--batch_size", default=8, type=int, help='batch_size')
     parser.add_argument("--seed", default=42, type=int, help='seed')
@@ -97,12 +98,12 @@ def main(args):
         return batch
 
     data_files = {"train":args.train_manifest, "validation": args.val_manifest}
-    train_dataset = load_dataset("json", data_files=data_files, split="train")
+    train_dataset = load_dataset("json", data_files=data_files, split="train", cache_dir=args.cache_dir)
     train_dataset = train_dataset.map(add_prefix)
     train_dataset = train_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
     train_dataset = train_dataset.map(prepare_dataset, num_proc=1)
 
-    eval_dataset = load_dataset("json", data_files=data_files, split="validation")
+    eval_dataset = load_dataset("json", data_files=data_files, split="validation", cache_dir=args.cache_dir)
     eval_dataset = eval_dataset.map(add_prefix)
     eval_dataset = eval_dataset.cast_column("audio_filepath", Audio(sampling_rate=16_000))
     eval_dataset = eval_dataset.map(prepare_dataset, num_proc=1)
