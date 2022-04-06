@@ -32,8 +32,10 @@ def gather_result(asr:str, dataset:str, tool:str):
         dataset: dataset name
         tool: tool name
     """
-    if tool in ["error_model", "word_error_predictor_real"] :
+    if tool in ["error_model"] :
         data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
+    elif tool in ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"] :
+        data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/word_error_predictor_real/"
     else :
         raise ValueError(f"Undefined tool name: {tool}")
     
@@ -50,10 +52,10 @@ def gather_result(asr:str, dataset:str, tool:str):
         for size in sizes:
             size = str(size)
             
-            if tool == "error_model":
+            if tool in ["error_model"] :
                 path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
-            elif tool == "word_error_predictor_real" :
-                path_to_log = os.path.join(data_path, size, "word_enhance", f"seed_{seed}", "test_out_ori_log.txt")
+            elif tool in ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"] :
+                path_to_log = os.path.join(data_path, size, tool.split("/")[-1], f"seed_{seed}", "test_out_ori_log.txt")
             else :
                 raise ValueError("Undefined tool")
 
@@ -118,13 +120,17 @@ if __name__ == "__main__":
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
     # tools = ["error_model", "word_error_predictor_real"]
 
-    asrs = ["wav2vec"]
-    datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = ["error_model", "word_error_predictor_real"]
+    # asrs = ["wav2vec"]
+    # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    # tools = ["error_model", "word_error_predictor_real"]
 
-    asrs = ["wavlm"]
+    asrs = ["wav2vec-base"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = ["error_model", "word_error_predictor_real"]
+    tools = ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"]
+
+    # asrs = ["wavlm"]
+    # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    # tools = ["error_model", "word_error_predictor_real"]
 
 
 
@@ -144,7 +150,7 @@ if __name__ == "__main__":
                 # print(df)
 
                 os.makedirs("result", exist_ok=True)
-                df.to_csv(f"result/{asr}_{dataset}_{tool}.csv")
+                df.to_csv(f"result/{asr}_{dataset}_{tool.replace('/','_')}.csv")
 
                 dfs.append(df)
 
