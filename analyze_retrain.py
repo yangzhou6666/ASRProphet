@@ -51,13 +51,13 @@ def gather_result(asr:str, dataset:str, tool:str):
 
             
             
-            if tool == "error_model":
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_mix/test_infer_log.txt"
-            elif tool == "word_error_predictor_real" :
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance/test_infer_log.txt"
-            elif tool == "word_error_predictor_real_no_seed":
+            if tool in ["icassp_real_mix", "icassp_real_mix_lr1e-5"]:
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/{tool}/test_infer_log.txt"
+            elif tool in ["word_error_real_mix", "word_error_real_mix_lr1e-5"] :
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/{tool}/word_enhance/test_infer_log.txt"
+            elif tool == "word_error_real_mix_no_seed":
                 path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
-            elif tool == "error_model_no_seed":
+            elif tool == "icassp_real_mix_no_seed":
                 path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
             else :
                 raise ValueError("Undefined tool")
@@ -142,21 +142,21 @@ if __name__ == "__main__":
     
     # asrs = ["quartznet"]
     # datasets = ["SVBI", "HJK"]
-    # tools = [ "error_model", "word_error_predictor_real"]
+    # tools = [ "icassp_real_mix", "word_error_real_mix"]
     
     # asrs = ["hubert"]
     # datasets = ["ABA", "SKA", "YBAA", "ZHAA", "BWC", "LXC", "NCC", "TXHC", "HJK", "HKK", "YDCK", "YKWK", "ASI", "RRBI", "SVBI", "TNI", "EBVS", "ERMS", "MBMPS", "NJS", "HQTV", "PNV", "THV", "TLV"]
     # datasets = ["BWC", "LXC"]
-    # tools = [ "error_model", "word_error_predictor_real"]
+    # tools = [ "icassp_real_mix", "word_error_real_mix"]
     
 
     asrs = ["wav2vec"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = [ "error_model", "word_error_predictor_real"]
+    tools = [ "icassp_real_mix_lr1e-5", "word_error_real_mix_lr1e-5"]
 
     # asrs = ["wavlm"]
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = [ "error_model", "word_error_predictor_real"]
+    # tools = [ "icassp_real_mix", "word_error_real_mix"]
     
     
     
