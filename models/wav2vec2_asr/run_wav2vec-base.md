@@ -210,9 +210,9 @@ for model in "wav2vec-base"
 do  
   for seed in 1 2 3
   do
-    for accent in "THV" "TLV"
+    for accent in "TLV"
     do
-      cuda_devices=4
+      cuda_devices=3
       echo $accent seed $seed
       mkdir -p $PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u train_error_model_asrevolve.py \
@@ -222,7 +222,7 @@ do
         --output_dir=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/best \
         --log_dir=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/train_log \
         > $PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/train_log.txt 
-    done 
+    done &
   done 
 done &
 ```
@@ -240,10 +240,10 @@ do
   do
     for num_sample in 100 200 300 400
     do
-      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+      for accent in "TLV"
       do
         echo $accent seed $seed
-        CUDA_VISIBLE_DEVICES=7 python3 -u error_model_sampling_asrevolve.py \
+        CUDA_VISIBLE_DEVICES=3 python3 -u error_model_sampling_asrevolve.py \
           --seed_json_file=$DATA/$accent/manifests/seed.json \
           --random_json_file=$DATA/$accent/manifests/train/random/"$num_sample"/seed_"$seed"/train.json \
           --selection_json_file=$DATA/$accent/manifests/selection.json \
@@ -253,7 +253,7 @@ do
           --output_json_path=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real \
           --exp_id=$seed
       done
-    done
+    done &
   done  
 done &
 ```
@@ -266,11 +266,11 @@ done &
 ```
 for model in "wav2vec-base"
 do
-  for seed in 1 2 3
+  for accent in "TLV"
   do
-    for size in 100 200 300 400
+    for size in 300
     do
-      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+      for seed in 2 3
       do
         echo $accent seed $seed size $size method $method
         echo 
@@ -330,11 +330,11 @@ Before using the error model to select test cases, we need to first infer the mo
 ```
 for model in "wav2vec-base"
 do
-  for seed in 1 2 3
+  for seed in 3
   do
-    for accent in "YDCK" "YKWK" "THV" "TLV"
+    for accent in "YKWK"
     do
-      cuda_devices=5
+      cuda_devices=7
       echo $accent seed $seed cuda $cuda_devices
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u infer_error_model.py \
         --batch_size=64 \
@@ -363,16 +363,16 @@ done &
 ```
 for model in "wav2vec-base"
 do
-  for seed in 1 2 3
+  for accent in "YBAA"
   do
-    for size in 100 200 300 400
+    for size in 400
     do
-      for accent in "YKWK" "THV" "TLV"
+      for seed in 3
       do
         echo $accent $seed $size
         echo 
         echo
-        CUDA_VISIBLE_DEVICES=3 python3 -u inference.py \
+        CUDA_VISIBLE_DEVICES=5 python3 -u inference.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
@@ -381,29 +381,33 @@ do
           --output_file=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori.txt \
           > $DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori_log.txt
       done 
-    done 
+    done &
   done 
 done &
 ```
+
+
 
 # 3. Fine-Tune ASR Models
 
 ## Train on ICASSP sampling (real)
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI"
+"NCC" "TXHC" "EBVS" "ERMS"
+"YDCK" "YKWK" "THV" "TLV"
 ```
 for model in "wav2vec-base"
 do
-  for accent in "EBVS" "ERMS" "MBMPS" "NJS" "HQTV" "PNV" "THV" "TLV"
+  for accent in "YDCK" "YKWK" "THV" "TLV"
   do
     for seed in 1 2 3
     do
       for size in 100 200 300 400
       do
+        cuda_devices=7
         echo $accent seed $seed $model
         model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
         mkdir -p $model_dir
-        cuda_devices=6
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
@@ -438,23 +442,24 @@ done &
 TODO: standardize word enhance
 
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
 
 **word_enhance**
 ```
 for model in "wav2vec-base"
 do
-  for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+  for accent in "YKWK" "THV" "TLV"
   do
     for seed in 1 2 3
     do
       for size in 100 200 300 400
       do
+        cuda_devices=3
         sampling_method=word_enhance
         echo $accent seed $seed $model
         model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/"$sampling_method"
         mkdir -p $model_dir
-        cuda_devices=6
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
@@ -510,6 +515,56 @@ do
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --train_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/"$sampling_method"/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=1e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+        
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done 
+    done
+  done
+done &
+```
+
+
+#### Train ASREvolve Failure Estimator
+
+"YBAA" "ZHAA" "ASI" 
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
+
+```
+for model in "wav2vec-base"
+do
+  for accent in "YKWK" 
+  do
+    for seed in 2
+    do
+      for size in 100 200
+      do
+        cuda_devices=5
+        echo $accent seed $seed $model
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/asrevolve_error_model_real
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real/$size/seed_"$seed"/train.json \
           --val_manifest=$DATA/$accent/manifests/dev.json \
           --output_dir=$model_dir/best \
           --model=$model \
