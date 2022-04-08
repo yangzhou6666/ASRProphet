@@ -1,38 +1,18 @@
 # Scripts to run experiments on L2Arctic
 
-The following code takes `ASI` in the L2Arctic dataset as an example. Please kindly change 
-
-# 1. Infer ASR on dataset
-
-## 1.1 Infer on `seed_plus_dev.json`
-Generate transcripts for the seed+dev set using the pre-trainded ASR (Transcripts are used while training error models)
-
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+Prepare some environment variables
 ```
 DATA=$(cd ../../data/l2arctic/processed; pwd)
 WAV_DIR=$(cd ../../data/l2arctic/; pwd)
 PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd) 
-declare -a accents=('ASI' 'RRBI')
-declare -a models=('hubert')
-
-for model in "hubert"
-do
-  for accent in 
-  do
-    echo $model $accent
-    mkdir -p $DATA/$accent/manifests/"$model"_outputs
-    echo $WAV_DIR/$accent/wav 
-    CUDA_VISIBLE_DEVICES=1 python3 -u inference.py \
-      --wav_dir=$WAV_DIR \
-      --val_manifest=$DATA/$accent/manifests/seed_plus_dev.json \
-      --model $model \
-      --output_file=$DATA/$accent/manifests/"$model"_outputs/seed_plus_dev_out.txt \
-      > $DATA/$accent/manifests/"$model"_outputs/seed_plus_dev_infer_log.txt
-  done
-done &
+mkdir -p "$(pwd)"/../../huggingface_cache/
+CACHE_DIR=$(cd ../../huggingface_cache/; pwd)
 ```
 
-## 1.2 Infer on `seed.json` and `dev.json`
+# 1. Infer ASR on dataset
+
+
+## Infer on `seed.json` and `dev.json`
 
 The results will be used for training word error predictor.
 
@@ -47,6 +27,7 @@ do
     echo $WAV_DIR/$accent/wav 
 
     CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
+      --cache_dir=$CACHE_DIR \
       --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/seed.json \
       --model $model \
@@ -54,6 +35,7 @@ do
       > $DATA/$accent/manifests/"$model"_outputs/seed_infer_log.txt
     
     CUDA_VISIBLE_DEVICES=6 python3 -u inference.py \
+      --cache_dir=$CACHE_DIR \
       --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/dev.json \
       --model $model \
@@ -62,7 +44,6 @@ do
   done
 done &
 ```
-
 
 
 ## Infer on test dataset
@@ -79,6 +60,7 @@ do
     mkdir -p $DATA/$accent/manifests/"$model"_outputs
     echo $WAV_DIR/$accent/wav 
     CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+      --cache_dir=$CACHE_DIR \
       --wav_dir=$WAV_DIR \
       --val_manifest=$DATA/$accent/manifests/test.json \
       --model $model \
@@ -94,15 +76,18 @@ done &
 
 ### 2.1.1 Training
 
-"YBAA" "ZHAA" "ASI" "TNI" 
-"NCC" "TXHC" "EBVS" "ERMS"
-"YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA"
+"ASI" "TNI" 
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
 ```
 for model in "hubert"
 do
   for seed in 1 2 3
   do
-    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    for accent in "THV" "TLV"
     do
     mkdir -p $PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best
     echo $accent seed $seed
@@ -145,15 +130,19 @@ done &
 ```
 
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA"
+"ASI" "TNI" 
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
 **no_word_enhance**
 ```
 for model in "hubert"
 do
   for seed in 1 2 3
   do
-    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    for accent in "THV" "TLV"
     do
       echo $accent seed $seed
       CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
@@ -183,7 +172,7 @@ do
   do
     for size in 100 200 300 400
     do
-      for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
       do
         for method in "no_word_enhance"
         do
@@ -191,6 +180,7 @@ do
           echo 
           echo
           CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/train.json \
           --model $model \
@@ -198,6 +188,106 @@ do
           --output_file=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori.txt \
           > $DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori_log.txt
         done
+      done 
+    done
+  done
+done &
+```
+
+## 2.2 ASREvolve
+
+### 2.2.1 Training
+
+"YBAA" "ZHAA"
+"ASI" "TNI"
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK" 
+"THV" "TLV"
+```
+for model in "hubert"
+do  
+  for seed in 1 2 3
+  do
+    for accent in "YBAA" "ZHAA"
+    do
+      cuda_devices=1
+      echo $accent seed $seed
+      mkdir -p $PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u train_error_model_asrevolve.py \
+        --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
+        --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
+        --seed=$seed \
+        --output_dir=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/best \
+        --log_dir=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/train_log \
+        > $PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/train_log.txt 
+    done & 
+  done 
+done &
+```
+
+
+### 2.2.2 Using ASREvolve for sampling
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+
+"ZHAA"
+"TNI"
+"TXHC"
+"ERMS"
+"YKWK" 
+"TLV"
+
+```
+for model in "hubert"
+do
+  for seed in 1 2 3
+  do
+    for num_sample in 100 200 300 400
+    do
+      for accent in "TLV" 
+      do
+        echo $accent seed $seed
+        CUDA_VISIBLE_DEVICES=6 python3 -u error_model_sampling_asrevolve.py \
+          --seed_json_file=$DATA/$accent/manifests/seed.json \
+          --random_json_file=$DATA/$accent/manifests/train/random/"$num_sample"/seed_"$seed"/train.json \
+          --selection_json_file=$DATA/$accent/manifests/selection.json \
+          --finetuned_ckpt=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/best \
+          --log_dir=$PRETRAINED_CKPTS/asrevolve_error_models/"$model"/$accent/seed_"$seed"/train_log \
+          --num_sample=$num_sample \
+          --output_json_path=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real \
+          --exp_id=$seed
+      done
+    done &
+  done  
+done &
+```
+
+### 2.2.3 Measure original model performance on the selected audio
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+
+```
+for model in "hubert"
+do
+  for seed in 1 2 3
+  do
+    for size in 100 200 300 400
+    do
+      for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+      do
+        echo $accent seed $seed size $size method $method
+        echo 
+        echo
+        CUDA_VISIBLE_DEVICES=0 python3 -u inference.py \
+        --cache_dir=$CACHE_DIR \
+        --wav_dir=$WAV_DIR \
+        --val_manifest=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real/$size/seed_"$seed"/train.json \
+        --model $model \
+        --batch_size 8 \
+        --output_file=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real/$size/seed_"$seed"/test_out_ori.txt \
+        > $DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real/$size/$method/seed_"$seed"/test_out_ori_log.txt
       done 
     done
   done
@@ -286,6 +376,7 @@ do
         echo 
         echo
         CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
           --model $model \
@@ -302,21 +393,25 @@ done &
 
 ## Train on ICASSP sampling (real)
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
 ```
 for model in "hubert"
 do
-  for accent in "EBVS" "ERMS" "MBMPS" "NJS" "HQTV" "PNV" "THV" "TLV"
+  for accent in "YBAA" "ZHAA" "ASI"
   do
     for seed in 1 2 3
     do
       for size in 100 200 300 400
       do
         echo $accent seed $seed $model
-        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/icassp_real_mix/$accent/$size/seed_"$seed"/
         mkdir -p $model_dir
-        cuda_devices=6
+        cuda_devices=0
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --train_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
           --val_manifest=$DATA/$accent/manifests/dev.json \
@@ -330,6 +425,7 @@ do
         rm -rf $model_dir/best/tmp_checkpoints/
 
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/test.json \
           --output_file=$model_dir/test_out.txt \
@@ -343,29 +439,32 @@ do
 done &
 ```
 
-## Train on Word Error Data (real)
+#### Train ASREvolve Failure Estimator
 
-TODO: standardize word enhance
+"YBAA" "ZHAA"
+"ASI" "TNI"
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
-**word_enhance**
 ```
 for model in "hubert"
 do
-  for accent in "EBVS" "ERMS" "MBMPS" "NJS" "HQTV" "PNV" "THV" "TLV"
+  for accent in "YDCK"
   do
     for seed in 1 2 3
     do
       for size in 100 200 300 400
       do
-        sampling_method=word_enhance
+        cuda_devices=5
         echo $accent seed $seed $model
-        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/"$sampling_method"
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/asrevolve_error_model_real/$accent/$size/seed_"$seed"
         mkdir -p $model_dir
-        cuda_devices=3
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
-          --train_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/"$sampling_method"/seed_"$seed"/train.json \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/asrevolve_error_model_real/$size/seed_"$seed"/train.json \
           --val_manifest=$DATA/$accent/manifests/dev.json \
           --output_dir=$model_dir/best \
           --model=$model \
@@ -377,6 +476,7 @@ do
         rm -rf $model_dir/best/tmp_checkpoints/
 
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/test.json \
           --output_file=$model_dir/test_out.txt \
@@ -391,23 +491,28 @@ done &
 ```
 
 
+## Train on Word Error Data (real)
+
+TODO: standardize word enhance
+
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
-**no_word_enhance**
+**word_enhance**
 ```
 for model in "hubert"
 do
-  for accent in "EBVS" "ERMS" "MBMPS" "NJS" "HQTV" "PNV" "THV" "TLV"
+  for accent in "YDCK"
   do
-    for seed in 1 2 3
+    for seed in 3
     do
-      for size in 100 200 300 400
+      for size in 400
       do
-        sampling_method=no_word_enhance
+        cuda_devices=5
+        sampling_method=word_enhance
         echo $accent seed $seed $model
-        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/"$sampling_method"
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/word_error_real_mix/"$sampling_method"/$accent/$size/seed_"$seed"
         mkdir -p $model_dir
-        cuda_devices=3
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --train_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/"$sampling_method"/seed_"$seed"/train.json \
           --val_manifest=$DATA/$accent/manifests/dev.json \
@@ -421,6 +526,58 @@ do
         rm -rf $model_dir/best/tmp_checkpoints/
 
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done 
+    done
+  done
+done &
+```
+
+
+"YBAA" "ZHAA"
+"ASI" "TNI"
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
+**no_word_enhance**
+```
+for model in "hubert"
+do
+  for accent in "THV" "TLV"
+  do
+    for seed in 1 2 3
+    do
+      for size in 100 200 300 400
+      do
+        cuda_devices=6
+        sampling_method=no_word_enhance
+        echo $accent seed $seed $model
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/word_error_real_mix/"$sampling_method"/$accent/$size/seed_"$seed"
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/"$sampling_method"/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=2e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+        
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --val_manifest=$DATA/$accent/manifests/test.json \
           --output_file=$model_dir/test_out.txt \
