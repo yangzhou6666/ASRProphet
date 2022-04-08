@@ -76,8 +76,9 @@ def normalized_json_transcript(json_str):
 
 
 class ErrorModelSampler():
-  def __init__(self, json_file, error_model_weights=None):
+  def __init__(self, json_file, sampling_method, error_model_weights=None):
     self.json_file = json_file
+    self.sampling_method = sampling_method
     print('\tparsing json...')
     
     self.sentences = [normalized_json_transcript(line) for line in open(self.json_file)]
@@ -113,18 +114,23 @@ class ErrorModelSampler():
   def get_f(self,freq,tau=500):
     return 1 - np.exp(-freq/tau)
     
-  def select_text_and_update_phone_freq(self, weight_id):
+  
+  def select_text_and_update_phone_freq(self, sampling_method, weight_id):
     min_indices = []
     min_sentences = []
     max_score = -1e10 
 
     for i,sentence in enumerate(self.sentences):
-      f_i = self.get_f(self.acc_phone_freqs)
-      f_f = self.get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
-      score = (f_f - f_i) * self.error_model_weights[weight_id][i]
-      #score = self.error_model_weights[weight_id][i]
-      #score = self.error_model_weights[i]
-      #score = (f_f - f_i)
+      
+      if sampling_method == 'diversity_enhancing' :
+        f_i = self.get_f(self.acc_phone_freqs)
+        f_f = self.get_f(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
+        score = (f_f - f_i) * self.error_model_weights[weight_id][i]
+      elif sampling_method == 'without_diversity_enhancing':
+        score = self.error_model_weights[weight_id][i]
+      else :
+        raise ValueError('sampling_method {} not supported'.format(sampling_method))
+      
       score = score[4:-2]
       score = np.sum(score)/len(self.phone_sentences[i])
       if score > max_score:
@@ -153,7 +159,9 @@ class ErrorModelSampler():
     total_sents = len(self.sentences)
     for i in range(total_sents):
       weight_id = i%len(self.error_model_weights)
-      samples.append(self.select_text_and_update_phone_freq(weight_id))
+      
+      samples.append(self.select_text_and_update_phone_freq(self.sampling_method, weight_id))  
+      
       selected_duration += json.loads(samples[-1].strip())['duration']
       if selected_duration >= duration:
         break
@@ -174,17 +182,18 @@ def get_json_duration(json_file):
   return sum([json.loads(line.strip())['duration'] for line in open(json_file)])
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='error model sampling')
-    parser.add_argument("--selection_json_file", type=str, help='path to json file from where sentences are selected')
-    parser.add_argument("--seed_json_file", type=str, help='path to json file containing seed sentences')
-    parser.add_argument("--error_model_weights", type=str, help='weights provided by error model inference')
-    parser.add_argument("--random_json_path",type=str,
-      help='path to dir containing json files for randomly selected sentences, used to ensure same amount of speech time')
-    parser.add_argument("--output_json_path", type=str, 
-      help='path to dir containing json files for sentences selected via error model weights')
-    parser.add_argument("--exp_id", type=str, help='experiment id')
-    args=parser.parse_args()
-    return args
+  parser = argparse.ArgumentParser(description='error model sampling')
+  parser.add_argument("--selection_json_file", type=str, help='path to json file from where sentences are selected')
+  parser.add_argument("--sampling_method", type=str, default='diversity_enhancing', help='sampling method')
+  parser.add_argument("--seed_json_file", type=str, help='path to json file containing seed sentences')
+  parser.add_argument("--error_model_weights", type=str, help='weights provided by error model inference')
+  parser.add_argument("--random_json_path",type=str,
+    help='path to dir containing json files for randomly selected sentences, used to ensure same amount of speech time')
+  parser.add_argument("--output_json_path", type=str, 
+    help='path to dir containing json files for sentences selected via error model weights')
+  parser.add_argument("--exp_id", type=str, help='experiment id')
+  args=parser.parse_args()
+  return args
 
 def main(args):
   selection_json_file = args.selection_json_file
@@ -203,7 +212,7 @@ def main(args):
     required_duration = random_samples_duration - seed_duration
     assert required_duration > 0
     output_json_file = os.path.join(output_json_path,str(num_samples),'seed_'+exp_id,'train.json')
-    sampler = ErrorModelSampler(selection_json_file, error_model_weights=weights_list)
+    sampler = ErrorModelSampler(selection_json_file, args.sampling_method, error_model_weights=weights_list)
     samples = get_samples(sampler, required_duration)
     dump_samples(seed_samples + samples,output_json_file)
 
