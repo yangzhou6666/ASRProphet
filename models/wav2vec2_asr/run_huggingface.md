@@ -72,99 +72,74 @@ done &
 
 # 2. Train Error Model
 
-## 2.1 Word error predictor
+## 2.1 ICASSP
 
-### 2.1.1 Training
+### 2.1.1 Train
 
-"YBAA" "ZHAA"
-"ASI" "TNI" 
-"NCC" "TXHC"
-"EBVS" "ERMS"
-"YDCK" "YKWK"
-"THV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for model in "hubert"
 do
   for seed in 1 2 3
   do
-    for accent in "THV" "TLV"
+    for accent in "SKA" "ZHAA" "HJK" "HKK" "ASI"
     do
-    mkdir -p $PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best
-    echo $accent seed $seed
-    echo 
-    CUDA_VISIBLE_DEVICES=6 python word_error_predictor.py \
-      --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
-      --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
-      --output_dir=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
-      --seed=$seed \
-      > $PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/training.log
-    done &
+      LR=3e-4
+      echo $accent seed $seed
+      mkdir -p $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/
+      CUDA_VISIBLE_DEVICES=2 python3 -u train_error_model.py \
+        --batch_size=64 \
+        --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
+        --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
+        --lr_decay=warmup \
+        --seed=$seed \
+        --output_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/recent \
+        --best_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best \
+      > $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/train_log.txt
+    done & 
   done 
 done &
 ```
 
-### 2.1.2 Sampling `real` audio and evaluation
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
-**word_enhance**
+### 2.1.2 Sample
+
+Before using the error model to select test cases, we need to first infer the model on all the texts and store the results.
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for model in "hubert"
 do
   for seed in 1 2 3
   do
-    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    for accent in "RRBI" "SVBI" "TNI" "THV"
     do
-      echo $accent seed $seed
-      CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
-        --sampling_method=word_enhance \
-        --seed_json_file=$DATA/$accent/manifests/seed.json \
-        --data_folder=$DATA/$accent/manifests/train/random/ \
-        --selection_json_file=$DATA/$accent/manifests/selection.json \
-        --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
-        --output_json_path=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real \
-        --seed=$seed 
-    done 
-  done
-done &
-```
+      cuda_devices=0
+      echo $accent seed $seed cuda $cuda_devices
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u infer_error_model.py \
+        --batch_size=64 \
+        --json_path=$DATA/$accent/manifests/selection.json \
+        --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt \
+        --output_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best \
+      > $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/infer_log.txt
 
-
-"YBAA" "ZHAA"
-"ASI" "TNI" 
-"NCC" "TXHC"
-"EBVS" "ERMS"
-"YDCK" "YKWK"
-"THV" "TLV"
-**no_word_enhance**
-```
-for model in "hubert"
-do
-  for seed in 1 2 3
-  do
-    for accent in "THV" "TLV"
-    do
-      echo $accent seed $seed
-      CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
-        --sampling_method=no_word_enhance \
-        --seed_json_file=$DATA/$accent/manifests/seed.json \
-        --data_folder=$DATA/$accent/manifests/train/random/ \
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
         --selection_json_file=$DATA/$accent/manifests/selection.json \
-        --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
-        --output_json_path=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real \
-        --seed=$seed 
-    done 
-  done
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --error_model_weights=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/weights.pkl \
+        --random_json_path=$DATA/$accent/manifests/train/random \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/error_model \
+        --exp_id=$seed 
+    echo
+    done &
+  done 
 done &
 ```
 
 
 ### 2.1.3 Evaluate
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
-
-for method in "word_enhance" "no_word_enhance"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for model in "hubert"
 do
@@ -172,27 +147,25 @@ do
   do
     for size in 100 200 300 400
     do
-      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+      for accent in "TXHC"
       do
-        for method in "no_word_enhance"
-        do
-          echo $accent seed $seed size $size method $method
-          echo 
-          echo
-          CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+        echo $accent $seed $size
+        echo 
+        echo
+        CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
-          --val_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
           --model $model \
           --batch_size 8 \
-          --output_file=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori.txt \
-          > $DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori_log.txt
-        done
+          --output_file=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori.txt \
+          > $DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori_log.txt
       done 
-    done
-  done
+    done 
+  done 
 done &
 ```
+
 
 ## 2.2 ASREvolve
 
@@ -294,75 +267,98 @@ do
 done &
 ```
 
+## 2.3 Word error predictor
 
-## 2.3 ICASSP
+### 2.3.1 Training
 
-### 2.3.1 Train
-
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA"
+"ASI" "TNI" 
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
 ```
 for model in "hubert"
 do
   for seed in 1 2 3
   do
-    for accent in "SKA" "ZHAA" "HJK" "HKK" "ASI"
+    for accent in "THV" "TLV"
     do
-      LR=3e-4
-      echo $accent seed $seed
-      mkdir -p $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/
-      CUDA_VISIBLE_DEVICES=2 python3 -u train_error_model.py \
-        --batch_size=64 \
-        --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
-        --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
-        --lr_decay=warmup \
-        --seed=$seed \
-        --output_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/recent \
-        --best_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best \
-      > $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/train_log.txt
-    done & 
-  done 
-done &
-```
-
-
-### 2.3.2 Sample
-
-Before using the error model to select test cases, we need to first infer the model on all the texts and store the results.
-
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
-```
-for model in "hubert"
-do
-  for seed in 1 2 3
-  do
-    for accent in "RRBI" "SVBI" "TNI" "THV"
-    do
-      cuda_devices=0
-      echo $accent seed $seed cuda $cuda_devices
-      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u infer_error_model.py \
-        --batch_size=64 \
-        --json_path=$DATA/$accent/manifests/selection.json \
-        --pretrained_ckpt=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/ErrorClassifierPhoneBiLSTM_V2.pt \
-        --output_dir=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best \
-      > $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/infer_log.txt
-
-      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
-        --selection_json_file=$DATA/$accent/manifests/selection.json \
-        --seed_json_file=$DATA/$accent/manifests/seed.json \
-        --error_model_weights=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/weights.pkl \
-        --random_json_path=$DATA/$accent/manifests/train/random \
-        --output_json_path=$DATA/$accent/manifests/train/"$model"/error_model \
-        --exp_id=$seed 
-    echo
+    mkdir -p $PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best
+    echo $accent seed $seed
+    echo 
+    CUDA_VISIBLE_DEVICES=6 python word_error_predictor.py \
+      --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
+      --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
+      --output_dir=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
+      --seed=$seed \
+      > $PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/training.log
     done &
   done 
 done &
 ```
 
+### 2.3.2 Sampling `real` audio and evaluation
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+**word_enhance**
+```
+for model in "hubert"
+do
+  for seed in 1 2 3
+  do
+    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    do
+      echo $accent seed $seed
+      CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
+        --sampling_method=word_enhance \
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --data_folder=$DATA/$accent/manifests/train/random/ \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
+        --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real \
+        --seed=$seed 
+    done 
+  done
+done &
+```
+
+
+"YBAA" "ZHAA"
+"ASI" "TNI" 
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
+**no_word_enhance**
+```
+for model in "hubert"
+do
+  for seed in 1 2 3
+  do
+    for accent in "THV" "TLV"
+    do
+      echo $accent seed $seed
+      CUDA_VISIBLE_DEVICES=6 python3 -u word_error_sampling.py \
+        --sampling_method=no_word_enhance \
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --data_folder=$DATA/$accent/manifests/train/random/ \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
+        --finetuned_ckpt=$PRETRAINED_CKPTS/word_error_predictor/"$model"/$accent/seed_"$seed"/best \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real \
+        --seed=$seed 
+    done 
+  done
+done &
+```
 
 ### 2.3.3 Evaluate
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+
+for method in "word_enhance" "no_word_enhance"
 ```
 for model in "hubert"
 do
@@ -370,24 +366,28 @@ do
   do
     for size in 100 200 300 400
     do
-      for accent in "TXHC"
+      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
       do
-        echo $accent $seed $size
-        echo 
-        echo
-        CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+        for method in "no_word_enhance"
+        do
+          echo $accent seed $seed size $size method $method
+          echo 
+          echo
+          CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
-          --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/train.json \
           --model $model \
           --batch_size 8 \
-          --output_file=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori.txt \
-          > $DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/test_out_ori_log.txt
+          --output_file=$DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori.txt \
+          > $DATA/$accent/manifests/train/"$model"/word_error_predictor_real/$size/$method/seed_"$seed"/test_out_ori_log.txt
+        done
       done 
-    done 
-  done 
+    done
+  done
 done &
 ```
+
 
 # 3. Fine-Tune ASR Models
 
@@ -492,8 +492,6 @@ done &
 
 
 ## Train on Word Error Data (real)
-
-TODO: standardize word enhance
 
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 **word_enhance**
