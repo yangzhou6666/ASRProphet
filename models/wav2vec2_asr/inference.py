@@ -9,6 +9,7 @@ from tqdm import tqdm
 from datasets import load_dataset, Audio
 from transformers import AutoModelForCTC, Wav2Vec2Processor
 
+os.environ['TRANSFORMERS_OFFLINE'] = 'yes'
 
 def parse_args():
     parser = argparse.ArgumentParser(description='wav2vec2')

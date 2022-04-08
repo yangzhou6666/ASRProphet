@@ -9,6 +9,7 @@ from datasets import load_dataset, Audio
 from typing import Dict, List, Optional, Union
 from transformers import AutoModelForCTC, Wav2Vec2Processor, Trainer, TrainingArguments, Wav2Vec2CTCTokenizer, Wav2Vec2FeatureExtractor
 
+os.environ['TRANSFORMERS_OFFLINE'] = 'yes'
 
 def parse_args():
     parser = argparse.ArgumentParser(description='wav2vec2')
