@@ -349,7 +349,7 @@ do
       echo $accent $seed $size
       echo $cuda_devices
       echo
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/icassp_real_mix/$accent/$size/seed_"$seed"
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
         --batch_size=16 \
@@ -400,7 +400,7 @@ do
     do
       echo $accent $seed $size
       echo 
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/word_enhance
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/word_error_real_mix/word_enhance/$accent/$size/seed_"$seed"
       mkdir -p $model_dir
       cuda_devices=4
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
@@ -440,11 +440,13 @@ do
 done & 
 ```
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
 **no_word_enhance**
 ```
-for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+for accent in "ERMS"
 do
   for seed in 1 2 3
   do
@@ -453,7 +455,7 @@ do
       cuda_devices=3
       echo $accent $seed $size
       echo 
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/word_error_real_mix/no_word_enhance
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/word_error_real_mix/no_word_enhance/$accent/$size/seed_"$seed"
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
         --batch_size=16 \
@@ -495,20 +497,22 @@ done &
 
 ### 3. Failure Estimator
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
 
 ```
-for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+for accent in "YBAA" "ZHAA" "ASI"
 do
   for seed in 1 2 3
   do
     for size in 100 200 300 400
     do
-      cuda_devices=5
+      cuda_devices=1
       echo $accent $seed $size
       echo 
-      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/$accent/$size/seed_"$seed"/asrevolve_error_model_real
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/asrevolve_error_model_real/$accent/$size/seed_"$seed"/
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
         --batch_size=16 \
