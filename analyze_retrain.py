@@ -63,19 +63,15 @@ def gather_result(asr:str, dataset:str, tool:str):
 
             
             
-            if tool in ["icassp_real_mix", "asrevolve_error_model_real", "icassp_real_mix_lr1e-5"]:
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/{tool}/test_infer_log.txt"
-            elif tool in ["word_error_real_mix", "word_error_real_mix_lr1e-5"] :
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/{tool}/word_enhance/test_infer_log.txt"
-            elif tool == "word_error_real_mix_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/word_error_real_mix/word_enhance_no_seed/test_infer_log.txt"
-            elif tool == "icassp_real_mix_no_seed":
-                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{dataset}/{size}/seed_{seed}/icassp_real_no_seed/test_infer_log.txt"
+            if tool in ["icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]:
+                path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{tool}/{dataset}/{size}/seed_{seed}/test_infer_log.txt"
             else :
                 raise ValueError("Undefined tool")
 
             try:
                 WER, CER = analyze_result(path_to_log)
+                WER = float(WER)
+                CER = float(CER)
             except:
                 print(path_to_log)
                 WER = -1
@@ -184,14 +180,29 @@ def get_original_performance(asr:str, dataset:str):
 
 if __name__ == "__main__":
 
-    
-    # asrs = ["quartznet"]
-    # datasets = ["SVBI", "HJK"]
-    # tools = [ "icassp_real_mix", "word_error_real_mix"]
-    
-    asrs = ["hubert"]
+    asrs = ["quartznet"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = [ "asrevolve_error_model_real"]
+    tools = ["icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
+    # tools = ["icassp_real_mix"]
+    # tools = ["asrevolve_error_model_real"]
+    # tools = ["word_error_real_mix/no_word_enhance"]
+    # tools = ["word_error_real_mix/word_enhance"]
+    
+    # asrs = ["hubert"]
+    # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    # tools = ["icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
+    # tools = ["icassp_real_mix"]
+    # tools = ["asrevolve_error_model_real"]
+    # tools = ["word_error_real_mix/no_word_enhance"]
+    # tools = ["word_error_real_mix/word_enhance"]
+    
+    # asrs = ["wav2vec-base"]
+    # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    # tools = ["icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
+    # tools = ["icassp_real_mix"]
+    # tools = ["asrevolve_error_model_real"]
+    # tools = ["word_error_real_mix/no_word_enhance"]
+    # tools = ["word_error_real_mix/word_enhance"]
     
     
     for asr in asrs :
@@ -215,7 +226,7 @@ if __name__ == "__main__":
                 # print(df)
 
                 os.makedirs("result/RQ2", exist_ok=True)
-                df.to_csv(f"result/RQ2/{asr}_{dataset}_{tool}.csv")
+                df.to_csv(f"result/RQ2/{asr}_{dataset}_{tool.replace('/','_')}.csv")
 
                 dfs.append(df)
             
@@ -230,7 +241,16 @@ if __name__ == "__main__":
             
             dataframes.append(combined_df)
             
-        # print()
-        # print()
-        # result = combine_dataset(datasets, dataframes)
-        # print(result.to_string(index=False))
+        print()
+        print()
+        result = combine_dataset(datasets, dataframes)
+        
+        # select only column with average values
+        selected_column = []
+        for col in result.columns.to_list() :
+            if col.startswith("Wa") or col.startswith("Ca") or col.startswith("WER") or col.startswith("CER") :
+                selected_column.append(col)
+        result = result[selected_column]
+        
+        
+        print(result.to_string(index=False))

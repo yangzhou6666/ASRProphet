@@ -138,16 +138,18 @@ if __name__ == "__main__":
     ## RQ1 
     # Measure the WER and CER using the original model
     
-    asrs = ["hubert"]
+    asrs = ["quartznet"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
-    datasets = ["YBAA"]
-    tools = ["asrevolve_error_model_real"]
-
-    # asrs = ["wav2vec-base"]
+    tools = ["error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    
+    # asrs = ["hubert"]
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["error_model", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
-
+    # tools = ["error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    
+    asrs = ["wav2vec-base"]
+    datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
+    tools = ["error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    
     for asr in asrs :
         
         dataframes = []
@@ -184,5 +186,13 @@ if __name__ == "__main__":
         print()
         print()
         result = combine_dataset(datasets, dataframes)
+        
+        # select only column with average values
+        selected_column = []
+        for col in result.columns.to_list() :
+            if col.startswith("Wa") or col.startswith("Ca") :
+                selected_column.append(col)
+        result = result[selected_column]
+        
         print(result.to_string(index=False))
 
