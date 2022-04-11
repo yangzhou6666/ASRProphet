@@ -392,6 +392,7 @@ done &
 
 ## Train on ICASSP sampling (real)
 
+**diversity_enhancing**
 "YBAA" "ZHAA" "ASI" "TNI"
 "NCC" "TXHC" "EBVS" "ERMS"
 "YDCK" "YKWK" "THV" "TLV"
@@ -406,12 +407,63 @@ do
       do
         cuda_devices=7
         echo $accent seed $seed $model
-        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/$accent/$size/seed_"$seed"/icassp_real_mix
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/icassp_real_mix/$accent/$size/seed_"$seed"
         mkdir -p $model_dir
         CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
           --cache_dir=$CACHE_DIR \
           --wav_dir=$WAV_DIR \
           --train_manifest=$DATA/$accent/manifests/train/"$model"/error_model/$size/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=1e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done
+    done
+  done
+done &
+```
+
+**without_diversity_enhancing**
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for accent in "YKWK" "THV" "TLV"
+  do
+    for seed in 1 2 3
+    do
+      for size in 100 200 300 400
+      do
+        cuda_devices=6
+        sampling_method=without_diversity_enhancing
+        echo
+        echo
+        echo $accent seed $seed $model icassp $sampling_method 
+        echo cuda $cuda_devices
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/icassp_"$sampling_method"_real_mix/$accent/$size/seed_"$seed"/
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
           --val_manifest=$DATA/$accent/manifests/dev.json \
           --output_dir=$model_dir/best \
           --model=$model \
