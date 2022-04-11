@@ -30,6 +30,18 @@ class DiversityDrivenSampler():
         phone_list = [item for item in phone_list if item not in {"'"}]
         return phone_list
 
+    def get_sentence_wise_phone_freqs(self):
+        '''Compute the phone freq for each sentence stored in the class'''
+        sent_wise_phone_freqs = []
+        for text in self.sentences:
+            freq = np.zeros(len(self.phone_vocab))
+            phones = self.get_phonemes(text)
+            for phone in phones:
+                freq[self.phone_to_id[phone]] +=1
+            self.phone_sentences.append(phones)
+            sent_wise_phone_freqs.append(freq)
+        return sent_wise_phone_freqs
+
 
 if __name__ == '__main__':
     text = 'I have a doy.'
