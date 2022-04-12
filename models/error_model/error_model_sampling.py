@@ -113,7 +113,15 @@ class ErrorModelSampler():
 
   def get_f(self,freq,tau=500):
     return 1 - np.exp(-freq/tau)
-    
+
+
+  def get_f2(self, freq):
+    '''
+    From A SUBMODULAR OPTIMIZATION APPROACH TO SENTENCE SET SELECTION
+    sum log(f_i(S))
+    '''
+    return np.log(freq + 1)
+
   
   def select_text_and_update_phone_freq(self, sampling_method, weight_id):
     min_indices = []
@@ -128,6 +136,10 @@ class ErrorModelSampler():
         score = (f_f - f_i) * self.error_model_weights[weight_id][i]
       elif sampling_method == 'without_diversity_enhancing':
         score = self.error_model_weights[weight_id][i]
+      elif sampling_method == 'pure_diversity':
+        f_i = self.get_f2(self.acc_phone_freqs)
+        f_f = self.get_f2(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
+        score = (f_f - f_i)
       else :
         raise ValueError('sampling_method {} not supported'.format(sampling_method))
       
