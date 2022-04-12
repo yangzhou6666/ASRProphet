@@ -386,9 +386,58 @@ done &
 ```
 
 
-
-
 # 3. Fine-Tune ASR Models
+
+
+## Train using random sampling
+
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for accent in "EBVS" "ERMS" "YDCK"
+  do
+    for seed in 1 2 3
+    do
+      for size in 100 200 300 400
+      do
+        cuda_devices=2
+        echo $accent seed $seed $model
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/random/$accent/$size/seed_"$seed"/
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/random/$size/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=1e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done
+    done
+  done
+done &
+```
+
+
 
 ## Train on ICASSP sampling (real)
 
