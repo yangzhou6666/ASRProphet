@@ -122,6 +122,13 @@ class ErrorModelSampler():
     '''
     return np.log(freq + 1)
 
+
+  def compute_trip_distrbution(selected_text):
+    pass
+
+  def compute_e_distance(dist_1, dist_2):
+    pass
+
   
   def select_text_and_update_phone_freq(self, sampling_method, weight_id):
     min_indices = []
@@ -140,6 +147,15 @@ class ErrorModelSampler():
         f_i = self.get_f2(self.acc_phone_freqs)
         f_f = self.get_f2(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
         score = (f_f - f_i)
+      elif sampling_method == 'triphone_rich':
+        '''
+        dist = self.compute_trip_distrbution(xxx + text_to_be_selected) # if we add this text to the selected texts
+        assert len(dist) == triphone_size
+        idea_dist = [1.0 / triphone_size for _ in range(triphone_size)]
+        score = self.compute_e_distance()
+
+        '''
+
       else :
         raise ValueError('sampling_method {} not supported'.format(sampling_method))
       
