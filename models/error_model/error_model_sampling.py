@@ -180,7 +180,20 @@ class ErrorModelSampler():
     sum log(f_i(S))
     '''
     return np.log(freq + 1)
-  
+
+  def compute_euclidean_distance(v_1:List[float], v_2: List[float]) -> float:
+    """Compute the Euclidean distance between two vectors.
+
+    Args:
+        v_1 (List[float]): an array of float
+        v_2 (List[float]): an array of float
+
+    Returns:
+        float: euclidean distance
+    """
+    return np.linalg.norm(np.array(v_1) - np.array(v_2))
+    
+
   def select_text_and_update_phone_freq(self, sampling_method, weight_id):
     min_indices = []
     min_sentences = []
