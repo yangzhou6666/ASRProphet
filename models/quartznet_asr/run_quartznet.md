@@ -73,14 +73,14 @@ done &
 
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
-for accent in "ZHAA"
+for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 do
   for seed in 1 2 3
   do
     LR=3e-4
     echo $accent seed $seed
     mkdir -p $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/
-    CUDA_VISIBLE_DEVICES=4 python3 -u train_error_model.py \
+    CUDA_VISIBLE_DEVICES=1 python3 -u train_error_model.py \
       --batch_size=1 \
       --train_path=$DATA/$accent/manifests/quartznet_outputs/seed_out.txt \
       --test_path=$DATA/$accent/manifests/quartznet_outputs/dev_out.txt \
@@ -90,7 +90,7 @@ do
       --best_dir=$PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/best \
     > $PRETRAINED_CKPTS/error_models/quartznet/$accent/seed_"$seed"/train_log.txt & 
   echo
-  done 
+  done &
 done &
 ```
 
@@ -163,10 +163,36 @@ do
 done &
 ```
 
+**pure_diversity**
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "quartznet"
+do
+  for seed in 1 2 3
+  do
+    for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    do
+      cuda_devices=3
+      sampling_method=pure_diversity
+      echo $accent seed $seed cuda $cuda_devices
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
+        --sampling_method=$sampling_method \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --error_model_weights=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/weights.pkl \
+        --random_json_path=$DATA/$accent/manifests/train/random \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method" \
+        --exp_id=$seed 
+    done &
+  done 
+done &
+```
+
 
 ### 2.1.3 Evaluate
 
-**diversity_enhancing**
+**without_diversity_enhancing**
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for accent in "YBAA" "ZHAA" "ASI"
@@ -194,7 +220,7 @@ do
 done &
 ```
 
-**without_diversity_enhancing**
+**diversity_enhancing**
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for size in 100 200 300 400
@@ -219,22 +245,48 @@ do
 done &
 ```
 
+**pure_diversity**
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+do
+  for seed in 1 2 3
+  do
+    for size in 100 200 300 400
+    do
+      echo 
+      cuda_devices=1
+      sampling_method=pure_diversity
+      echo INFERENCE
+      echo $accent seed $seed size $size sampling_method $sampling_method cuda $cuda_devices
+      echo
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+      --batch_size=32 \
+      --output_file=$DATA/$accent/manifests/train/quartznet/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/train/quartznet/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+      > $DATA/$accent/manifests/train/quartznet/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
+    done 
+  done
+done &
+```
+
 
 
 ## 2.2 ASREvolve
 
 ### 2.2.1 Training
 
-"YBAA" "ZHAA" "ASI"
-"TNI" "NCC" "TXHC"
-"EBVS" "ERMS" "YDCK"
-"YKWK" "THV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for seed in 1 2 3
 do
-  for accent in "YBAA" "ZHAA" "ASI"
+  for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
   do
-    cuda_devices=3
+    cuda_devices=1
     echo $accent seed $seed
     mkdir -p $PRETRAINED_CKPTS/asrevolve_error_models/quartznet/$accent/seed_"$seed"
     CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u train_error_model_asrevolve.py \
@@ -255,14 +307,14 @@ done &
 "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 
 ```
-for num_sample in 100 200 300 400
+for num_sample in 50 75 500
 do
   for seed in 1 2 3
   do
-    for accent in "YKWK"
+    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
     do
       echo $accent seed $seed
-      CUDA_VISIBLE_DEVICES=3 python3 -u error_model_sampling_asrevolve.py \
+      CUDA_VISIBLE_DEVICES=0 python3 -u error_model_sampling_asrevolve.py \
         --seed_json_file=$DATA/$accent/manifests/seed.json \
         --random_json_file=$DATA/$accent/manifests/train/random/"$num_sample"/seed_"$seed"/train.json \
         --selection_json_file=$DATA/$accent/manifests/selection.json \
@@ -512,6 +564,63 @@ do
       echo $cuda_devices
       echo
       model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/icassp_"$sampling_method"_real_mix/$accent/$size/seed_"$seed"
+      mkdir -p $model_dir
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+        --batch_size=16 \
+        --num_epochs=100 \
+        --eval_freq=1 \
+        --train_freq=30 \
+        --lr=1e-5 \
+        --wav_dir=$WAV_DIR \
+        --train_manifest=$DATA/$accent/manifests/train/quartznet/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+        --val_manifest=$DATA/$accent/manifests/dev.json \
+        --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+        --output_dir=$model_dir/recent \
+        --best_dir=$model_dir/best \
+        --early_stop_patience=10 \
+        --zero_infinity \
+        --save_after_each_epoch \
+        --turn_bn_eval \
+        --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+        --lr_decay=warmup \
+        --seed=$seed \
+        --optimizer=novograd \
+      > $model_dir/train_log.txt
+
+
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+      --batch_size=16 \
+      --output_file=$model_dir/test_out.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/test.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$model_dir/best/Jasper.pt \
+      > $model_dir/test_infer_log.txt
+    done 
+  done &
+done  &
+```
+
+**pure_diversity_enhancing**
+"YBAA" "ZHAA"
+"ASI" "TNI"
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
+```
+for accent in "YBAA" "ZHAA"
+do
+  for seed in 1 2 3
+  do
+    for size in 100 200 300 400
+    do
+      sampling_method=pure_diversity
+      cuda_devices=2
+      echo $accent $seed $size
+      echo $cuda_devices
+      echo
+      model_dir=$PRETRAINED_CKPTS/quartznet/finetuned/"$sampling_method"/$accent/$size/seed_"$seed"
       mkdir -p $model_dir
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
         --batch_size=16 \
