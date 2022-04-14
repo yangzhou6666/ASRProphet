@@ -85,9 +85,6 @@ class ErrorModelSampler():
     self.json_lines = [line for line in open(self.json_file)]
     self.phone_sentences = []
     
-    print(len(self.sentences))
-    print(self.sentences[0])
-    
     print('\tgenerating_vocab...')
     if sampling_method == "triphone_rich" :
       self.phone_vocab = self.get_triphone_vocab(self.sentences)
@@ -184,7 +181,7 @@ class ErrorModelSampler():
     '''
     return np.log(freq + 1)
 
-  def compute_euclidean_distance(v_1:List[float], v_2: List[float]) -> float:
+  def compute_euclidean_distance(self, v_1:List[float], v_2: List[float]) -> float:
     """Compute the Euclidean distance between two vectors.
 
     Args:
@@ -195,6 +192,11 @@ class ErrorModelSampler():
         float: euclidean distance
     """
     return np.linalg.norm(np.array(v_1) - np.array(v_2))
+  
+  def get_proportion(self, l:List[float])->List[float]:
+    s = np.sum(l)
+    if s == 0 : s = 1
+    return l/s
     
 
   def select_text_and_update_phone_freq(self, sampling_method, weight_id):
@@ -222,14 +224,20 @@ class ErrorModelSampler():
         assert len(dist) == triphone_size
         idea_dist = [1.0 / triphone_size for _ in range(triphone_size)]
         score = self.compute_e_distance()
-
         '''
-
+        new_dists = self.acc_phone_freqs + self.sent_wise_phone_freqs[i]
+        assert len(self.ideal_triphone_dists) == len(new_dists)
+        input_feature = self.get_proportion(new_dists) 
       else :
         raise ValueError('sampling_method {} not supported'.format(sampling_method))
       
-      score = score[4:-2]
-      score = np.sum(score)/len(self.phone_sentences[i])
+      if sampling_method == 'triphone_rich':
+        # give negative score because we want to choose the score with lowest value
+        score = -self.compute_euclidean_distance(input_feature, self.ideal_triphone_dists)
+      else :
+        score = score[4:-2]
+        score = np.sum(score)/len(self.phone_sentences[i])
+      
       if score > max_score:
         max_score = score
         max_indices = [i]
@@ -300,7 +308,7 @@ def main(args):
   seed_samples = [line for line in open(seed_json_file)]
   weights_file = args.error_model_weights
   exp_id = args.exp_id
-  for num_samples in [50]:
+  for num_samples in [100, 200, 300, 400]:
     weights = pickle.load(open(weights_file,'rb'))
     weights_list = [weights]  
     random_json_file = os.path.join(random_json_path,str(num_samples),'seed_'+exp_id,'train.json')
