@@ -106,6 +106,9 @@ class ErrorModelSampler():
     self.error_model_weights = error_model_weights
     self.acc_phone_freqs = np.zeros(len(self.phone_vocab))
     
+    if sampling_method == "triphone_rich" :
+      self.ideal_triphone_dists = np.ones(len(self.phone_vocab))/len(self.phone_vocab)
+    
   def get_triphones(self, text:str)->List[List[str]]:
     """get triphone sequence for a given text
 
