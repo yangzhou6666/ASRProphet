@@ -80,14 +80,14 @@ done &
 ```
 for model in "hubert"
 do
-  for seed in 1 2 3
+  for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
   do
-    for accent in "SKA" "ZHAA" "HJK" "HKK" "ASI"
+    for seed in 1 2 3
     do
       LR=3e-4
       echo $accent seed $seed
       mkdir -p $PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/
-      CUDA_VISIBLE_DEVICES=2 python3 -u train_error_model.py \
+      CUDA_VISIBLE_DEVICES=3 python3 -u train_error_model.py \
         --batch_size=64 \
         --train_path=$DATA/$accent/manifests/"$model"_outputs/seed_out.txt \
         --test_path=$DATA/$accent/manifests/"$model"_outputs/dev_out.txt \
@@ -181,6 +181,32 @@ do
 done &
 ```
 
+**pure_diversity**
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "hubert"
+do
+  for seed in 1 2 3
+  do
+    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    do
+      cuda_devices=5
+      sampling_method=pure_diversity
+      echo $accent seed $seed cuda $cuda_devices
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
+        --sampling_method=$sampling_method \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --error_model_weights=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/weights.pkl \
+        --random_json_path=$DATA/$accent/manifests/train/random \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method" \
+        --exp_id=$seed 
+    done &
+  done 
+done &
+```
 
 
 ### 2.1.3 Evaluate
@@ -243,6 +269,36 @@ done &
 ```
 
 
+**pure_diversity**
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "hubert"
+do
+  for seed in 2
+  do
+    for size in 200 300
+    do
+      for accent in "NCC"
+      do
+        sampling_method=pure_diversity
+        echo $accent $seed $size $sampling_method
+        echo 
+        echo
+        CUDA_VISIBLE_DEVICES=0 python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+          --model $model \
+          --batch_size 8 \
+          --output_file=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori.txt \
+          > $DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
+      done 
+    done 
+  done &
+done &
+```
+
+
 ## 2.2 ASREvolve
 
 ### 2.2.1 Training
@@ -278,7 +334,8 @@ done &
 
 ### 2.2.2 Using ASREvolve for sampling
 
-"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC"
+"YBAA" "ZHAA" "ASI"
+"TNI" "NCC" "TXHC"
 "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 
 "ZHAA"
@@ -289,13 +346,13 @@ done &
 "TLV"
 
 ```
-for model in "hubert"
+for model in "hubert" "wav2vec-base"
 do
   for seed in 1 2 3
   do
-    for num_sample in 100 200 300 400
+    for num_sample in 50 75 500
     do
-      for accent in "TLV" 
+      for accent in "YBAA" "ZHAA" "ASI"
       do
         echo $accent seed $seed
         CUDA_VISIBLE_DEVICES=6 python3 -u error_model_sampling_asrevolve.py \
@@ -476,13 +533,13 @@ done &
 ```
 for model in "hubert"
 do
-  for accent in "YKWK" "THV" "TLV"
+  for accent in "YBAA" "ZHAA" "ASI"
   do
     for seed in 1 2 3
     do
-      for size in 100 200 300 400
+      for size in 100 200
       do
-        cuda_devices=7
+        cuda_devices=4
         echo $accent seed $seed $model
         model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/random/$accent/$size/seed_"$seed"/
         mkdir -p $model_dir
@@ -616,6 +673,58 @@ do
   done
 done &
 ```
+
+**pure_diversity**
+"YBAA" "ZHAA"
+"ASI" "TNI"
+"NCC" "TXHC"
+"EBVS" "ERMS"
+"YDCK" "YKWK"
+"THV" "TLV"
+```
+for model in "hubert"
+do
+  for seed in 2
+  do
+    for size in 300
+    do
+      for accent in "NCC"
+      do
+        cuda_devices=7
+        sampling_method=pure_diversity
+        echo $accent seed $seed $model icassp $sampling_method 
+        echo cuda $cuda_devices
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/"$sampling_method"/$accent/$size/seed_"$seed"/
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=2e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done
+    done
+  done
+done &
+```
+
 
 #### Train ASREvolve Failure Estimator
 
