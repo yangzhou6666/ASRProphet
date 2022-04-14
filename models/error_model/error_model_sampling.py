@@ -1,5 +1,6 @@
 import os,sys,json,random,argparse
 from math import ceil
+from typing import List
 import numpy as np
 from operator import itemgetter
 from tqdm import tqdm
@@ -71,7 +72,6 @@ def normalize_string(s, labels=labels, table=table, **unused_kwargs):
 def normalized_json_transcript(json_str):
   transcript = json.loads(json_str.strip())["text"]
   output = normalize_string(transcript,labels,table)
-  #print(output)
   return output
 
 
@@ -84,15 +84,61 @@ class ErrorModelSampler():
     self.sentences = [normalized_json_transcript(line) for line in open(self.json_file)]
     self.json_lines = [line for line in open(self.json_file)]
     self.phone_sentences = []
-
+    
+    print(len(self.sentences))
+    print(self.sentences[0])
+    
     print('\tgenerating_vocab...')
-    self.phone_vocab = phone_vocab
+    if sampling_method == "triphone_rich" :
+      self.phone_vocab = self.get_triphone_vocab(self.sentences)
+    else :
+      self.phone_vocab = phone_vocab
+    
     self.phone_to_id = dict([(phone,i) for i,phone in enumerate(self.phone_vocab)])
+    
     print('\tcomputing phone freq for each sentence...')
-    self.sent_wise_phone_freqs = self.get_sentence_wise_phone_freqs()
+    if sampling_method == "triphone_rich" :
+      self.sent_wise_phone_freqs = self.get_sentence_wise_triphone_freqs()
+    else :
+      self.sent_wise_phone_freqs = self.get_sentence_wise_phone_freqs()
+    
     self.phone_freqs = np.sum(np.array(self.sent_wise_phone_freqs),0)
     self.error_model_weights = error_model_weights
     self.acc_phone_freqs = np.zeros(len(self.phone_vocab))
+    
+  def get_triphones(self, text:str)->List[List[str]]:
+    """get triphone sequence for a given text
+
+    Args:
+        text (str): input text
+
+    Returns:
+        List[List[str]]: list of triphones in text
+    """
+    phones = self.get_phonemes(text)
+    triphones = [phones[i:i+3] for i in range(len(phones)-2)]
+    return triphones
+
+  def format_list(self, l: List[str]):
+      return "_".join(l)
+
+  def get_triphone_vocab(self, sentences:List[str]) -> List[str]:
+    """get triphone vocabulary
+
+    Args:
+        sentences (List[str]): corpus of sentences
+
+    Returns:
+        List[str]: unique list of triphones vocabularies
+    """
+    phone_vocab = []
+    for text in sentences:
+      triphones = self.get_triphones(text)
+      triphones = [self.format_list(triphone) for triphone in triphones]
+      phone_vocab += triphones
+    phone_vocab = np.unique(phone_vocab).tolist()
+    phone_vocab += [MASK, ' ']
+    return phone_vocab
 
   def get_phonemes(self, text):
     phone_list = get_phoneme_seq(text)
@@ -100,6 +146,19 @@ class ErrorModelSampler():
     phone_list = [item for item in phone_list if item not in {"'"}]
     return phone_list
 
+  def get_sentence_wise_triphone_freqs(self):
+    sent_wise_triphone_freqs = []
+    for text in self.sentences:
+      freq = np.zeros(len(self.phone_vocab))
+      triphones = self.get_triphones(text)
+      triphones = [self.format_list(triphone) for triphone in triphones]
+      for phone in triphones:
+        freq[self.phone_to_id[phone]] +=1
+      self.phone_sentences.append(triphones)
+      sent_wise_triphone_freqs.append(freq)
+    return sent_wise_triphone_freqs
+
+  
   def get_sentence_wise_phone_freqs(self):
     sent_wise_phone_freqs = []
     for text in self.sentences:
@@ -121,14 +180,6 @@ class ErrorModelSampler():
     sum log(f_i(S))
     '''
     return np.log(freq + 1)
-
-
-  def compute_trip_distrbution(selected_text):
-    pass
-
-  def compute_e_distance(dist_1, dist_2):
-    pass
-
   
   def select_text_and_update_phone_freq(self, sampling_method, weight_id):
     min_indices = []
@@ -144,6 +195,8 @@ class ErrorModelSampler():
       elif sampling_method == 'without_diversity_enhancing':
         score = self.error_model_weights[weight_id][i]
       elif sampling_method == 'pure_diversity':
+        # print("acc_phone_freqs\n", self.acc_phone_freqs)
+        # print("sent_wise_phone_freqs[i]\n", self.sent_wise_phone_freqs[i])
         f_i = self.get_f2(self.acc_phone_freqs)
         f_f = self.get_f2(self.acc_phone_freqs + self.sent_wise_phone_freqs[i])
         score = (f_f - f_i)
@@ -231,7 +284,7 @@ def main(args):
   seed_samples = [line for line in open(seed_json_file)]
   weights_file = args.error_model_weights
   exp_id = args.exp_id
-  for num_samples in [100, 200, 300, 400]:
+  for num_samples in [50]:
     weights = pickle.load(open(weights_file,'rb'))
     weights_list = [weights]  
     random_json_file = os.path.join(random_json_path,str(num_samples),'seed_'+exp_id,'train.json')
