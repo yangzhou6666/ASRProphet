@@ -63,7 +63,7 @@ def gather_result(asr:str, dataset:str, tool:str):
 
             
             
-            if tool in ["random", "icassp_real_mix", "icassp_without_diversity_enhancing_real_mix", "pure_diversity", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]:
+            if tool in ["random", "icassp_real_mix", "icassp_without_diversity_enhancing_real_mix", "pure_diversity", "triphone_rich", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]:
                 path_to_log = f"models/pretrained_checkpoints/{asr}/finetuned/{tool}/{dataset}/{size}/seed_{seed}/test_infer_log.txt"
             else :
                 raise ValueError("Undefined tool")
@@ -180,7 +180,7 @@ def get_original_performance(asr:str, dataset:str):
 
 if __name__ == "__main__":
 
-    # asrs = ["quartznet"]
+    asrs = ["quartznet"]
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
     # tools = ["random", "pure_diversity", "icassp_without_diversity_enhancing_real_mix", "icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
     
@@ -188,9 +188,10 @@ if __name__ == "__main__":
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
     # tools = ["random", "pure_diversity", "icassp_without_diversity_enhancing_real_mix", "icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
     
-    asrs = ["wav2vec-base"]
+    # asrs = ["wav2vec-base"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    tools = ["random", "pure_diversity", "icassp_without_diversity_enhancing_real_mix", "icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
+    # tools = ["random", "pure_diversity", "icassp_without_diversity_enhancing_real_mix", "icassp_real_mix", "asrevolve_error_model_real", "word_error_real_mix/no_word_enhance", "word_error_real_mix/word_enhance"]
+    tools = ["triphone_rich"]
     
     
     for asr in asrs :
