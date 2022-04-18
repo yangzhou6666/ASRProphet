@@ -162,12 +162,37 @@ done &
 ```
 for model in "wav2vec-base"
 do
-  for seed in 1 2 3
+  for accent in "YBAA"
   do
-    for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+    for seed in 1 
     do
       cuda_devices=5
       sampling_method=pure_diversity
+      echo $accent seed $seed cuda $cuda_devices
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
+        --sampling_method=$sampling_method \
+        --selection_json_file=$DATA/$accent/manifests/selection.json \
+        --seed_json_file=$DATA/$accent/manifests/seed.json \
+        --error_model_weights=$PRETRAINED_CKPTS/error_models/"$model"/$accent/seed_"$seed"/best/weights.pkl \
+        --random_json_path=$DATA/$accent/manifests/train/random \
+        --output_json_path=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method" \
+        --exp_id=$seed 
+    done
+  done 
+done
+```
+
+**triphone_rich**
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for accent in "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+  do
+    for seed in 1 2 3
+    do
+      cuda_devices=0
+      sampling_method=triphone_rich
       echo $accent seed $seed cuda $cuda_devices
       CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u error_model_sampling.py \
         --sampling_method=$sampling_method \
@@ -271,6 +296,34 @@ do
 done &
 ```
 
+**triphone_rich**
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for seed in 1 2 3
+  do
+    for size in 100 200 300 400
+    do
+      for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+      do
+        sampling_method=triphone_rich
+        echo $accent $seed $size $sampling_method
+        echo 
+        echo
+        CUDA_VISIBLE_DEVICES=0 python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+          --model $model \
+          --batch_size 8 \
+          --output_file=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori.txt \
+          > $DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
+      done 
+    done 
+  done &
+done &
+```
 
 
 ## 2.2 ASREvolve
@@ -693,6 +746,56 @@ do
   done
 done &
 ```
+
+**triphone_rich**
+"YBAA" "ZHAA" "ASI" 
+"TNI" "NCC" "TXHC"
+"EBVS" "ERMS" "YDCK"
+"YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for size in 300
+  do
+    for accent in "ZHAA"
+    do
+      for seed in 2
+      do
+        cuda_devices=6
+        sampling_method=triphone_rich
+        echo $accent seed $seed $model icassp $sampling_method 
+        echo cuda $cuda_devices
+        model_dir=$PRETRAINED_CKPTS/"$model"/finetuned/"$sampling_method"/$accent/$size/seed_"$seed"/
+        mkdir -p $model_dir
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u finetune.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --train_manifest=$DATA/$accent/manifests/train/"$model"/error_model_"$sampling_method"/$size/seed_"$seed"/train.json \
+          --val_manifest=$DATA/$accent/manifests/dev.json \
+          --output_dir=$model_dir/best \
+          --model=$model \
+          --seed=$seed \
+          --lr=1e-5 \
+          --batch_size=6 \
+          > $model_dir/train_log.txt
+
+        rm -rf $model_dir/best/tmp_checkpoints/
+
+        CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/test.json \
+          --output_file=$model_dir/test_out.txt \
+          --model=$model \
+          --seed=$seed \
+          --checkpoint=$model_dir/best \
+          > $model_dir/test_infer_log.txt
+      done
+    done &
+  done
+done &
+```
+
 
 
 #### Train ASREvolve Failure Estimator
