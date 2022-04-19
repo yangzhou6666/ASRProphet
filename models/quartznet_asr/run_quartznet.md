@@ -13,7 +13,7 @@ PRETRAINED_CKPTS=$(cd ../pretrained_checkpoints; pwd)
 
 The results will be used for training word error predictor.
 
-"NCC" "TXHC" "YBAA" "YDCK" "YKWK" "ERMS" "MBMPS" "PNV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for accent in "ZHAA"
 do
@@ -46,7 +46,7 @@ done &
 Let's try on the test set.
 
 
-"NCC" "TXHC" "YBAA" "YDCK" "YKWK" "ERMS" "MBMPS" "PNV" "TLV"
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
 for accent in "ZHAA"
 do
@@ -61,6 +61,36 @@ do
   --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
   --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
   > $DATA/$accent/manifests/quartznet_outputs/original_test_infer_log.txt 
+done &
+```
+
+## Infer on randomly selected samples
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+do
+  for seed in 1 2 3
+  do
+    for size in 100 200 300 400
+    do
+      echo 
+      cuda_devices=4
+      sampling_method=random
+      echo INFERENCE
+      echo $accent seed $seed size $size sampling_method $sampling_method cuda $cuda_devices
+      echo
+      mkdir -p $DATA/$accent/manifests/train/quartznet/"$sampling_method"/$size/seed_"$seed"/
+      CUDA_VISIBLE_DEVICES=$cuda_devices python3 -u inference.py \
+      --batch_size=32 \
+      --output_file=$DATA/$accent/manifests/train/quartznet/"$sampling_method"/$size/seed_"$seed"/test_out_ori.txt \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/train/"$sampling_method"/$size/seed_"$seed"/train.json \
+      --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+      --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+      > $DATA/$accent/manifests/train/quartznet/"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
+    done 
+  done &
 done &
 ```
 

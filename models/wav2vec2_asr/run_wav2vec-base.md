@@ -67,6 +67,38 @@ do
 done &
 ```
 
+## Infer on randomly selected samples
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for accent in "THV" "TLV"
+  do
+    for seed in 1 2 3
+    do
+      for size in 100 200 300 400
+      do
+        sampling_method=random
+        echo $accent $seed $size $sampling_method
+        mkdir -p $DATA/$accent/manifests/train/"$model"/"$sampling_method"/$size/seed_"$seed"/
+        echo 
+        echo
+        CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+          --cache_dir=$CACHE_DIR \
+          --wav_dir=$WAV_DIR \
+          --val_manifest=$DATA/$accent/manifests/train/"$sampling_method"/$size/seed_"$seed"/train.json \
+          --model $model \
+          --batch_size 8 \
+          --output_file=$DATA/$accent/manifests/train/"$model"/"$sampling_method"/$size/seed_"$seed"/test_out_ori.txt \
+          > $DATA/$accent/manifests/train/"$model"/"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
+      done 
+    done 
+  done &
+done &
+```
+
+
 # 2. Train Error Model
 
 
