@@ -56,7 +56,7 @@ def gather_result(asr:str, dataset:str, tool:str):
         for size in sizes:
             size = str(size)
             
-            if tool in ["error_model", "error_model_triphone_rich", "error_model_without_diversity_enhancing", "error_model_pure_diversity", "asrevolve_error_model_real"] :
+            if tool in ["random", "error_model", "error_model_triphone_rich", "error_model_without_diversity_enhancing", "error_model_pure_diversity", "asrevolve_error_model_real"] :
                 data_path = f"data/l2arctic/processed/{dataset}/manifests/train/{asr}/{tool}/"
                 path_to_log = os.path.join(data_path, size,f"seed_{seed}", "test_out_ori_log.txt")
             elif tool in ["word_error_predictor_real/word_enhance", "word_error_predictor_real/no_word_enhance"] :
@@ -138,18 +138,18 @@ if __name__ == "__main__":
     ## RQ1 
     # Measure the WER and CER using the original model
     
-    # asrs = ["quartznet"]
+    asrs = ["quartznet"]
     # datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    # tools = ["error_model_triphone_rich", "error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
     
     # asrs = ["hubert"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    # tools = ["error_model_triphone_rich", "error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
     
-    asrs = ["wav2vec-base"]
+    # asrs = ["wav2vec-base"]
     datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
-    # tools = ["error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
-    tools = ["error_model_triphone_rich"]
+    # tools = ["error_model_triphone_rich","error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    tools = ["random", "error_model_triphone_rich"]
     
     
     for asr in asrs :
