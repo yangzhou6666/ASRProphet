@@ -227,20 +227,21 @@ def combine_result(wer:str, cer:str, datas: List[pd.DataFrame])-> pd.DataFrame:
 
 
 
-def get_original_performance(asr:str, dataset:str):
+def get_original_performance(asr:str, dataset:str, type="test"):
     """get wer and cer from the original model
     
     Args:
         asr: asr name
         dataset: dataset name
+        type: seed, test, all test cases in the dataset
     """
     
-    path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_test_infer_log.txt"
+    path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_{type}_infer_log.txt"
 
     try:
         WER, CER = analyze_result(path_to_log)
     except:
-        # print(path_to_log)
+        print(path_to_log)
         WER = -1
         CER = -1
          
