@@ -240,6 +240,8 @@ def get_original_performance(asr:str, dataset:str, type="test"):
 
     try:
         WER, CER = analyze_result(path_to_log)
+        WER = float(WER)
+        CER = float(CER)
     except:
         print(path_to_log)
         WER = -1
