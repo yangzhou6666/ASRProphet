@@ -64,6 +64,27 @@ do
 done &
 ```
 
+
+## Infer on all test cases in the dataset
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for accent in "YDCK" "YKWK" "THV" "TLV"
+do
+  mkdir -p $DATA/$accent/manifests/quartznet_outputs
+  echo $accent
+  echo $WAV_DIR/$accent/wav 
+  CUDA_VISIBLE_DEVICES=0 python3 -u inference.py \
+  --batch_size=16 \
+  --output_file=$DATA/$accent/manifests/quartznet_outputs/original_all_out.txt \
+  --wav_dir=$WAV_DIR \
+  --val_manifest=$DATA/$accent/manifests/all.json \
+  --model_toml=$PRETRAINED_CKPTS/quartznet/quartznet15x5.toml \
+  --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
+  > $DATA/$accent/manifests/quartznet_outputs/original_all_infer_log.txt &
+done &
+```
+
 ## Infer on randomly selected samples
 
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
@@ -303,14 +324,14 @@ done &
 **pure_diversity**
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
 ```
-for accent in "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+for size in 100 200 300 400
 do
-  for seed in 1 2 3
+  for accent in "EBVS"
   do
-    for size in 100 200 300 400
+    for seed in 1 2 3
     do
       echo 
-      cuda_devices=1
+      cuda_devices=0
       sampling_method=pure_diversity
       echo INFERENCE
       echo $accent seed $seed size $size sampling_method $sampling_method cuda $cuda_devices
@@ -324,7 +345,7 @@ do
       --ckpt=$PRETRAINED_CKPTS/quartznet/librispeech/quartznet.pt \
       > $DATA/$accent/manifests/train/quartznet/error_model_"$sampling_method"/$size/seed_"$seed"/test_out_ori_log.txt
     done 
-  done
+  done &
 done &
 ```
 

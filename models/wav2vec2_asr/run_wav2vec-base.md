@@ -67,6 +67,30 @@ do
 done &
 ```
 
+## Infer on all test cases in the dataset
+
+"YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
+```
+for model in "wav2vec-base"
+do
+  for accent in "YKWK" "THV" "TLV"
+  do
+    echo $model $accent
+    mkdir -p $DATA/$accent/manifests/"$model"_outputs
+    echo $WAV_DIR/$accent/wav 
+    CUDA_VISIBLE_DEVICES=7 python3 -u inference.py \
+      --cache_dir=$CACHE_DIR \
+      --wav_dir=$WAV_DIR \
+      --val_manifest=$DATA/$accent/manifests/all.json \
+      --model $model \
+      --batch_size 8 \
+      --output_file=$DATA/$accent/manifests/"$model"_outputs/original_all_out.txt \
+      > $DATA/$accent/manifests/"$model"_outputs/original_all_infer_log.txt
+  done &
+done &
+```
+
+
 ## Infer on randomly selected samples
 
 "YBAA" "ZHAA" "ASI" "TNI" "NCC" "TXHC" "EBVS" "ERMS" "YDCK" "YKWK" "THV" "TLV"
