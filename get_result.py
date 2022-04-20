@@ -50,3 +50,22 @@ if __name__ == "__main__":
     with open('result/RQ2.json', 'w') as fp:
         json.dump(raw_results, fp)    
     
+
+    ## Measure the WER and CER using the original model            
+    
+    raw_results = {}
+    for asr in asrs :
+        raw_results[asr] = {}
+        for dataset in datasets :
+            
+            raw_results[asr][dataset] = {}
+            
+            for t in ["all", "seed", "dev", "seed_plus_dev", "test"] :
+                wer, cer = helper.get_original_performance(asr, dataset, type=t)
+                raw_results[asr][dataset][t] = {"wer":wer, "cer":cer}
+    
+    
+    with open('result/original.json', 'w') as fp:
+        json.dump(raw_results, fp)  
+      
+    
