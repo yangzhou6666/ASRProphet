@@ -236,7 +236,12 @@ def get_original_performance(asr:str, dataset:str, type="test"):
         type: seed, test, all test cases in the dataset
     """
     
-    path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_{type}_infer_log.txt"
+    if type in ["test", "all"]:
+        path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/original_{type}_infer_log.txt"
+    elif type in ["seed", "dev", "seed_plus_dev"] :
+        path_to_log = f"data/l2arctic/processed/{dataset}/manifests/{asr}_outputs/{type}_infer_log.txt"
+    else :
+        raise ValueError("Undefined type")
 
     try:
         WER, CER = analyze_result(path_to_log)
