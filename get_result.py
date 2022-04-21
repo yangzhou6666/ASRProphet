@@ -154,13 +154,50 @@ def save_the_value_of_phoneme_submodular_function_from_selected_samples():
     with open('result/phoneme_submodular_function.json', 'w') as fp:
         json.dump(raw_results, fp)
 
+
+def save_the_number_of_test_cases_from_selected_samples():
+    """Measure the number of test cases from selected samples"""
+
+    tools = ["random", "error_model_triphone_rich","error_model_pure_diversity", "error_model_without_diversity_enhancing", "error_model", "asrevolve_error_model_real", "word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"]
+    
+    raw_results = {}
+    for asr in asrs :
+        raw_results[asr] = {}
+        for dataset in datasets :
+            raw_results[asr][dataset] = {}
+            for tool in tools :
+                raw_results[asr][dataset][tool] = {}
+                for seed in [1, 2, 3] :
+                    raw_results[asr][dataset][tool][seed] = []        
+                    for size in [100, 200, 300, 400] :
+                        if tool == "random":
+                            fpath = f"{DATA}/{dataset}/manifests/train/{tool}/{size}/seed_{seed}/train.json"
+                        elif tool in ["word_error_predictor_real/no_word_enhance", "word_error_predictor_real/word_enhance"] :
+                            fpath = f"{DATA}/{dataset}/manifests/train/{asr}/word_error_predictor_real/{size}/{tool.split('/')[-1]}/seed_{seed}/train.json"
+                        else :
+                            fpath = f"{DATA}/{dataset}/manifests/train/{asr}/{tool}/{size}/seed_{seed}/train.json"
+                        
+                        
+                        if os.path.exists(fpath):
+                            test_cases = open(fpath).readlines()
+                            assert len(test_cases) > 0 
+                            number_of_test_cases = len(test_cases)
+                        else :
+                            print(f"Missing: {fpath}")
+                            number_of_test_cases = -999
+                        
+                        raw_results[asr][dataset][tool][seed].append(number_of_test_cases)
+                        
+    with open('result/number_of_test_cases.json', 'w') as fp:
+        json.dump(raw_results, fp)
+
 if __name__ == "__main__":
     
     # save_performance_of_original_model_on_test_set()
     # save_performance_of_finetuned_model_on_test_set()
     # save_performance_of_original_model_on_the_dataset()
     # save_the_distance_between_the_triphone_rich_selected_samples_and_ideal_distributions()
-    save_the_value_of_phoneme_submodular_function_from_selected_samples()
+    save_the_number_of_test_cases_from_selected_samples()
     
     
     
