@@ -6,6 +6,12 @@ import os
 import helper
 import json
 
+import os 
+
+from models.error_model.error_model_sampling import ErrorModelSampler
+
+DATA = "data/l2arctic/processed"
+
 asrs = ["quartznet", "hubert", "wav2vec-base"]
 datasets = ["YBAA", "ZHAA", "ASI", "TNI", "NCC", "TXHC", "EBVS", "ERMS", "YDCK", "YKWK", "THV", "TLV"]
     
@@ -72,12 +78,39 @@ def save_performance_of_original_model_on_the_dataset():
     with open('result/original.json', 'w') as fp:
         json.dump(raw_results, fp)  
     
-    
+
+def save_the_distance_between_the_triphone_rich_selected_samples_and_ideal_distributions():
+    """Measure the distance between the triphone-rich selected samples and ideal distributions"""
+
+    raw_results = {}
+    for asr in asrs :
+        raw_results[asr] = {}
+        for dataset in datasets :
+            raw_results[asr][dataset] = {}
+            for seed in [1, 2, 3] :
+                raw_results[asr][dataset][seed] = []        
+                for size in [100, 200, 300, 400] :
+                    fpath = f"{DATA}/{dataset}/manifests/train/{asr}/error_model_triphone_rich/{size}/seed_{seed}/train.json"
+                    sampler = ErrorModelSampler(fpath, "triphone_rich", error_model_weights=None, verbose=False)
+                    assert len(sampler.phone_freqs) == len(sampler.ideal_triphone_dists)
+                    triphone_dists = sampler.phone_freqs / sampler.phone_freqs.sum()
+                    assert 0.95 < triphone_dists.sum() and triphone_dists.sum() < 1.05
+                    assert 0.95 < sampler.ideal_triphone_dists.sum() and sampler.ideal_triphone_dists.sum() < 1.05
+                    distance = sampler.compute_euclidean_distance(triphone_dists, sampler.ideal_triphone_dists)
+                    raw_results[asr][dataset][seed].append(distance)
+                    
+    with open('result/triphone_rich.json', 'w') as fp:
+        json.dump(raw_results, fp)
 
 if __name__ == "__main__":
     
-    save_performance_of_original_model_on_test_set()
-    save_performance_of_original_model_on_the_dataset()
-    save_performance_of_original_model_on_the_dataset()
+    # save_performance_of_original_model_on_test_set()
+    # save_performance_of_finetuned_model_on_test_set()
+    # save_performance_of_original_model_on_the_dataset()
+    save_the_distance_between_the_triphone_rich_selected_samples_and_ideal_distributions()
+    
+    
+    
+    
       
     
