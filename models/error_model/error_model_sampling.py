@@ -80,16 +80,17 @@ def normalized_json_transcript(json_str):
 
 
 class ErrorModelSampler():
-  def __init__(self, json_file, sampling_method, error_model_weights=None):
+  def __init__(self, json_file, sampling_method, error_model_weights=None, verbose=True):
     self.json_file = json_file
     self.sampling_method = sampling_method
-    print('\tparsing json...')
     
+    
+    if verbose: print('\tparsing json...')
     self.sentences = [normalized_json_transcript(line) for line in open(self.json_file)]
     self.json_lines = [line for line in open(self.json_file)]
     self.phone_sentences = []
     
-    print('\tgenerating_vocab...')
+    if verbose: print('\tgenerating_vocab...')
     if sampling_method == "triphone_rich" :
       self.phone_vocab = self.get_triphone_vocab(self.sentences)
     else :
@@ -97,7 +98,7 @@ class ErrorModelSampler():
     
     self.phone_to_id = dict([(phone,i) for i,phone in enumerate(self.phone_vocab)])
     
-    print('\tcomputing phone freq for each sentence...')
+    if verbose: print('\tcomputing phone freq for each sentence...')
     if sampling_method == "triphone_rich" :
       self.sent_wise_phone_freqs = self.get_sentence_wise_triphone_freqs()
     else :
