@@ -1,0 +1,221 @@
+Significant: 		34
+Non-significant: 	2
+Total: 				36
+Percentage: 		94.44%
+
+Dataset: YBAA
+ASR: quartznet
+Corr coef:	0.7276647041804998
+p-value:	4.558651219759381e-17
+SIGNIFICANT
+
+Dataset: YBAA
+ASR: hubert
+Corr coef:	0.7545323518700265
+p-value:	6.894449888537281e-19
+SIGNIFICANT
+
+Dataset: YBAA
+ASR: wav2vec-base
+Corr coef:	0.25816769978478055
+p-value:	0.011098291619450047
+SIGNIFICANT
+
+Dataset: ZHAA
+ASR: quartznet
+Corr coef:	0.6926417421040483
+p-value:	5.380244178045789e-15
+SIGNIFICANT
+
+Dataset: ZHAA
+ASR: hubert
+Corr coef:	0.7206538525547456
+p-value:	1.2551712642023238e-16
+SIGNIFICANT
+
+Dataset: ZHAA
+ASR: wav2vec-base
+Corr coef:	0.6845201424314635
+p-value:	1.4787437568988638e-14
+SIGNIFICANT
+
+Dataset: ASI
+ASR: quartznet
+Corr coef:	0.5256369924822224
+p-value:	3.8177103025317505e-08
+SIGNIFICANT
+
+Dataset: ASI
+ASR: hubert
+Corr coef:	0.5850571057436948
+p-value:	3.857284426701916e-10
+SIGNIFICANT
+
+Dataset: ASI
+ASR: wav2vec-base
+Corr coef:	-0.10285267532707601
+p-value:	0.3186708710157431
+NO
+
+Dataset: TNI
+ASR: quartznet
+Corr coef:	0.5943159757472737
+p-value:	1.7302246762433382e-10
+SIGNIFICANT
+
+Dataset: TNI
+ASR: hubert
+Corr coef:	0.5491763212784255
+p-value:	6.88089071596293e-09
+SIGNIFICANT
+
+Dataset: TNI
+ASR: wav2vec-base
+Corr coef:	0.1598355436063616
+p-value:	0.1198112478294421
+NO
+
+Dataset: NCC
+ASR: quartznet
+Corr coef:	0.7952760954221705
+p-value:	3.8036698369121966e-22
+SIGNIFICANT
+
+Dataset: NCC
+ASR: hubert
+Corr coef:	0.8827059062311226
+p-value:	1.3736864413607857e-32
+SIGNIFICANT
+
+Dataset: NCC
+ASR: wav2vec-base
+Corr coef:	0.6602340936578451
+p-value:	2.5249867716756735e-13
+SIGNIFICANT
+
+Dataset: TXHC
+ASR: quartznet
+Corr coef:	0.7320302057748252
+p-value:	2.3877996670030064e-17
+SIGNIFICANT
+
+Dataset: TXHC
+ASR: hubert
+Corr coef:	0.7987253033269273
+p-value:	1.8652265545075544e-22
+SIGNIFICANT
+
+Dataset: TXHC
+ASR: wav2vec-base
+Corr coef:	0.33623286760979404
+p-value:	0.0008101162232299693
+SIGNIFICANT
+
+Dataset: EBVS
+ASR: quartznet
+Corr coef:	0.7960666328794774
+p-value:	3.2344381127624465e-22
+SIGNIFICANT
+
+Dataset: EBVS
+ASR: hubert
+Corr coef:	0.7663529622261024
+p-value:	9.15468373647324e-20
+SIGNIFICANT
+
+Dataset: EBVS
+ASR: wav2vec-base
+Corr coef:	0.6875629111666461
+p-value:	1.0163864051473571e-14
+SIGNIFICANT
+
+Dataset: ERMS
+ASR: quartznet
+Corr coef:	0.5356250019023536
+p-value:	1.874949494227454e-08
+SIGNIFICANT
+
+Dataset: ERMS
+ASR: hubert
+Corr coef:	0.7497467669564415
+p-value:	1.51192357300933e-18
+SIGNIFICANT
+
+Dataset: ERMS
+ASR: wav2vec-base
+Corr coef:	0.23800948803350977
+p-value:	0.01953702194179221
+SIGNIFICANT
+
+Dataset: YDCK
+ASR: quartznet
+Corr coef:	0.7093797691002657
+p-value:	6.007726762116248e-16
+SIGNIFICANT
+
+Dataset: YDCK
+ASR: hubert
+Corr coef:	0.6660820968471864
+p-value:	1.3061343946896557e-13
+SIGNIFICANT
+
+Dataset: YDCK
+ASR: wav2vec-base
+Corr coef:	0.6007647434444326
+p-value:	9.749653942504338e-11
+SIGNIFICANT
+
+Dataset: YKWK
+ASR: quartznet
+Corr coef:	0.673935383873329
+p-value:	5.263980920228674e-14
+SIGNIFICANT
+
+Dataset: YKWK
+ASR: hubert
+Corr coef:	0.7794750648061408
+p-value:	8.42898319709218e-21
+SIGNIFICANT
+
+Dataset: YKWK
+ASR: wav2vec-base
+Corr coef:	0.46501606578786636
+p-value:	1.812409724733381e-06
+SIGNIFICANT
+
+Dataset: THV
+ASR: quartznet
+Corr coef:	0.7509859779523839
+p-value:	1.2358397724955802e-18
+SIGNIFICANT
+
+Dataset: THV
+ASR: hubert
+Corr coef:	0.8810290545134238
+p-value:	2.5718617591860464e-32
+SIGNIFICANT
+
+Dataset: THV
+ASR: wav2vec-base
+Corr coef:	0.8456935601374362
+p-value:	2.2324202691614945e-27
+SIGNIFICANT
+
+Dataset: TLV
+ASR: quartznet
+Corr coef:	0.8595082066966857
+p-value:	3.7991902244157274e-29
+SIGNIFICANT
+
+Dataset: TLV
+ASR: hubert
+Corr coef:	0.800020476200239
+p-value:	1.422233519878375e-22
+SIGNIFICANT
+
+Dataset: TLV
+ASR: wav2vec-base
+Corr coef:	0.8301534138888234
+p-value:	1.3887628214853172e-25
+SIGNIFICANT
+
