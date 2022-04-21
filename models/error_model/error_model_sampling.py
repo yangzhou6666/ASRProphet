@@ -7,6 +7,10 @@ from tqdm import tqdm
 from g2p_en import G2p
 get_phoneme_seq = G2p()
 
+## add this codes so that `get_result.py` can import ErrorModelSampler from the main path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+
 from text import _clean_text
 import string
 import pickle
