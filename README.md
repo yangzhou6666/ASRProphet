@@ -1,104 +1,14 @@
 # ASRDebugger
 
-This repository provides an implementation of experiments in our [FSE-2022 paper]()
+This repository provides an implementation of experiments in our [ASE-2022 paper]()
 
 # Requirements
 This code was developed with python 3.8.9. <br/>
 Create a new virtual environment and install the dependencies by running `bash install_requirements.sh`
 
-# Dataset
+# L2-ARCTIC Dataset
 
-### 1. Librispeech
-
-Librispeech dataset is used in our experiments is downloaded from [Librispeech OpenSLR](https://www.openslr.org/12/). The dataset is Open Source, and contains 1000 hours of speeches. 
-
-Prepare librispeech test-clean, test-other, dev-clean, dev-other inside this folder (`data/Librispeech/test-clean`, `data/Librispeech/test-other`, `data/Librispeech/dev-clean`, `data/Librispeech/dev-other`).
-
-```
-cd data/Librispeech/
-
-# download test-clean, test-other, dev-clean, dev-other
-wget https://www.openslr.org/resources/12/test-clean.tar.gz 
-wget https://www.openslr.org/resources/12/test-other.tar.gz 
-wget https://www.openslr.org/resources/12/dev-clean.tar.gz 
-wget https://www.openslr.org/resources/12/dev-other.tar.gz 
-
-# extract the tar.gz dataset
-tar -zxvf test-clean.tar.gz 
-tar -zxvf test-other.tar.gz 
-tar -zxvf dev-clean.tar.gz 
-tar -zxvf dev-other.tar.gz 
-```
-
-Prepare `manifests` for the dataset.
-
-```
-bash generate_data.sh
-```
-
-### 2. Librispeech Train
-
-Prepare Librispeech-train dataset
-```
-cd data/LibrispeechTrain/
-
-# download train-100
-wget https://www.openslr.org/resources/12/train-clean-100.tar.gz
-
-# extract the tar.gz dataset
-
-```
-
-Prepare `manifests` for the next experiments.
-
-```
-bash generate_data.sh
-```
-
-
-### 3. ST-AEDS
-
-A free American English corpus by Surfingtech (www.surfing.ai), containing utterances from 10 speakers, Each speaker has about 350 utterances.
-
-Prepare ST-AEDS dataset
-```
-cd data/ST-AEDS/
-
-# download the dataset
-wget https://www.openslr.org/resources/45/ST-AEDS-20180100_1-OS.tgz
-
-# extract the .tgz dataset
-
-
-```
-
-Please rename the extracted folder into `data`, thus each audio files and the transcription (text.txt) located in `data/ST-AEDS/data/`
-
-Prepare `manifests` for the next experiments.
-
-```
-bash generate_data.sh
-
-cd models/deepspeech_asr/
-
-git clone https://github.com/mhilmiasyrofi/FineTuneDeepSpeech
-
-#read the readme from the project
-#build the docker image
-cd FineTuneDeepSpeech
-docker build -t <your username>/traindeepspeech .
-
-#run the docker
-docker run --name gpu1-deepspeech --rm -it --gpus '"device=1"' -v <absolute path to FineTuneDeepSpeech>:/DeepSpeech -v <absolute path to ASRDebugger>:<absolute path to ASRDebugger>  <your username>/traindeepspeech /bin/bash
-```
-
-### 3. Wav2Vec2
-
-Wav2Vec2 ASR will download the model and tokenizer automatically from HuggingFace
-
-
-
-### 4. l2arctic
+L2-ARCTIC dataset used in our experiments can be obtained by requesting in [the original website](https://psi.engr.tamu.edu/l2-arctic-corpus/). The dataset consists of utterances from various accented speakers. This corpus includes recordings from twenty-four (24) non-native speakers of English whose first languages (L1s) are Hindi, Korean, Mandarin, Spanish, Arabic and Vietnamese, each L1 containing recordings from two male and two female speakers. 
 
 At the current stage (for better sharing within the collaborators), we upload the dataset to Google Drive. The dataset can be download using a command:
 
