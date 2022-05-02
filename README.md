@@ -31,36 +31,13 @@ Then, we processed dataset will be stored under `data/l2arctic/processed`.
 
 # ASR Models
 
-### 1. QuartzNet
+## 1. QuartzNet
 
-QuartzNet ASR models are available to use directly after cloning the repository
+QuartzNet ASR models are available to use directly after cloning the repository.
 
-### 2. Deepspeech
+## 2. HuBERT and wav2vec2.0
 
-Download the model and the scorer
-
-```
-mkdir models/pretrained_checkpoints/deepspeech/
-
-cd models/pretrained_checkpoints/deepspeech/
-
-wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.pbmm
-
-wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-models.scorer
-```
-
-Download the checkpoint for fine-tuning
-
-```
-mkdir models/pretrained_checkpoints/deepspeech/checkpoints/
-cd models/pretrained_checkpoints/deepspeech/checkpoints/
-
-wget https://github.com/mozilla/DeepSpeech/releases/download/v0.9.3/deepspeech-0.9.3-checkpoint.tar.gz
-
-# extract the tar.gz file
-```
-
-Please follow [this procedure](https://github.com/mhilmiasyrofi/FineTuneDeepSpeech/tree/asr_debugger) to prepare the environment for fine-tuning
+Both HuBERT and wav2vec2.0 are implemented using huggingface framework. are available to use directly after cloning the repository.
 
 
 # Usage
