@@ -3,6 +3,6 @@ Non-significant: 	1
 Total: 				1
 Percentage: 		0.00%
 
-Corr coef:	0.021986090955998173
-p-value:	0.19628736520635923
+Corr coef:	0.036938564939554074
+p-value:	0.06006185580712478
 NO
