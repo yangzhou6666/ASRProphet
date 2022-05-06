@@ -1,1013 +1,1013 @@
-Significant: 		12
-Non-significant: 	132
+Significant: 		10
+Non-significant: 	134
 Total: 				144
-Percentage: 		8.33%
+Percentage: 		6.94%
 
 Dataset: YBAA
 ASR: quartznet
 Budget: 100
-Corr coef:	0.1111713662573945
-p-value:	0.6605421063060297
+Corr coef:	0.03011557466894675
+p-value:	0.8968946766290222
 NO
 
 Dataset: YBAA
 ASR: quartznet
 Budget: 200
-Corr coef:	0.4027194695586796
-p-value:	0.09752637715901388
+Corr coef:	0.2718118354334003
+p-value:	0.23328849408890143
 NO
 
 Dataset: YBAA
 ASR: quartznet
 Budget: 300
-Corr coef:	0.028067271123098838
-p-value:	0.911971987644402
+Corr coef:	0.09237177482880421
+p-value:	0.6904577835538578
 NO
 
 Dataset: YBAA
 ASR: quartznet
 Budget: 400
-Corr coef:	0.02714166400599661
-p-value:	0.9148648491268814
+Corr coef:	0.10209738936252036
+p-value:	0.6596663871312423
 NO
 
 Dataset: YBAA
 ASR: hubert
 Budget: 100
-Corr coef:	0.18428623764212881
-p-value:	0.4641469028732892
+Corr coef:	0.20654035931832085
+p-value:	0.3690410994448181
 NO
 
 Dataset: YBAA
 ASR: hubert
 Budget: 200
-Corr coef:	0.24531888620804632
-p-value:	0.3265027601443762
+Corr coef:	0.2245574372054073
+p-value:	0.32777086797575716
 NO
 
 Dataset: YBAA
 ASR: hubert
 Budget: 300
-Corr coef:	-0.08542042057622795
-p-value:	0.7361114895095177
+Corr coef:	-0.09465044091124979
+p-value:	0.683199019020071
 NO
 
 Dataset: YBAA
 ASR: hubert
 Budget: 400
-Corr coef:	-0.08656582463483228
-p-value:	0.7326947428274393
+Corr coef:	-0.06929312008906321
+p-value:	0.7653553906001553
 NO
 
 Dataset: YBAA
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	-0.0975625651762281
-p-value:	0.7001427163808207
+Corr coef:	-0.07458503545716812
+p-value:	0.7479751409799449
 NO
 
 Dataset: YBAA
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.19782626099106843
-p-value:	0.43135505443281186
+Corr coef:	0.0071661617957792904
+p-value:	0.975406037219696
 NO
 
 Dataset: YBAA
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.40874878477596105
-p-value:	0.09214752650989483
+Corr coef:	0.35130225349927907
+p-value:	0.1183951722072087
 NO
 
 Dataset: YBAA
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.47673318097783374
-p-value:	0.04546727604384159
+Corr coef:	0.4385174260796247
+p-value:	0.04675384945327236
 SIGNIFICANT
 
 Dataset: ZHAA
 ASR: quartznet
 Budget: 100
-Corr coef:	0.215408088368596
-p-value:	0.3906535309337287
+Corr coef:	0.23037359651030234
+p-value:	0.3150616048197987
 NO
 
 Dataset: ZHAA
 ASR: quartznet
 Budget: 200
-Corr coef:	0.3338553703697657
-p-value:	0.17574497784505674
+Corr coef:	0.2828300995508835
+p-value:	0.21413204176326728
 NO
 
 Dataset: ZHAA
 ASR: quartznet
 Budget: 300
-Corr coef:	0.04814713968574937
-p-value:	0.8495322456226906
+Corr coef:	0.022385286130546307
+p-value:	0.9232724391099489
 NO
 
 Dataset: ZHAA
 ASR: quartznet
 Budget: 400
-Corr coef:	0.14523016927795393
-p-value:	0.5652999407623515
+Corr coef:	0.07950523535762162
+p-value:	0.7319204062294653
 NO
 
 Dataset: ZHAA
 ASR: hubert
 Budget: 100
-Corr coef:	0.36506570854036213
-p-value:	0.13632268768612463
+Corr coef:	0.4929831761422874
+p-value:	0.02316426981151247
+SIGNIFICANT
+
+Dataset: ZHAA
+ASR: hubert
+Budget: 200
+Corr coef:	0.2199768895880294
+p-value:	0.3379918335801101
 NO
 
 Dataset: ZHAA
 ASR: hubert
-Budget: 200
-Corr coef:	0.2285766409030541
-p-value:	0.36160624004898345
-NO
-
-Dataset: ZHAA
-ASR: hubert
 Budget: 300
-Corr coef:	0.1444414190572481
-p-value:	0.5674364608060789
+Corr coef:	0.17908436310572304
+p-value:	0.43732012631475103
 NO
 
 Dataset: ZHAA
 ASR: hubert
 Budget: 400
-Corr coef:	-0.03937857663826282
-p-value:	0.8767154149690293
+Corr coef:	-0.08154031517450412
+p-value:	0.7253108539027375
 NO
 
 Dataset: ZHAA
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.10307535325746187
-p-value:	0.68400532910127
+Corr coef:	0.009807357615562748
+p-value:	0.9663458398734717
 NO
 
 Dataset: ZHAA
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.4833082857424107
-p-value:	0.04216407535282839
-SIGNIFICANT
-
-Dataset: ZHAA
-ASR: wav2vec-base
-Budget: 300
-Corr coef:	-0.41269283836556436
-p-value:	0.08874733447380634
+Corr coef:	0.42793413013542464
+p-value:	0.05296240471152073
 NO
 
 Dataset: ZHAA
 ASR: wav2vec-base
+Budget: 300
+Corr coef:	-0.3154855295264437
+p-value:	0.16359272666424937
+NO
+
+Dataset: ZHAA
+ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.12474342721377261
-p-value:	0.6218850479001286
+Corr coef:	0.04315237350847609
+p-value:	0.8526595518879165
 NO
 
 Dataset: ASI
 ASR: quartznet
 Budget: 100
-Corr coef:	0.2812707996038065
-p-value:	0.25819151239263827
+Corr coef:	0.25269732985105425
+p-value:	0.26909283721493943
 NO
 
 Dataset: ASI
 ASR: quartznet
 Budget: 200
-Corr coef:	0.2588426114685782
-p-value:	0.2996669260048884
+Corr coef:	0.11941415435257355
+p-value:	0.6061566585234007
 NO
 
 Dataset: ASI
 ASR: quartznet
 Budget: 300
-Corr coef:	0.4454117949762346
-p-value:	0.06396764277349876
+Corr coef:	0.3313807059812924
+p-value:	0.14226011771353494
 NO
 
 Dataset: ASI
 ASR: quartznet
 Budget: 400
-Corr coef:	0.12240828553427546
-p-value:	0.6284729602482402
+Corr coef:	0.004561775799207798
+p-value:	0.984342824438859
 NO
 
 Dataset: ASI
 ASR: hubert
 Budget: 100
-Corr coef:	-0.18089465575481697
-p-value:	0.47255190189857377
+Corr coef:	-0.18018749253911176
+p-value:	0.43445498749520894
 NO
 
 Dataset: ASI
 ASR: hubert
 Budget: 200
-Corr coef:	0.024834722822543207
-p-value:	0.9220792434075658
+Corr coef:	-0.0036679066286961757
+p-value:	0.9874105485424614
 NO
 
 Dataset: ASI
 ASR: hubert
 Budget: 300
-Corr coef:	-0.13639263915886368
-p-value:	0.5894351309242972
+Corr coef:	-0.11834211522779048
+p-value:	0.6094170890467356
 NO
 
 Dataset: ASI
 ASR: hubert
 Budget: 400
-Corr coef:	-0.3835518903320171
-p-value:	0.11612635223999514
+Corr coef:	-0.35601695072923284
+p-value:	0.11319737438467349
 NO
 
 Dataset: ASI
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.049897370885509044
-p-value:	0.8441247191669261
+Corr coef:	0.10722710993015272
+p-value:	0.643632772160401
 NO
 
 Dataset: ASI
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.2341989031644052
-p-value:	0.34958797260368524
+Corr coef:	0.19550467710890562
+p-value:	0.3957169488590442
 NO
 
 Dataset: ASI
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.29464974719052234
-p-value:	0.2352568897167954
+Corr coef:	0.192604977302613
+p-value:	0.40289919095679483
 NO
 
 Dataset: ASI
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.303471698797817
-p-value:	0.22087035901664623
+Corr coef:	0.28171104061141755
+p-value:	0.2160285372981799
 NO
 
 Dataset: TNI
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.4145549078196299
-p-value:	0.08717412301898503
+Corr coef:	-0.24086490284267906
+p-value:	0.2929009353373207
 NO
 
 Dataset: TNI
 ASR: quartznet
 Budget: 200
-Corr coef:	0.35763713936067665
-p-value:	0.14508789226287142
+Corr coef:	0.31178956960280774
+p-value:	0.168853897524221
 NO
 
 Dataset: TNI
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.5998079791862233
-p-value:	0.008506068344711556
+Corr coef:	-0.5589177597153359
+p-value:	0.008442144255834665
 SIGNIFICANT
 
 Dataset: TNI
 ASR: quartznet
 Budget: 400
-Corr coef:	0.1816324351685098
-p-value:	0.47071713222173506
+Corr coef:	0.17921262068316346
+p-value:	0.4369864929518653
 NO
 
 Dataset: TNI
 ASR: hubert
 Budget: 100
-Corr coef:	0.21543383395885984
-p-value:	0.3905955259360714
+Corr coef:	0.14597682557464953
+p-value:	0.5277891732097061
 NO
 
 Dataset: TNI
 ASR: hubert
 Budget: 200
-Corr coef:	0.08025327939615967
-p-value:	0.7515829049855154
+Corr coef:	0.07705242732469078
+p-value:	0.7399109697713413
 NO
 
 Dataset: TNI
 ASR: hubert
 Budget: 300
-Corr coef:	0.4720513043102818
-p-value:	0.04793661096267276
-SIGNIFICANT
+Corr coef:	0.3737885739238743
+p-value:	0.0950846096301531
+NO
 
 Dataset: TNI
 ASR: hubert
 Budget: 400
-Corr coef:	0.19241355008537606
-p-value:	0.44431574218653513
-NO
-
-Dataset: TNI
-ASR: wav2vec-base
-Budget: 100
-Corr coef:	-0.5965860017322273
-p-value:	0.008961967558058802
-SIGNIFICANT
-
-Dataset: TNI
-ASR: wav2vec-base
-Budget: 200
-Corr coef:	-0.02596088990823601
-p-value:	0.9185566745595034
+Corr coef:	0.14723401919527745
+p-value:	0.5242016078365226
 NO
 
 Dataset: TNI
 ASR: wav2vec-base
+Budget: 100
+Corr coef:	-0.6366935651180026
+p-value:	0.0019126069530834588
+SIGNIFICANT
+
+Dataset: TNI
+ASR: wav2vec-base
+Budget: 200
+Corr coef:	0.014360463222014475
+p-value:	0.9507371168599498
+NO
+
+Dataset: TNI
+ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.5972153075006676
-p-value:	0.008871412829404932
+Corr coef:	0.6258891862157113
+p-value:	0.002405853890528177
 SIGNIFICANT
 
 Dataset: TNI
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.29564713031583484
-p-value:	0.23360111539957865
+Corr coef:	0.26453755581409877
+p-value:	0.24652834894490422
 NO
 
 Dataset: NCC
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.32936518845633384
-p-value:	0.1819871193955202
+Corr coef:	-0.28059990980490973
+p-value:	0.21792255158236404
 NO
 
 Dataset: NCC
 ASR: quartznet
 Budget: 200
-Corr coef:	0.0282004674631788
-p-value:	0.9115557861067887
+Corr coef:	0.012434938447999274
+p-value:	0.9573363031001805
 NO
 
 Dataset: NCC
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.22291585288664478
-p-value:	0.3739395512052608
+Corr coef:	-0.2168684011859462
+p-value:	0.34503386517418766
 NO
 
 Dataset: NCC
 ASR: quartznet
 Budget: 400
-Corr coef:	0.0487050816315356
-p-value:	0.8478077188130013
+Corr coef:	-0.025448918140712398
+p-value:	0.9128077440315467
 NO
 
 Dataset: NCC
 ASR: hubert
 Budget: 100
-Corr coef:	0.32158108911546945
-p-value:	0.1931564068987984
+Corr coef:	0.2637977293535554
+p-value:	0.2479014267951349
 NO
 
 Dataset: NCC
 ASR: hubert
 Budget: 200
-Corr coef:	-0.03644078145465823
-p-value:	0.8858537234397911
+Corr coef:	-0.10605919774716029
+p-value:	0.6472701782229964
 NO
 
 Dataset: NCC
 ASR: hubert
 Budget: 300
-Corr coef:	0.0331092675146471
-p-value:	0.8962332819517362
+Corr coef:	0.007161482616830643
+p-value:	0.9754220912948168
 NO
 
 Dataset: NCC
 ASR: hubert
 Budget: 400
-Corr coef:	0.11795176552093029
-p-value:	0.6411197921264342
+Corr coef:	0.05465202342832118
+p-value:	0.813986194783324
 NO
 
 Dataset: NCC
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.3962708904584171
-p-value:	0.10352586245796098
+Corr coef:	0.300425520490685
+p-value:	0.18575701123929322
 NO
 
 Dataset: NCC
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	-0.3473340033350047
-p-value:	0.1578782955581078
+Corr coef:	-0.29195365114929905
+p-value:	0.19908151021467063
 NO
 
 Dataset: NCC
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.20704033589641815
-p-value:	0.409754969021756
+Corr coef:	0.2259122243672939
+p-value:	0.3247835177825924
 NO
 
 Dataset: NCC
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	-0.3058612865188847
-p-value:	0.21707379604815671
+Corr coef:	-0.2136819153650552
+p-value:	0.35234102112828525
 NO
 
 Dataset: TXHC
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.0695030095830208
-p-value:	0.7840555546864347
+Corr coef:	-0.17601177662003561
+p-value:	0.44535290143554984
 NO
 
 Dataset: TXHC
 ASR: quartznet
 Budget: 200
-Corr coef:	0.16953193872387187
-p-value:	0.5012523252280567
+Corr coef:	0.17457096555701693
+p-value:	0.4491460819600668
 NO
 
 Dataset: TXHC
 ASR: quartznet
 Budget: 300
-Corr coef:	0.4107939073862126
-p-value:	0.09037283635643656
+Corr coef:	0.32146976690681
+p-value:	0.15531670072333106
 NO
 
 Dataset: TXHC
 ASR: quartznet
 Budget: 400
-Corr coef:	0.4987181233366085
-p-value:	0.03514054381726276
+Corr coef:	0.33181500828040045
+p-value:	0.1417062703352529
+NO
+
+Dataset: TXHC
+ASR: hubert
+Budget: 100
+Corr coef:	0.01894219535458979
+p-value:	0.9350477766784416
+NO
+
+Dataset: TXHC
+ASR: hubert
+Budget: 200
+Corr coef:	0.31911566540874964
+p-value:	0.15853676779333503
+NO
+
+Dataset: TXHC
+ASR: hubert
+Budget: 300
+Corr coef:	0.009797687252374027
+p-value:	0.966379005877106
+NO
+
+Dataset: TXHC
+ASR: hubert
+Budget: 400
+Corr coef:	-0.1298423467314511
+p-value:	0.5748237242864667
+NO
+
+Dataset: TXHC
+ASR: wav2vec-base
+Budget: 100
+Corr coef:	0.386700571950395
+p-value:	0.08333049668767491
+NO
+
+Dataset: TXHC
+ASR: wav2vec-base
+Budget: 200
+Corr coef:	0.17210040380625707
+p-value:	0.45568923776057013
+NO
+
+Dataset: TXHC
+ASR: wav2vec-base
+Budget: 300
+Corr coef:	0.23433664985014527
+p-value:	0.30657464328256967
+NO
+
+Dataset: TXHC
+ASR: wav2vec-base
+Budget: 400
+Corr coef:	0.2623196177581124
+p-value:	0.250659413156778
+NO
+
+Dataset: EBVS
+ASR: quartznet
+Budget: 100
+Corr coef:	0.533529663461378
+p-value:	0.012744659288589765
 SIGNIFICANT
 
-Dataset: TXHC
-ASR: hubert
-Budget: 100
-Corr coef:	0.039419617375444645
-p-value:	0.8765878559908151
-NO
-
-Dataset: TXHC
-ASR: hubert
-Budget: 200
-Corr coef:	0.3616611380724664
-p-value:	0.14029283200288878
-NO
-
-Dataset: TXHC
-ASR: hubert
-Budget: 300
-Corr coef:	0.132020127134576
-p-value:	0.601532502813225
-NO
-
-Dataset: TXHC
-ASR: hubert
-Budget: 400
-Corr coef:	-0.008382318753250356
-p-value:	0.9736663188845722
-NO
-
-Dataset: TXHC
-ASR: wav2vec-base
-Budget: 100
-Corr coef:	0.3772053130612543
-p-value:	0.12280429725860627
-NO
-
-Dataset: TXHC
-ASR: wav2vec-base
-Budget: 200
-Corr coef:	0.1554417498878796
-p-value:	0.5379601250915249
-NO
-
-Dataset: TXHC
-ASR: wav2vec-base
-Budget: 300
-Corr coef:	0.28075033762176227
-p-value:	0.2591109751611771
-NO
-
-Dataset: TXHC
-ASR: wav2vec-base
-Budget: 400
-Corr coef:	0.3203425590610585
-p-value:	0.19497450166992503
-NO
-
-Dataset: EBVS
-ASR: quartznet
-Budget: 100
-Corr coef:	0.5743157523260239
-p-value:	0.012677739817397544
-SIGNIFICANT
-
 Dataset: EBVS
 ASR: quartznet
 Budget: 200
-Corr coef:	0.31282333169538695
-p-value:	0.2062551857600545
+Corr coef:	0.31532745937326245
+p-value:	0.16381538727766018
 NO
 
 Dataset: EBVS
 ASR: quartznet
 Budget: 300
-Corr coef:	0.008298866815883084
-p-value:	0.9739284047079328
+Corr coef:	-0.0058805445165879865
+p-value:	0.9798172620268067
 NO
 
 Dataset: EBVS
 ASR: quartznet
 Budget: 400
-Corr coef:	-0.015552268806044985
-p-value:	0.9511609410149937
+Corr coef:	-0.013042177806084146
+p-value:	0.9552548538915133
 NO
 
 Dataset: EBVS
 ASR: hubert
 Budget: 100
-Corr coef:	-0.2062186131020979
-p-value:	0.41165733377912883
+Corr coef:	-0.2785409462178806
+p-value:	0.22146112174609323
 NO
 
 Dataset: EBVS
 ASR: hubert
 Budget: 200
-Corr coef:	-0.20114181165717043
-p-value:	0.42351490942544245
+Corr coef:	-0.23391409422407095
+p-value:	0.30747286418960196
 NO
 
 Dataset: EBVS
 ASR: hubert
 Budget: 300
-Corr coef:	-0.2059345022535376
-p-value:	0.4123161752365021
+Corr coef:	-0.21401183539451382
+p-value:	0.35158031365181786
 NO
 
 Dataset: EBVS
 ASR: hubert
 Budget: 400
-Corr coef:	-0.10592105903644194
-p-value:	0.6757253904215865
+Corr coef:	-0.15616112660716988
+p-value:	0.49906205818608285
 NO
 
 Dataset: EBVS
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	-0.007759967959192934
-p-value:	0.9756209090201218
+Corr coef:	0.08946006272525638
+p-value:	0.6997712540636656
 NO
 
 Dataset: EBVS
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.23704891091512353
-p-value:	0.3435842891857599
+Corr coef:	0.2078075585411241
+p-value:	0.36604534770559216
 NO
 
 Dataset: EBVS
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	-0.221188093870217
-p-value:	0.37775006280195955
+Corr coef:	-0.2336846482863933
+p-value:	0.30796126387370154
 NO
 
 Dataset: EBVS
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.01652893443974693
-p-value:	0.9480976944647226
+Corr coef:	0.05922566618516667
+p-value:	0.7987149733281147
 NO
 
 Dataset: ERMS
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.38469575558298086
-p-value:	0.11495071772741146
+Corr coef:	-0.3237974129149114
+p-value:	0.15217792240503136
 NO
 
 Dataset: ERMS
 ASR: quartznet
 Budget: 200
-Corr coef:	-0.40000193295180814
-p-value:	0.10002328788544688
+Corr coef:	-0.3135609876789963
+p-value:	0.16631794782377868
 NO
 
 Dataset: ERMS
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.1840748507897059
-p-value:	0.46466855432704635
+Corr coef:	-0.21107603834840818
+p-value:	0.3583830360054553
 NO
 
 Dataset: ERMS
 ASR: quartznet
 Budget: 400
-Corr coef:	0.32021000476903194
-p-value:	0.19516975260207822
+Corr coef:	0.20091533658997818
+p-value:	0.3825071243646979
 NO
 
 Dataset: ERMS
 ASR: hubert
 Budget: 100
-Corr coef:	0.08939945616987037
-p-value:	0.724262645445739
+Corr coef:	0.1649265520471483
+p-value:	0.4749646789549832
 NO
 
 Dataset: ERMS
 ASR: hubert
 Budget: 200
-Corr coef:	0.3136360723004848
-p-value:	0.20501571575718583
+Corr coef:	0.3716624996785303
+p-value:	0.09713122878035545
 NO
 
 Dataset: ERMS
 ASR: hubert
 Budget: 300
-Corr coef:	-0.0373060199730911
-p-value:	0.8831608370448315
+Corr coef:	0.12842340738572972
+p-value:	0.5790454742939195
 NO
 
 Dataset: ERMS
 ASR: hubert
 Budget: 400
-Corr coef:	-0.05301595656585336
-p-value:	0.8345060768885315
+Corr coef:	0.005230590728300132
+p-value:	0.9820476145015206
 NO
 
 Dataset: ERMS
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.22442070197754402
-p-value:	0.370638224034779
+Corr coef:	0.19830604650439407
+p-value:	0.3888462635304105
 NO
 
 Dataset: ERMS
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.2946669639977526
-p-value:	0.23522824436582637
+Corr coef:	0.2202681351484185
+p-value:	0.3373364162747734
 NO
 
 Dataset: ERMS
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.5095838764796108
-p-value:	0.03075636304296265
+Corr coef:	0.43575144429255
+p-value:	0.048319264305055135
 SIGNIFICANT
 
 Dataset: ERMS
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.22257567415281337
-p-value:	0.3746881008358427
+Corr coef:	0.13730300661787845
+p-value:	0.5528495545834884
 NO
 
 Dataset: YDCK
 ASR: quartznet
 Budget: 100
-Corr coef:	0.26060035055621283
-p-value:	0.29627957129703525
+Corr coef:	0.303089831568553
+p-value:	0.18169491764626838
 NO
 
 Dataset: YDCK
 ASR: quartznet
 Budget: 200
-Corr coef:	0.05385828515951892
-p-value:	0.8319118582432141
+Corr coef:	0.007812514901203826
+p-value:	0.973188516232416
 NO
 
 Dataset: YDCK
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.021922113235612647
-p-value:	0.9311959239368041
+Corr coef:	-0.0471063381834746
+p-value:	0.839321045377762
 NO
 
 Dataset: YDCK
 ASR: quartznet
 Budget: 400
-Corr coef:	0.009380345143989546
-p-value:	0.9705321631778276
+Corr coef:	-0.10020009489157654
+p-value:	0.6656336660150066
 NO
 
 Dataset: YDCK
 ASR: hubert
 Budget: 100
-Corr coef:	0.3384056095581456
-p-value:	0.16956798450430516
+Corr coef:	0.29385722963956185
+p-value:	0.1960332462272527
 NO
 
 Dataset: YDCK
 ASR: hubert
 Budget: 200
-Corr coef:	0.15884016922840644
-p-value:	0.5289965349665686
+Corr coef:	0.17825024280698776
+p-value:	0.4394931858764396
 NO
 
 Dataset: YDCK
 ASR: hubert
 Budget: 300
-Corr coef:	0.18428623764212881
-p-value:	0.4641469028732892
+Corr coef:	0.040497107309812645
+p-value:	0.8616389620097343
 NO
 
 Dataset: YDCK
 ASR: hubert
 Budget: 400
-Corr coef:	-0.26577644574637044
-p-value:	0.2864396378570682
+Corr coef:	-0.15042044597231424
+p-value:	0.5151604784916686
 NO
 
 Dataset: YDCK
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	-0.003108834997757591
-p-value:	0.9902319814105821
+Corr coef:	-0.08279072455831306
+p-value:	0.7212590315296851
 NO
 
 Dataset: YDCK
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.45247491987346894
-p-value:	0.05937586193237245
+Corr coef:	0.40411268426692515
+p-value:	0.06923603142691295
 NO
 
 Dataset: YDCK
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.25300313981377004
-p-value:	0.3110866905775791
+Corr coef:	0.22091975142276093
+p-value:	0.3358727422353158
 NO
 
 Dataset: YDCK
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.24779948297631677
-p-value:	0.3214780764943475
+Corr coef:	0.3306192073842331
+p-value:	0.14323490523006036
 NO
 
 Dataset: YKWK
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.4574742499582339
-p-value:	0.05627806768806516
-NO
-
-Dataset: YKWK
-ASR: quartznet
-Budget: 200
-Corr coef:	-0.14500354208769412
-p-value:	0.5659134576681794
-NO
-
-Dataset: YKWK
-ASR: quartznet
-Budget: 300
-Corr coef:	0.28779877059157266
-p-value:	0.24683256110428334
-NO
-
-Dataset: YKWK
-ASR: quartznet
-Budget: 400
-Corr coef:	0.44927752889522743
-p-value:	0.06142289722400171
-NO
-
-Dataset: YKWK
-ASR: hubert
-Budget: 100
-Corr coef:	0.04677878520516473
-p-value:	0.8537643910577855
-NO
-
-Dataset: YKWK
-ASR: hubert
-Budget: 200
-Corr coef:	0.24259148796958196
-p-value:	0.3320801703490093
-NO
-
-Dataset: YKWK
-ASR: hubert
-Budget: 300
-Corr coef:	0.14603928167403482
-p-value:	0.5631118988840955
-NO
-
-Dataset: YKWK
-ASR: hubert
-Budget: 400
-Corr coef:	-0.5308307239857558
-p-value:	0.023415466839057514
+Corr coef:	-0.4694101529920613
+p-value:	0.031804673942619925
 SIGNIFICANT
 
 Dataset: YKWK
+ASR: quartznet
+Budget: 200
+Corr coef:	-0.1523940116441784
+p-value:	0.5095982829226275
+NO
+
+Dataset: YKWK
+ASR: quartznet
+Budget: 300
+Corr coef:	0.2223691315937347
+p-value:	0.33263060408888234
+NO
+
+Dataset: YKWK
+ASR: quartznet
+Budget: 400
+Corr coef:	0.2993824884085348
+p-value:	0.18736390947471454
+NO
+
+Dataset: YKWK
+ASR: hubert
+Budget: 100
+Corr coef:	0.061439220809880256
+p-value:	0.7913489633283697
+NO
+
+Dataset: YKWK
+ASR: hubert
+Budget: 200
+Corr coef:	0.19449454829760912
+p-value:	0.3982108226647785
+NO
+
+Dataset: YKWK
+ASR: hubert
+Budget: 300
+Corr coef:	0.11285179620151371
+p-value:	0.6262257977614084
+NO
+
+Dataset: YKWK
+ASR: hubert
+Budget: 400
+Corr coef:	-0.3635740888102731
+p-value:	0.1052133481179334
+NO
+
+Dataset: YKWK
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.5582636370376224
-p-value:	0.01604829685226901
+Corr coef:	0.5651856674276232
+p-value:	0.007588381106121096
 SIGNIFICANT
 
 Dataset: YKWK
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	-0.08817545991875776
-p-value:	0.7279012757171175
+Corr coef:	-0.07521450369651106
+p-value:	0.7459154064433066
 NO
 
 Dataset: YKWK
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	-0.24079271405196723
-p-value:	0.33578878274777035
+Corr coef:	-0.18140510879789865
+p-value:	0.43130409308105544
 NO
 
 Dataset: YKWK
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.03738390318933245
-p-value:	0.8829185000567172
+Corr coef:	0.057442036450286615
+p-value:	0.8046623555957362
 NO
 
 Dataset: THV
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.08628087048952604
-p-value:	0.7335443186314363
+Corr coef:	-0.22831288248861153
+p-value:	0.31953011610950177
 NO
 
 Dataset: THV
 ASR: quartznet
 Budget: 200
-Corr coef:	0.4066444739782711
-p-value:	0.09399979218800467
+Corr coef:	0.18051598519722287
+p-value:	0.43360372803358016
 NO
 
 Dataset: THV
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.15933834991423917
-p-value:	0.5276883386919167
+Corr coef:	-0.24356991604667827
+p-value:	0.28734722376122174
 NO
 
 Dataset: THV
 ASR: quartznet
 Budget: 400
-Corr coef:	0.40476385667749754
-p-value:	0.09567781096343586
+Corr coef:	0.2973330322231283
+p-value:	0.19054869562015142
 NO
 
 Dataset: THV
 ASR: hubert
 Budget: 100
-Corr coef:	0.2527204590671241
-p-value:	0.3116459889971202
+Corr coef:	0.19948001350270703
+p-value:	0.3859869363781616
 NO
 
 Dataset: THV
 ASR: hubert
 Budget: 200
-Corr coef:	-0.16606394072549466
-p-value:	0.5101745021612669
+Corr coef:	-0.1735177906913448
+p-value:	0.45192935502945997
 NO
 
 Dataset: THV
 ASR: hubert
 Budget: 300
-Corr coef:	-0.27211679238600583
-p-value:	0.2746614630611739
+Corr coef:	-0.23445232560642829
+p-value:	0.30632903152503826
 NO
 
 Dataset: THV
 ASR: hubert
 Budget: 400
-Corr coef:	-0.10771691697942992
-p-value:	0.6705182121359974
+Corr coef:	-0.10101074983960123
+p-value:	0.6630816275479908
 NO
 
 Dataset: THV
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.32883169853418964
-p-value:	0.18273849397466105
+Corr coef:	0.33433172070261413
+p-value:	0.13852673570997248
 NO
 
 Dataset: THV
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.04039384386728622
-p-value:	0.8735607125706907
+Corr coef:	-0.0032637520710390123
+p-value:	0.988797649841265
 NO
 
 Dataset: THV
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	0.3562944177011913
-p-value:	0.14671278933939597
+Corr coef:	0.3638148065660239
+p-value:	0.10496596679025068
 NO
 
 Dataset: THV
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	0.34746713407495045
-p-value:	0.15770827522244543
+Corr coef:	0.3545151478241489
+p-value:	0.11483480271079592
 NO
 
 Dataset: TLV
 ASR: quartznet
 Budget: 100
-Corr coef:	-0.20062090479327496
-p-value:	0.4247416654496948
+Corr coef:	-0.13272634261163715
+p-value:	0.566284509799678
 NO
 
 Dataset: TLV
 ASR: quartznet
 Budget: 200
-Corr coef:	-0.16986129215987025
-p-value:	0.5004088912945359
+Corr coef:	-0.17572450406587914
+p-value:	0.44610785370149686
 NO
 
 Dataset: TLV
 ASR: quartznet
 Budget: 300
-Corr coef:	-0.12130769668715087
-p-value:	0.6315872708715455
+Corr coef:	-0.08482972713570798
+p-value:	0.714667284502769
 NO
 
 Dataset: TLV
 ASR: quartznet
 Budget: 400
-Corr coef:	-0.11209315998970888
-p-value:	0.6578891529799473
+Corr coef:	-0.16639677245850412
+p-value:	0.47098120296687684
 NO
 
 Dataset: TLV
 ASR: hubert
 Budget: 100
-Corr coef:	0.04878128258811405
-p-value:	0.8475722423241072
+Corr coef:	0.1147336025375047
+p-value:	0.6204439520521361
 NO
 
 Dataset: TLV
 ASR: hubert
 Budget: 200
-Corr coef:	0.2561266353670265
-p-value:	0.30494652809184875
+Corr coef:	0.2335689268263949
+p-value:	0.30820776783759074
 NO
 
 Dataset: TLV
 ASR: hubert
 Budget: 300
-Corr coef:	-0.1854938215328696
-p-value:	0.46117252978246237
+Corr coef:	-0.0866171091823749
+p-value:	0.7089050037776103
 NO
 
 Dataset: TLV
 ASR: hubert
 Budget: 400
-Corr coef:	-0.0496381620107072
-p-value:	0.8449251602886628
+Corr coef:	-0.07024399529914963
+p-value:	0.7622241565588329
 NO
 
 Dataset: TLV
 ASR: wav2vec-base
 Budget: 100
-Corr coef:	0.31884211728048395
-p-value:	0.19719219170188448
+Corr coef:	0.2876675214708096
+p-value:	0.20606100247565634
 NO
 
 Dataset: TLV
 ASR: wav2vec-base
 Budget: 200
-Corr coef:	0.5804468461161569
-p-value:	0.011550475446459447
+Corr coef:	0.5406646603444631
+p-value:	0.011387172537625466
 SIGNIFICANT
 
 Dataset: TLV
 ASR: wav2vec-base
 Budget: 300
-Corr coef:	-0.005165292012420914
-p-value:	0.9837711987482665
+Corr coef:	0.01692161891004762
+p-value:	0.941964364888231
 NO
 
 Dataset: TLV
 ASR: wav2vec-base
 Budget: 400
-Corr coef:	-0.19097353183431887
-p-value:	0.4477972769992846
+Corr coef:	-0.22816341413708321
+p-value:	0.3198557011154571
 NO
 
