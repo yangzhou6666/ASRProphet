@@ -1,6 +1,6 @@
 # ASRDebugger
 
-This repository provides an implementation of experiments in our [ASE-2022 paper]()
+This repository provides an implementation of experiments in our ASE-2022 paper.
 
 # Requirements
 This code was developed with python 3.8.9. <br/>
