@@ -2,6 +2,10 @@
 
 This repository provides an implementation of experiments in our ASE-2022 paper.
 
+# Obtained Models
+
+As we explained in the paper, our experiments produced over 3,000 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we are uploading them to the [Google Drive](https://drive.google.com/drive/folders/1JfA75SYN8gzmLZS0QLeG03NZFF74G0rn?usp=sharing).   
+
 # Requirements
 This code was developed with python 3.8.9. <br/>
 Create a new virtual environment and install the dependencies by running `bash install_requirements.sh`
