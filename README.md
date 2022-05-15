@@ -7,14 +7,14 @@ This repository provides an implementation of experiments in our ASE-2022 paper.
 As we explained in the paper, our experiments produced over 3,000 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we are uploading them to the Google Drive:
 * Error Predictors:
   * [ASRDebugger](https://drive.google.com/uc?id=1OQXCywZmPf2JCPL9ANcgk8Gx3bXX1sPL)
-  * [CrossASR]()
+  * [CrossASR](https://drive.google.com/uc?id=1wKWwlYSzfAJ7Wuwmn__n4KdKFjwNfxwq)
   * [Phone Error Predictor]()
 * Fine-tuned ASR Models:
-  * [Random]()
-  * [ASRDebugger]()
-  * [ASRDebugger-D]()
+  * [Random](https://drive.google.com/uc?id=1zi5-GbDwN_H04qaLKQmiJynlc2b4KIxN)
+  * [ASRDebugger](https://drive.google.com/uc?id=1Bzx9MSviChxdwb-SXWKUmruNUTu3QAlq)
+  * [ASRDebugger-D](https://drive.google.com/uc?id=1FBb6gEES4PGV7H9cXhSKD7gSTtkXAawT)
   * [Phone Richness]()
-  * [PEP]()
+  * [PEP](https://drive.google.com/uc?id=1SeVpe35HGdQwkCVf0HH9NRvnPA1S3Je)
   * [PEP-D]()
   * [CrossASR]()
 
