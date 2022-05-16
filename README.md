@@ -13,7 +13,7 @@ As we explained in the paper, our experiments produced over 3,000 ASR models, ea
   * [Random](https://drive.google.com/uc?id=1zi5-GbDwN_H04qaLKQmiJynlc2b4KIxN)
   * [ASRDebugger](https://drive.google.com/uc?id=1Bzx9MSviChxdwb-SXWKUmruNUTu3QAlq)
   * [ASRDebugger-D](https://drive.google.com/uc?id=1FBb6gEES4PGV7H9cXhSKD7gSTtkXAawT)
-  * [Phone Richness]()
+  * [Phone Richness](https://drive.google.com/uc?id=1qbh6_7KlefGOZU3NdccOmGNLq2hZdWY-)
   * [PEP](https://drive.google.com/uc?id=1SeVpe35HGdQwkCVf0HH9NRvnPA1S3Je)
   * [PEP-D]()
   * [CrossASR]()
