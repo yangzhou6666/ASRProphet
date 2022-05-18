@@ -10,13 +10,13 @@ As we explained in the paper, our experiments produced over 3,000 ASR models, ea
   * [CrossASR](https://drive.google.com/uc?id=1wKWwlYSzfAJ7Wuwmn__n4KdKFjwNfxwq)
   * [Phone Error Predictor]()
 * Fine-tuned ASR Models:
-  * [Random](https://drive.google.com/uc?id=1zi5-GbDwN_H04qaLKQmiJynlc2b4KIxN)
-  * [ASRDebugger](https://drive.google.com/uc?id=1Bzx9MSviChxdwb-SXWKUmruNUTu3QAlq)
-  * [ASRDebugger-D](https://drive.google.com/uc?id=1FBb6gEES4PGV7H9cXhSKD7gSTtkXAawT)
-  * [Phone Richness](https://drive.google.com/uc?id=1qbh6_7KlefGOZU3NdccOmGNLq2hZdWY-)
-  * [PEP](https://drive.google.com/uc?id=1SeVpe35HGdQwkCVf0HH9NRvnPA1S3Je)
-  * [PEP-D]()
-  * [CrossASR]()
+  * Random: [Quartznet](https://drive.google.com/uc?id=18Osp4_6-soEDj6vttNhktmb4vr3pBQ3d) | [wav2vec](https://drive.google.com/uc?id=1csIkrjdACSZ_VeugsfaDIc-gN5Y5O0Uk) | [HuBERT]()
+  * ASRDebugger: [Quartznet](https://drive.google.com/uc?id=10VYOECbXfavdfXMQVII-m0JCLToo42Bx) | [wav2vec](https://drive.google.com/uc?id=1iI53ouGK30ZIiHP03dxYRg_75I4L9Mn1) | [HuBERT](https://drive.google.com/uc?id=1htsl2XPjRaSLVsNXmRcZ8PtiXwoACWdJ)
+  * ASRDebugger-D: [Quartznet](https://drive.google.com/uc?id=1TF1nWq2zsTrzLbjYAFLCGv130KiBHK6T) | [wav2vec](https://drive.google.com/uc?id=1k8VoVs5fc7x3woMZxD9LH2DbEBka0N3D) | [HuBERT](https://drive.google.com/uc?id=13E_6-LNY6awKSUOCyejTrmgZT0NcT465)
+  * Phone Richness: [Quartznet](https://drive.google.com/uc?id=1qbh6_7KlefGOZU3NdccOmGNLq2hZdWY-) | [wav2vec]() | [HuBERT]()
+  * PEP: [Quartznet](https://drive.google.com/uc?id=1AV2S8Yy36XXtUzlnuky1A60HNHy1IZWL) | [wav2vec](https://drive.google.com/uc?id=1NiDE6Q68wrSUWVWKUjvIpCnnqTVwUi_J) | [HuBERT]()
+  * PEP-D: [Quartznet](https://drive.google.com/uc?id=1DH8HtCkSwwNiL5MlMseq48p8wJqCWNYX) | [wav2vec]() | [HuBERT](https://drive.google.com/uc?id=1E2gmlfutTvz7Vvz-C0aOeiEidVNtliNq)
+  * CrossASR: [Quartznet](https://drive.google.com/uc?id=1U7ZWeHjsU0pda6uSzmcwxxniycQBUDQx) | [wav2vec](https://drive.google.com/uc?id=1YoqHk5XilZxB3zkbsBApFa0uU14qDoVc) | [HuBERT]()
 
 Authors can also follow the following steps to obtain these models by their own.
 
