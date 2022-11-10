@@ -28,7 +28,7 @@ Create a new virtual environment and install the dependencies by running `bash i
 
 L2-ARCTIC dataset used in our experiments can be obtained by requesting in [the original website](https://psi.engr.tamu.edu/l2-arctic-corpus/). The dataset consists of utterances from various accented speakers. We use 12 non-native speakers of English whose first languages (L1s) are Hindi, Korean, Mandarin, Spanish, Arabic and Vietnamese.
 
-At the current stage (for better sharing within the collaborators), we upload the dataset to Google Drive. The dataset can be download using a command:
+At the current stage (for better sharing), we upload the dataset to Google Drive. The dataset can be download using a command:
 
 Prepare l2arctic dataset
 ```
