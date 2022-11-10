@@ -1,18 +1,18 @@
-# ASRDebugger
+# Prophet
 
-This repository provides an implementation of experiments in our ISSTA-2023 paper.
+This repository provides an implementation of experiments in our ISSTA 2023 paper.
 
 # Obtained Models
 
-As we explained in the paper, our experiments produced over 3,000 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we'ved uploaded them to the Google Drive:
+As we explained in the paper, our experiments produced 3，024 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we'ved uploaded them to the Google Drive:
 * Error Predictors:
-  * [ASRDebugger](https://drive.google.com/uc?id=1OQXCywZmPf2JCPL9ANcgk8Gx3bXX1sPL)
+  * [Prophet](https://drive.google.com/uc?id=1OQXCywZmPf2JCPL9ANcgk8Gx3bXX1sPL)
   * [CrossASR](https://drive.google.com/uc?id=1f8VRCjCPqqGakKeCZhmkvCUY-FURkTsX) 
   * [Phone Error Predictor](https://drive.google.com/uc?id=1wKWwlYSzfAJ7Wuwmn__n4KdKFjwNfxwq)
 * Fine-tuned ASR Models:
   * Random: [Quartznet](https://drive.google.com/uc?id=18Osp4_6-soEDj6vttNhktmb4vr3pBQ3d) | [wav2vec](https://drive.google.com/uc?id=1csIkrjdACSZ_VeugsfaDIc-gN5Y5O0Uk) | [HuBERT](https://drive.google.com/uc?id=1bpe-gAUC4ORtsTUvBWx39FOJrhNgtGrK)
-  * ASRDebugger: [Quartznet](https://drive.google.com/uc?id=10VYOECbXfavdfXMQVII-m0JCLToo42Bx) | [wav2vec](https://drive.google.com/uc?id=1iI53ouGK30ZIiHP03dxYRg_75I4L9Mn1) | [HuBERT](https://drive.google.com/uc?id=1htsl2XPjRaSLVsNXmRcZ8PtiXwoACWdJ)
-  * ASRDebugger-D: [Quartznet](https://drive.google.com/uc?id=1TF1nWq2zsTrzLbjYAFLCGv130KiBHK6T) | [wav2vec](https://drive.google.com/uc?id=1k8VoVs5fc7x3woMZxD9LH2DbEBka0N3D) | [HuBERT](https://drive.google.com/uc?id=13E_6-LNY6awKSUOCyejTrmgZT0NcT465)
+  * Prophet: [Quartznet](https://drive.google.com/uc?id=10VYOECbXfavdfXMQVII-m0JCLToo42Bx) | [wav2vec](https://drive.google.com/uc?id=1iI53ouGK30ZIiHP03dxYRg_75I4L9Mn1) | [HuBERT](https://drive.google.com/uc?id=1htsl2XPjRaSLVsNXmRcZ8PtiXwoACWdJ)
+  * Prophet-D: [Quartznet](https://drive.google.com/uc?id=1TF1nWq2zsTrzLbjYAFLCGv130KiBHK6T) | [wav2vec](https://drive.google.com/uc?id=1k8VoVs5fc7x3woMZxD9LH2DbEBka0N3D) | [HuBERT](https://drive.google.com/uc?id=13E_6-LNY6awKSUOCyejTrmgZT0NcT465)
   * Phone Richness: [Quartznet](https://drive.google.com/uc?id=1qbh6_7KlefGOZU3NdccOmGNLq2hZdWY-) | [wav2vec](https://drive.google.com/uc?id=1LdX01zsWU3MuNBpQKDtFV3vvN_FXq7Dy) | [HuBERT](https://drive.google.com/uc?id=1RYhZ_BZ9fyZW6gIP5F_HQTSHBn0P9Rjj)
   * PEP: [Quartznet](https://drive.google.com/uc?id=1AV2S8Yy36XXtUzlnuky1A60HNHy1IZWL) | [wav2vec](https://drive.google.com/uc?id=1NiDE6Q68wrSUWVWKUjvIpCnnqTVwUi_J) | [HuBERT](https://drive.google.com/uc?id=1-dADQXtLL91Q3uz_pv7TTos4csp-Pzfo)
   * PEP-D: [Quartznet](https://drive.google.com/uc?id=1DH8HtCkSwwNiL5MlMseq48p8wJqCWNYX) | [wav2vec]() | [HuBERT](https://drive.google.com/uc?id=1E2gmlfutTvz7Vvz-C0aOeiEidVNtliNq)
