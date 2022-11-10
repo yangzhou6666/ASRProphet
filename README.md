@@ -4,7 +4,7 @@ This repository provides an implementation of experiments in our ISSTA 2023 pape
 
 # Obtained Models
 
-As we explained in the paper, our experiments produced 3，024 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we'ved uploaded them to the Google Drive:
+As we explained in the paper, our experiments produced 3,024 ASR models, each of which is over 400 MB. It is barely possible to upload all of them to a permanent repository. So we'ved uploaded them to the Google Drive:
 * Error Predictors:
   * [Prophet](https://drive.google.com/uc?id=1OQXCywZmPf2JCPL9ANcgk8Gx3bXX1sPL)
   * [CrossASR](https://drive.google.com/uc?id=1f8VRCjCPqqGakKeCZhmkvCUY-FURkTsX) 
