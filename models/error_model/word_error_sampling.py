@@ -261,7 +261,7 @@ def main(args):
 
     sampling_method = args.sampling_method
 
-    for num_sample in [100, 200, 300, 400]:
+    for num_sample in [50, 75, 100, 200, 300, 400, 500]:
         random_json_file = os.path.join(args.data_folder, str(num_sample), "seed_" + str(args.seed), "train.json")
         required_duration = compute_required_duration(args.seed_json_file, random_json_file)
         assert required_duration > 0
